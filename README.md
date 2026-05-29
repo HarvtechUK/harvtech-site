@@ -11,11 +11,12 @@ Source for [HarvTech.co.uk](https://harvtech.co.uk) — a portfolio site showcas
 
 ## Repo layout
 
-| Path | Purpose |
-|------|---------|
-| `infra/` | Terraform for the site's Azure resources |
-| `site/` | Static site content (currently placeholder HTML) |
-| `.github/workflows/` | CI/CD pipeline |
+| Path | Purpose | State key |
+|------|---------|-----------|
+| `infra/` | Terraform for the site's Azure resources | `site.tfstate` |
+| `dns/` | Terraform for the `harvtech.co.uk` DNS zone | `dns.tfstate` |
+| `site/` | Static site content (currently placeholder HTML) | — |
+| `.github/workflows/` | CI/CD pipeline | — |
 
 ## Deploy
 
