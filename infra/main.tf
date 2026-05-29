@@ -1,8 +1,3 @@
-locals {
-  rg_name      = "rg-${var.project}-site-${var.environment}-uks"
-  storage_name = "st${var.project}site${var.environment}uks01"
-}
-
 resource "azurerm_resource_group" "site" {
   name     = local.rg_name
   location = var.location

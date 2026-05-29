@@ -41,12 +41,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terraform init
-        run: |
-          terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
-            -backend-config="key=site.tfstate"
+        run: terraform init
 
       - name: Terraform fmt check
         run: terraform fmt -check -recursive
@@ -69,6 +64,7 @@ jobs:
 
   terraform-dns:
     name: Terraform DNS
+    needs: terraform-site
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -88,12 +84,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terraform init
-        run: |
-          terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
-            -backend-config="key=dns.tfstate"
+        run: terraform init
 
       - name: Terraform fmt check
         run: terraform fmt -check -recursive
