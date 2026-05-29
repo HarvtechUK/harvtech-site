@@ -13,10 +13,15 @@ Source for [HarvTech.co.uk](https://harvtech.co.uk) — a portfolio site showcas
 
 | Path | Purpose | State key |
 |------|---------|-----------|
-| `infra/` | Terraform for the site's Azure resources | `site.tfstate` |
-| `dns/` | Terraform for the `harvtech.co.uk` DNS zone | `dns.tfstate` |
+| `bootstrap/` | One-off shell script + docs for the manually-managed platform layer (state SA, Entra app, federated creds) | — |
+| `infra/` | Terraform for the site's Azure resources (RG, storage, Front Door, WAF) | `site.tfstate` |
+| `dns/` | Terraform for the `harvtech.co.uk` DNS zone + records | `dns.tfstate` |
 | `site/` | Static site content (currently placeholder HTML) | — |
 | `.github/workflows/` | CI/CD pipeline | — |
+
+All Terraform state lives in `stplatformtfstateuks01` (`rg-platform-prd-uks-01`).
+Application stacks consume the platform layer; the platform layer itself is
+maintained out of band — see [`bootstrap/README.md`](bootstrap/README.md).
 
 ## Deploy
 
