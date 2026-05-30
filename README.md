@@ -37,6 +37,21 @@ All three start in soft-fail mode so we get visibility on what's there before we
 
 Dependabot watches GitHub Actions versions and Terraform providers/modules weekly (`/.github/dependabot.yml`).
 
+## Branching and merge policy
+
+`main` is the only long-lived branch and is protected. All changes land via pull request — no direct pushes (admin bypass exists for emergencies but should be rare and reviewable in audit log).
+
+**Required to merge a PR into `main`:**
+
+- All six CI jobs pass: `Terraform site`, `Terraform DNS`, `Checkov (IaC policy)`, `Trivy (IaC misconfig)`, `tflint (infra)`, `tflint (dns)`
+- Branch is up to date with `main` (strict mode)
+- All review conversations resolved
+- Linear history (squash or rebase merge only — no merge commits)
+
+`CODEOWNERS` declares review ownership; for a solo project `@HarvtechUK` owns everything by default.
+
+Stale approvals are dismissed on new commits, and force-pushes / deletions of `main` are blocked outright. Auto-merge is enabled at the repo level so Dependabot PRs (and any human PR with `gh pr merge --auto`) merge as soon as CI is green.
+
 ## Deploy
 
 Pushes to `main` run `terraform apply` and upload `site/` to the storage account.
