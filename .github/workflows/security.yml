@@ -38,7 +38,7 @@ jobs:
 
       - name: Upload Checkov SARIF
         if: always() && hashFiles('checkov.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: checkov.sarif
           category: checkov
@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload Trivy SARIF
         if: always() && hashFiles('trivy.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy.sarif
           category: trivy
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload tflint SARIF
         if: always() && hashFiles(format('tflint-{0}.sarif', matrix.stack)) != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: tflint-${{ matrix.stack }}.sarif
           category: tflint-${{ matrix.stack }}
