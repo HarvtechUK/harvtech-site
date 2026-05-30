@@ -19,6 +19,3 @@ AZU-0057
 # coordinate the RBAC re-grant cleanly.
 AZU-0061
 
-# AZU-0012 (default network action deny) is deliberately NOT suppressed
-# here. Tracked as a separate next-commit task: service-tag-based
-# restriction so only AzureFrontDoor.Backend can reach the origin.

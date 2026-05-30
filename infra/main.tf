@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_resource_group" "site" {
   name     = local.rg_name
   location = var.location
@@ -52,6 +54,43 @@ resource "azurerm_storage_account" "site" {
   sas_policy {
     expiration_period = "00.01:00:00" # 1 hour max
     expiration_action = "Log"
+  }
+
+  # Lock the storage account down to only the specific FD profile in
+  # front of it — anyone bypassing FD (and the WAF) by hitting the
+  # *.web.core.windows.net hostname directly gets denied. Closes
+  # Trivy AZU-0012 (the one CRITICAL).
+  #
+  # bypass = ["AzureServices"] keeps the AzureServices trusted-list
+  # exception (Azure Monitor, Backup, etc).
+  #
+  # `private_link_access` here is misleadingly named — it's actually
+  # the "resource instance rule" feature, NOT Private Link (which would
+  # need Premium FD). It tells the SA's network ACL to grant access to
+  # this specific Front Door profile's backplane.
+  #
+  # GitHub Actions runners are NOT Azure services and don't have a
+  # stable IP, so the deploy workflow temporarily adds the runner's
+  # public IP to ip_rules via `az storage account network-rule add`
+  # before doing any data-plane operation, and removes it after.
+  # `lifecycle.ignore_changes` below stops Terraform fighting those
+  # transient additions.
+  network_rules {
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
+
+    private_link_access {
+      endpoint_resource_id = azurerm_cdn_frontdoor_profile.this.id
+      endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # CI workflow adds/removes the runner IP transiently around
+      # data-plane operations. See deploy.yml.
+      network_rules[0].ip_rules,
+    ]
   }
 
   tags = var.tags
