@@ -99,13 +99,47 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: terraform apply -auto-approve tfplan
 
+  build-site:
+    name: Build site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Astro build
+        run: npm run build
+
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          retention-days: 1
+          if-no-files-found: error
+
   deploy-site:
     name: Deploy site content
-    needs: terraform-site
+    needs: [terraform-site, build-site]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: dist
 
       - name: Azure login (OIDC)
         uses: azure/login@v3
@@ -121,7 +155,7 @@ jobs:
           inlineScript: |
             az storage blob upload-batch \
               --account-name "${{ needs.terraform-site.outputs.storage_account_name }}" \
-              --source ./site \
+              --source ./dist \
               --destination '$web' \
               --overwrite \
               --auth-mode login

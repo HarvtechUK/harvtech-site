@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Writing — HarvTech"
+  description="Technical writing on Azure platform engineering, DevSecOps, and AI workload security."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Writing</p>
+    <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
+      Notes from the field.
+    </h1>
+    <p class="body-muted max-w-2xl text-lg">
+      Short technical posts on the work I do — Azure platform engineering,
+      DevSecOps, Terraform patterns, and the edges of securing AI
+      workloads. First posts landing soon.
+    </p>
+
+    <div class="mt-12 card p-8">
+      <p class="title-card mb-2">No posts yet.</p>
+      <p class="body-muted text-sm">
+        First in the queue: a deep dive on
+        <span class="code-inline">harvtech.co.uk</span>'s architecture —
+        why Standard SKU Front Door, what the Trivy
+        <span class="code-inline">AZU-0012</span> finding really means
+        when you can't satisfy it on your chosen tier, and how to
+        document those trade-offs honestly.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

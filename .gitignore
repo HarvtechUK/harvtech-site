@@ -7,9 +7,10 @@
 .terraform.lock.hcl.bak
 crash.log
 
-# Node / Astro (for later)
+# Node / Astro
 node_modules/
 dist/
+.astro/
 .DS_Store
 .env
 .env.local
