@@ -47,16 +47,24 @@ values you'll need for GitHub repo settings at the end.
 
 ## GitHub repo settings (set after running the script)
 
-After running the script, set the three Entra IDs as **secrets** (not vars)
-on the repo at github.com/HarvtechUK/harvtech-site/settings/secrets/actions:
+After running the script, set the three Entra IDs as **repository variables**
+(not secrets) at github.com/HarvtechUK/harvtech-site/settings/variables/actions:
 
 - `AZURE_CLIENT_ID` — the app registration's client ID
 - `AZURE_TENANT_ID` — the Entra tenant ID
 - `AZURE_SUBSCRIPTION_ID` — the subscription ID
 
-These aren't strictly secret (they're visible in the Azure portal to anyone
-with read access), but Secrets-not-Variables keeps them out of CI logs by
-default.
+These are identifiers, not secrets. Anyone with read access on the
+subscription or app registration in Azure can see them anyway, and putting
+them in Variables (rather than Secrets) means **Dependabot PRs can read
+them too**. Without that, every Dependabot-opened PR fails at the Azure
+login step because GitHub deliberately denies PRs raised by Dependabot
+access to Actions secrets — see [the GitHub docs](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/troubleshooting-dependabot-errors#dependabot-cant-resolve-your-package-versions).
+
+What protects against misuse isn't the IDs being secret — it's the federated
+credential trust subject (`repo:HarvtechUK/harvtech-site:ref:refs/heads/main`
++ `:pull_request`) and the RBAC on each resource. Knowing the IDs without
+the right OIDC trust gets you nothing.
 
 No state backend variables are needed — backend config is hardcoded in each
 stack's `backend.tf`.
