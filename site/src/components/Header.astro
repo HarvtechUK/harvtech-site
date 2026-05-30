@@ -1,0 +1,69 @@
+---
+const nav = [
+  { href: '/approach', label: 'Approach' },
+  { href: '/showcase', label: 'Showcase' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/cv', label: 'CV' },
+];
+
+const here = Astro.url.pathname;
+---
+
+<header class="border-border-faintest sticky top-0 z-40 border-b bg-bg-1/85 backdrop-blur">
+  <div class="container-page flex items-center justify-between py-4">
+    <a href="/" class="text-text-primary text-lg font-bold tracking-tight">
+      HarvTech
+    </a>
+
+    <nav aria-label="Primary" class="hidden gap-2 md:flex">
+      {
+        nav.map((item) => {
+          const active = here === item.href || here.startsWith(item.href + '/');
+          return (
+            <a
+              href={item.href}
+              class:list={[
+                'rounded-md px-3 py-2 text-sm font-medium transition',
+                active
+                  ? 'text-text-primary bg-bg-3'
+                  : 'text-text-muted hover:text-text-primary hover:bg-bg-3/60',
+              ]}
+            >
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <a
+      href="mailto:alex@harvtech.co.uk"
+      class="btn-primary hidden text-sm md:inline-flex"
+    >
+      Get in touch
+    </a>
+  </div>
+
+  <!-- Mobile menu: simple inline list. No JS toggle in v1 — visible always
+       on small screens, hidden on md+ where the nav above takes over. -->
+  <nav aria-label="Primary (mobile)" class="container-page flex flex-wrap gap-x-1 gap-y-2 pb-3 md:hidden">
+    {
+      nav.map((item) => {
+        const active = here === item.href || here.startsWith(item.href + '/');
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-md px-3 py-1.5 text-sm font-medium transition',
+              active
+                ? 'text-text-primary bg-bg-3'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-3/60',
+            ]}
+          >
+            {item.label}
+          </a>
+        );
+      })
+    }
+  </nav>
+</header>

@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Showcase — HarvTech"
+  description="Working portfolio pieces — this site, the secure-AI-landing-zone lab, and more."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Showcase</p>
+    <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
+      Working portfolio.
+    </h1>
+    <p class="body-muted mb-12 max-w-2xl text-lg">
+      Public projects, with the source on GitHub and the trade-offs
+      written up in plain English. Detailed case studies dropping in
+      one by one.
+    </p>
+
+    <div class="grid gap-5 md:grid-cols-2">
+      <div class="card p-7">
+        <p class="eyebrow mb-3">Live</p>
+        <p class="title-card mb-2">harvtech.co.uk infrastructure</p>
+        <p class="body-muted mb-4 text-sm">
+          This site. Astro + Tailwind output, served from Azure Storage
+          $web, behind Front Door with WAF. Terraform across two stacks
+          with OIDC-federated CI/CD. The git history is intentionally
+          honest about what worked first time and what didn't.
+        </p>
+        <a
+          href="https://github.com/HarvtechUK/harvtech-site"
+          rel="noopener"
+          target="_blank"
+          class="btn-secondary text-sm"
+        >
+          View the repo
+        </a>
+      </div>
+
+      <div class="card p-7">
+        <p class="eyebrow mb-3">In progress</p>
+        <p class="title-card mb-2">Secure AI Landing Zone</p>
+        <p class="body-muted text-sm">
+          Reference Terraform for an Azure OpenAI / Foundry workload
+          with private endpoints, Entra Conditional Access, Defender
+          for Cloud, AKS image scanning, and WAF in front of the app
+          tier. Coming as a separate repo with this site as its case
+          study home.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

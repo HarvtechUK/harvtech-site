@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+
+const capabilities = [
+  {
+    title: 'Azure platform engineering',
+    body: 'Subscription design, landing zones, hub-spoke networking, Entra ID identity foundations, RBAC. CAF-aligned where it earns its keep.',
+  },
+  {
+    title: 'Terraform at scale',
+    body: 'Multi-stack repos, remote state with OIDC-federated CI/CD, cross-stack references via terraform_remote_state, declarative imports for legacy resources.',
+  },
+  {
+    title: 'DevSecOps in CI/CD',
+    body: 'IaC security scanning (Checkov, Trivy, tflint) with SARIF flowing into Code Scanning. Dependabot, branch protection, deliberate suppressions with documented reasoning.',
+  },
+  {
+    title: 'Edge security',
+    body: 'Azure Front Door with WAF custom rules and managed rule sets, custom-domain TLS, rate limiting, network-rule origin restriction within Standard SKU limits.',
+  },
+  {
+    title: 'Identity and access',
+    body: 'Entra ID Conditional Access, Identity Protection (P2), phishing-resistant MFA rollouts, federated credentials for GitHub Actions, workload identities.',
+  },
+  {
+    title: 'Operations and SRE',
+    body: 'Diagnostic settings, Log Analytics, Defender for Cloud, alerting, runbooks, on-call. Postmortems that teach the team, not blame the operator.',
+  },
+];
+
+const featureBullets = [
+  'Two Terraform stacks (infra + dns) with state in a dedicated platform RG',
+  'GitHub Actions federated to Azure via OIDC — no long-lived secrets',
+  'Front Door Standard + WAF custom rules; site origin locked down where the SKU permits',
+  'Checkov + Trivy + tflint emitting SARIF to GitHub Code Scanning',
+  'Branch protection with required CI checks; admin bypass logged in audit trail',
+  'Dependabot auto-rebasing weekly across GitHub Actions and Terraform providers',
+];
+---
+
+<BaseLayout title="HarvTech — Secure Azure platforms for AI and data workloads">
+  <Hero />
+
+  <!-- Featured project: this site, in the open -->
+  <section class="border-border-faintest border-y">
+    <div class="container-page py-20">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+        <div>
+          <p class="eyebrow mb-4">Featured / Open source</p>
+          <h2 class="title-section mb-4">
+            This site, built in the open.
+          </h2>
+          <p class="body-muted">
+            Every Terraform module, every workflow, every WAF rule that runs
+            <span class="code-inline">harvtech.co.uk</span> is in a public GitHub
+            repo. It's a working portfolio piece — and a candid record of trade-offs
+            (cost, SKU choice, accepted-with-reasoning security findings) rather
+            than a polished pretence that everything was right first time.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              href="https://github.com/HarvtechUK/harvtech-site"
+              rel="noopener"
+              target="_blank"
+              class="btn-secondary text-sm"
+            >
+              View the repository
+            </a>
+            <a href="/showcase" class="btn-secondary text-sm">
+              Read the case study
+            </a>
+          </div>
+        </div>
+
+        <div class="card p-7">
+          <p class="title-card mb-4">What's running underneath</p>
+          <ul class="space-y-3">
+            {
+              featureBullets.map((b) => (
+                <li class="text-text-hero flex gap-3 text-sm leading-relaxed">
+                  <span aria-hidden="true" class="text-secondary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current"></span>
+                  <span>{b}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capability grid -->
+  <section>
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What I do</p>
+      <h2 class="title-section mb-12 max-w-3xl">
+        Platform and security work for teams shipping into Azure.
+      </h2>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {
+          capabilities.map((c) => (
+            <div class="card p-6">
+              <p class="title-card mb-2">{c.title}</p>
+              <p class="body-muted text-sm">{c.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="card p-10 md:p-14">
+        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p class="eyebrow mb-3">Engagements</p>
+            <h2 class="title-section mb-4">Available for contract work.</h2>
+            <p class="body-muted max-w-2xl">
+              Outside IR35, UK-based, hybrid or fully remote. Recent contracts at
+              Tokio Marine Kiln and Brit Insurance — happy to talk about either,
+              and about where I'd take a similar engagement next.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 md:items-end">
+            <a href="mailto:alex@harvtech.co.uk" class="btn-primary w-full justify-center md:w-auto">
+              alex@harvtech.co.uk
+            </a>
+            <a
+              href="https://www.linkedin.com/in/alex-h-39433619/"
+              rel="noopener"
+              target="_blank"
+              class="btn-secondary w-full justify-center md:w-auto"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

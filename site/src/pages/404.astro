@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="404 — HarvTech"
+  description="Page not found."
+>
+  <section class="container-page flex min-h-[60vh] items-center py-20">
+    <div>
+      <p class="eyebrow mb-4">404</p>
+      <h1 class="title-display hero-gradient mb-6 leading-tight">
+        Nothing here.
+      </h1>
+      <p class="body-muted max-w-xl">
+        That URL didn't resolve to a page on this site. Try
+        <a href="/" class="text-secondary hover:text-text-primary underline-offset-2 hover:underline">the home page</a>,
+        or check the
+        <a href="https://github.com/HarvtechUK/harvtech-site" rel="noopener" target="_blank" class="text-secondary hover:text-text-primary underline-offset-2 hover:underline">repository</a>
+        if you arrived from a link that's gone stale.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
