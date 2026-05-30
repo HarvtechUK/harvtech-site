@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 resource "azurerm_resource_group" "site" {
   name     = local.rg_name
   location = var.location
@@ -56,42 +54,24 @@ resource "azurerm_storage_account" "site" {
     expiration_action = "Log"
   }
 
-  # Lock the storage account down to only the specific FD profile in
-  # front of it — anyone bypassing FD (and the WAF) by hitting the
-  # *.web.core.windows.net hostname directly gets denied. Closes
-  # Trivy AZU-0012 (the one CRITICAL).
+  # NOTE: there's no `network_rules { default_action = "Deny" }` block
+  # here, even though Trivy AZU-0012 wants one. Microsoft's resource
+  # instance rule mechanism (`private_link_access` in azurerm) does NOT
+  # include Microsoft.Cdn/profiles in its supported resource types —
+  # see https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security-trusted-azure-services
+  # for the list. So a Standard-SKU Front Door has no way to be
+  # explicitly allowed when the SA defaults to Deny; locking the
+  # storage down would also lock out FD.
   #
-  # bypass = ["AzureServices"] keeps the AzureServices trusted-list
-  # exception (Azure Monitor, Backup, etc).
+  # The supported alternatives are:
+  #   - Upgrade to FD Premium and use actual Private Link to origin
+  #     (~£200/mo uplift), or
+  #   - Replace the storage origin with a service that IS in the
+  #     supported list (App Service, AKS workload, etc.)
   #
-  # `private_link_access` here is misleadingly named — it's actually
-  # the "resource instance rule" feature, NOT Private Link (which would
-  # need Premium FD). It tells the SA's network ACL to grant access to
-  # this specific Front Door profile's backplane.
-  #
-  # GitHub Actions runners are NOT Azure services and don't have a
-  # stable IP, so the deploy workflow temporarily adds the runner's
-  # public IP to ip_rules via `az storage account network-rule add`
-  # before doing any data-plane operation, and removes it after.
-  # `lifecycle.ignore_changes` below stops Terraform fighting those
-  # transient additions.
-  network_rules {
-    default_action = "Deny"
-    bypass         = ["AzureServices"]
-
-    private_link_access {
-      endpoint_resource_id = azurerm_cdn_frontdoor_profile.this.id
-      endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      # CI workflow adds/removes the runner IP transiently around
-      # data-plane operations. See deploy.yml.
-      network_rules[0].ip_rules,
-    ]
-  }
+  # For a portfolio site, neither is justified. AZU-0012 is
+  # consciously accepted and suppressed in .trivyignore with this
+  # reasoning recorded.
 
   tags = var.tags
 }

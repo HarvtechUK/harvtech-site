@@ -19,3 +19,15 @@ AZU-0057
 # coordinate the RBAC re-grant cleanly.
 AZU-0061
 
+# Default network action deny + restricted origin. Microsoft.Cdn/profiles
+# (Front Door, any SKU) is NOT in the supported resource type list for
+# storage account resource instance rules — see
+# https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security-trusted-azure-services
+# — so there is no way to deny by default and allow Standard FD as an
+# exception. Only paths to compliance are:
+#   - Upgrade to FD Premium and use actual Private Link to origin
+#     (~£200/mo uplift), or
+#   - Replace the storage origin with a service in the supported list.
+# Deliberately accepted as a known trade-off of the Standard SKU.
+AZU-0012
+

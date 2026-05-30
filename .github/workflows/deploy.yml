@@ -16,19 +16,6 @@ env:
   ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
   ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  # Pinned site storage account names. The site SA's network rules
-  # default-deny everything except Front Door's backplane, so jobs that
-  # need to do data-plane operations (Terraform managing static_website,
-  # az storage blob upload-batch) temporarily add their runner's public
-  # IP via az CLI before the operation and remove it after. See the
-  # "Allow runner IP" / "Remove runner IP" steps below, and the
-  # `network_rules` block + `lifecycle.ignore_changes` on
-  # azurerm_storage_account.site in infra/main.tf.
-  SITE_SA: stharvtechsiteproduks01
-  SITE_RG: rg-harvtech-site-prod-uks
-  # How long to sleep after adding the runner IP, to let the SA's
-  # network ACL propagate.
-  SA_RULE_PROPAGATION_SECONDS: "45"
 
 jobs:
   terraform-site:
@@ -53,25 +40,6 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Resolve runner IP
-        id: runner-ip
-        run: |
-          IP=$(curl -fsSL --retry 3 --max-time 10 https://api.ipify.org)
-          echo "ip=$IP" >> "$GITHUB_OUTPUT"
-          echo "Runner IP: $IP"
-
-      - name: Allow runner IP on site SA
-        # Adds this runner's public IP to the SA network ACL so Terraform
-        # can manage data-plane settings (static_website etc.). The "|| true"
-        # tolerates re-adding the same IP from a flaky retry.
-        run: |
-          az storage account network-rule add \
-            --account-name "$SITE_SA" \
-            --resource-group "$SITE_RG" \
-            --ip-address "${{ steps.runner-ip.outputs.ip }}" \
-            --output none || true
-          sleep "$SA_RULE_PROPAGATION_SECONDS"
-
       - name: Terraform init
         run: terraform init
 
@@ -93,17 +61,6 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           echo "storage_account_name=$(terraform output -raw storage_account_name)" >> $GITHUB_OUTPUT
-
-      - name: Remove runner IP from site SA
-        # `always()` so the IP gets cleaned up even if a previous step
-        # failed. `|| true` tolerates the rule already being absent.
-        if: always() && steps.runner-ip.outputs.ip != ''
-        run: |
-          az storage account network-rule remove \
-            --account-name "$SITE_SA" \
-            --resource-group "$SITE_RG" \
-            --ip-address "${{ steps.runner-ip.outputs.ip }}" \
-            --output none || true
 
   terraform-dns:
     name: Terraform DNS
@@ -157,22 +114,6 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Resolve runner IP
-        id: runner-ip
-        run: |
-          IP=$(curl -fsSL --retry 3 --max-time 10 https://api.ipify.org)
-          echo "ip=$IP" >> "$GITHUB_OUTPUT"
-          echo "Runner IP: $IP"
-
-      - name: Allow runner IP on site SA
-        run: |
-          az storage account network-rule add \
-            --account-name "$SITE_SA" \
-            --resource-group "$SITE_RG" \
-            --ip-address "${{ steps.runner-ip.outputs.ip }}" \
-            --output none || true
-          sleep "$SA_RULE_PROPAGATION_SECONDS"
-
       - name: Upload site to $web container
         uses: azure/cli@v2
         with:
@@ -184,12 +125,3 @@ jobs:
               --destination '$web' \
               --overwrite \
               --auth-mode login
-
-      - name: Remove runner IP from site SA
-        if: always() && steps.runner-ip.outputs.ip != ''
-        run: |
-          az storage account network-rule remove \
-            --account-name "$SITE_SA" \
-            --resource-group "$SITE_RG" \
-            --ip-address "${{ steps.runner-ip.outputs.ip }}" \
-            --output none || true
