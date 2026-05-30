@@ -1,0 +1,38 @@
+version: 2
+updates:
+  # GitHub Actions versions used in workflows. Keeps third-party actions
+  # current so we get security fixes (and so any pinned action whose
+  # commit SHA was compromised gets noisy alerts).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    labels:
+      - dependencies
+      - github-actions
+
+  # Terraform providers + modules per stack.
+  - package-ecosystem: terraform
+    directory: /infra
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "infra"
+    labels:
+      - dependencies
+      - terraform
+
+  - package-ecosystem: terraform
+    directory: /dns
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "dns"
+    labels:
+      - dependencies
+      - terraform

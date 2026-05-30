@@ -1,0 +1,25 @@
+framework:
+  - terraform
+
+# Where to scan from the repo root.
+directory:
+  - infra
+  - dns
+
+# Soft fail keeps the workflow green even when checks fail — we'll ratchet
+# this to fail-on-high after the initial triage of findings.
+soft-fail: true
+
+# Output both to console (for human review in workflow logs) and SARIF
+# (for upload into the GitHub Security tab via Code Scanning).
+output:
+  - cli
+  - sarif
+
+# --- Deliberate suppressions ---
+# Every entry here MUST come with a one-line reason in this file's comments.
+# Goal: future me / interviewers can audit *why* each rule is off.
+#
+# (No suppressions yet — initial run will surface candidates and we'll
+# add them here as we triage.)
+skip-check: []

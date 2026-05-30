@@ -1,0 +1,108 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Daily at 06:17 UTC — catches new rules / CVEs without us having to push.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+# security-events: write lets us upload SARIF into GitHub Code Scanning.
+# All findings show up under Security → Code scanning on the repo.
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # Checkov: IaC policy / misconfiguration scanner from Palo Alto's Prisma
+  # team. Catches things like "storage account allows public access" or
+  # "WAF policy disabled".
+  checkov:
+    name: Checkov (IaC policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          output_format: cli,sarif
+          output_file_path: console,checkov.sarif
+          soft_fail: true
+          config_file: .checkov.yaml
+
+      - name: Upload Checkov SARIF
+        if: always() && hashFiles('checkov.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov.sarif
+          category: checkov
+
+  # Trivy in config-scan mode. Different ruleset to Checkov; we run both
+  # so we get two perspectives. Disagreements between them are a useful
+  # signal — usually means a finding worth investigating rather than
+  # accepting either tool's verdict.
+  trivy:
+    name: Trivy (IaC misconfig)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: sarif
+          output: trivy.sarif
+          exit-code: '0'  # soft fail; ratchet later
+
+      - name: Upload Trivy SARIF
+        if: always() && hashFiles('trivy.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+  # tflint: Terraform-specific linting. Catches dead code (unused vars /
+  # locals), deprecated args, naming convention violations, and — via the
+  # azurerm ruleset — invalid SKUs and bad resource references.
+  tflint:
+    name: tflint (${{ matrix.stack }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: [infra, dns]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Init tflint plugins
+        run: tflint --init
+        env:
+          # Helps avoid GitHub API rate limits when downloading the
+          # azurerm plugin from its GitHub release.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run tflint (${{ matrix.stack }})
+        # `|| true` makes this soft-fail like the others on the first
+        # run. We ratchet once we've triaged.
+        run: |
+          tflint --format sarif --chdir ${{ matrix.stack }} \
+            > tflint-${{ matrix.stack }}.sarif || true
+
+      - name: Upload tflint SARIF
+        if: always() && hashFiles(format('tflint-{0}.sarif', matrix.stack)) != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: tflint-${{ matrix.stack }}.sarif
+          category: tflint-${{ matrix.stack }}
