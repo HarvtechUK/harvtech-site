@@ -27,7 +27,7 @@ jobs:
     outputs:
       storage_account_name: ${{ steps.tfout.outputs.storage_account_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -70,7 +70,7 @@ jobs:
       run:
         working-directory: dns
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -105,7 +105,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure login (OIDC)
         uses: azure/login@v2

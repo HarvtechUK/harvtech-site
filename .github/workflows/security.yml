@@ -24,7 +24,7 @@ jobs:
     name: Checkov (IaC policy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Run Checkov
         id: checkov
@@ -51,7 +51,7 @@ jobs:
     name: Trivy (IaC misconfig)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Run Trivy
         uses: aquasecurity/trivy-action@v0.36.0
@@ -80,7 +80,7 @@ jobs:
       matrix:
         stack: [infra, dns]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: terraform-linters/setup-tflint@v4
         with:
