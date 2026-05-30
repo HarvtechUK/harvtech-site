@@ -1,0 +1,7 @@
+# CODEOWNERS — declares review ownership for paths in this repo.
+# Format: <path/glob>  <@user-or-team>...
+#
+# Solo project, so ownership of everything sits with @HarvtechUK.
+# If/when collaborators are added, scope ownership tighter by path.
+
+*  @HarvtechUK
