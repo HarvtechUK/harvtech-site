@@ -107,40 +107,6 @@ jobs:
           sarif_file: tflint-${{ matrix.stack }}.sarif
           category: tflint-${{ matrix.stack }}
 
-  # Snyk IaC scan. Different ruleset to Checkov and Trivy; three IaC
-  # scanners with overlapping rules surfaces the genuinely interesting
-  # findings as disagreements between them. Snyk's free tier covers
-  # unlimited tests on public repos.
-  snyk-iac:
-    name: Snyk (IaC)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Snyk CLI
-        uses: snyk/actions/setup@master
-
-      - name: Snyk IaC test
-        # `|| true` keeps the job green so we can see findings before
-        # committing to enforcement. Ratchet once triage is complete.
-        # --policy-path is explicit (rather than relying on auto-load)
-        # because Snyk IaC's path matcher is finicky — see .snyk for
-        # the resource-path format that actually matches.
-        run: |
-          snyk iac test \
-            --policy-path=.snyk \
-            --sarif-file-output=snyk-iac.sarif \
-            infra/ dns/ || true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Upload Snyk IaC SARIF
-        if: always() && hashFiles('snyk-iac.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: snyk-iac.sarif
-          category: snyk-iac
-
   # Snyk Open Source — scans npm dependencies in site/ for known CVEs.
   # Complements Dependabot's version-bump PRs by surfacing the vulns
   # those bumps would close.
