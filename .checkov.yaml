@@ -5,6 +5,7 @@ framework:
 directory:
   - infra
   - dns
+  - identity
 
 # Soft fail keeps the workflow green even when checks fail — we'll ratchet
 # this to fail-on-high after we've worked through the deferred items
