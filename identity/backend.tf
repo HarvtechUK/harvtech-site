@@ -5,8 +5,12 @@ terraform {
     container_name       = "tfstate"
     key                  = "identity.tfstate"
     # use_oidc is read from ARM_USE_OIDC env var (set in CI, omitted locally).
-    # NOTE: the backend uses azurerm-style auth (Azure Storage), so the SP
-    # for THIS stack also needs Storage Blob Data Contributor on the
-    # platform state SA. That's granted out of band — see bootstrap docs.
+    #
+    # use_azuread_auth tells the backend to talk to Storage's data plane via
+    # Entra ID auth, skipping the listKeys control-plane call. The identity
+    # SP only has Storage Blob Data Contributor (data plane), so without
+    # this flag the backend tries listKeys and gets 403 AuthorizationFailed.
+    # Modern recommended pattern — same outcome with strictly less privilege.
+    use_azuread_auth = true
   }
 }
