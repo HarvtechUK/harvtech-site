@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allDocs = await getCollection('docs');
+const visibleDocs = allDocs.filter((d) => d.data.status !== 'draft');
+
+type Category = 'architecture' | 'decisions' | 'how-to' | 'tools';
+const categories: Array<{
+  key: Category;
+  title: string;
+  description: string;
+}> = [
+  {
+    key: 'architecture',
+    title: 'Architecture',
+    description: 'High and low level designs, component breakdowns, how the pieces fit together.',
+  },
+  {
+    key: 'decisions',
+    title: 'Decisions',
+    description: 'Architecture decision records — what we chose, what we rejected, and why.',
+  },
+  {
+    key: 'how-to',
+    title: 'How-to',
+    description: 'Operational runbooks and step-by-step guides.',
+  },
+  {
+    key: 'tools',
+    title: 'Tools',
+    description: 'Tooling choices and rationale.',
+  },
+];
+
+const byCategory = Object.fromEntries(
+  categories.map((c) => [
+    c.key,
+    visibleDocs
+      .filter((d) => d.data.category === c.key)
+      .sort((a, b) => a.data.order - b.data.order),
+  ])
+) as Record<Category, typeof visibleDocs>;
+---
+
+<BaseLayout
+  title="Docs — HarvTech"
+  description="Internal-style documentation for the HarvTech site and projects — HLDs, ADRs, how-to guides, and tooling notes."
+>
+  <section class="container-page py-16 md:py-20">
+    <p class="eyebrow mb-4">Docs</p>
+    <h1 class="title-display hero-gradient mb-4 max-w-3xl leading-tight">
+      Internal-style documentation.
+    </h1>
+    <p class="body-muted mb-12 max-w-2xl text-lg">
+      The same kind of pages you'd expect to find on a company's internal wiki —
+      architecture, decisions and their reasoning, runbooks, tooling notes.
+      Written as the work happens, kept honest about trade-offs.
+    </p>
+
+    <div class="space-y-12">
+      {
+        categories.map((cat) => (
+          <section id={cat.key}>
+            <p class="eyebrow mb-2">{cat.title}</p>
+            <h2 class="title-section mb-2">{cat.title}</h2>
+            <p class="body-muted mb-5 max-w-2xl text-sm">{cat.description}</p>
+
+            {byCategory[cat.key].length === 0 ? (
+              <p class="text-text-subtle text-sm italic">No docs in this category yet.</p>
+            ) : (
+              <ul class="grid gap-3 md:grid-cols-2">
+                {byCategory[cat.key].map((d) => (
+                  <li>
+                    <a
+                      href={`/docs/${d.id}`}
+                      class="card block p-5 hover:translate-y-[-1px]"
+                    >
+                      <p class="title-card mb-1">{d.data.title}</p>
+                      {d.data.description && (
+                        <p class="body-muted text-sm">{d.data.description}</p>
+                      )}
+                      {d.data.status === 'deprecated' && (
+                        <span class="badge-neutral mt-3 inline-block">Deprecated</span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
