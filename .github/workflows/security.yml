@@ -106,3 +106,67 @@ jobs:
         with:
           sarif_file: tflint-${{ matrix.stack }}.sarif
           category: tflint-${{ matrix.stack }}
+
+  # Snyk IaC scan. Different ruleset to Checkov and Trivy; three IaC
+  # scanners with overlapping rules surfaces the genuinely interesting
+  # findings as disagreements between them. Snyk's free tier covers
+  # unlimited tests on public repos.
+  snyk-iac:
+    name: Snyk (IaC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Snyk IaC test
+        # `|| true` keeps the job green so we can see findings before
+        # committing to enforcement. Ratchet once triage is complete.
+        run: |
+          snyk iac test \
+            --sarif-file-output=snyk-iac.sarif \
+            infra/ dns/ || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload Snyk IaC SARIF
+        if: always() && hashFiles('snyk-iac.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: snyk-iac.sarif
+          category: snyk-iac
+
+  # Snyk Open Source — scans npm dependencies in site/ for known CVEs.
+  # Complements Dependabot's version-bump PRs by surfacing the vulns
+  # those bumps would close.
+  snyk-deps:
+    name: Snyk (Open Source)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Snyk Open Source test
+        # --severity-threshold=low so we see everything on first run.
+        # Ratchet up to medium/high once we've triaged any noise.
+        # SARIF output goes one level up so it doesn't get mistaken
+        # for a site asset.
+        run: |
+          snyk test \
+            --sarif-file-output=../snyk-deps.sarif \
+            --severity-threshold=low || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload Snyk deps SARIF
+        if: always() && hashFiles('snyk-deps.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: snyk-deps.sarif
+          category: snyk-deps
