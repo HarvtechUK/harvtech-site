@@ -1,0 +1,24 @@
+# Snyk policy file. Same trade-off discipline as `.checkov.yaml` and
+# `.trivyignore` — every ignore has a one-line reason and an expiry
+# date that forces a periodic re-review rather than letting
+# suppressions go stale forever.
+#
+# Schema reference: https://docs.snyk.io/manage-risk/policies/the-.snyk-file
+
+version: v1.0.0
+ignore:
+  # Storage Account geo-replication disabled — LRS chosen for portfolio
+  # cost. Same trade-off documented for Checkov CKV_AZURE_206 and Trivy
+  # AZU-0058 (three IaC scanners agreeing on the same finding is itself
+  # confidence the rule is right; the trade-off is what we own). The
+  # static site is fully recoverable from git, so GRS doubling the
+  # storage bill isn't earning its keep. Reassess if we ever serve
+  # content that isn't reproducible from source.
+  SNYK-CC-AZURE-649:
+    - '*':
+        reason: >-
+          LRS chosen for portfolio cost. Site content is recoverable
+          from git; GRS doubles cost without earning its keep. Matches
+          CKV_AZURE_206 / AZU-0058 suppressions in .checkov.yaml and
+          .trivyignore.
+        expires: '2027-06-01T00:00:00.000Z'
