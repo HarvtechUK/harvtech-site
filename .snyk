@@ -3,7 +3,16 @@
 # date that forces a periodic re-review rather than letting
 # suppressions go stale forever.
 #
-# Schema reference: https://docs.snyk.io/manage-risk/policies/the-.snyk-file
+# Quirk: Snyk IaC's ignore matcher does NOT accept '*' as a wildcard
+# across all paths the way Snyk Open Source does. The path key here
+# must match the resource-path string Snyk prints in its CLI output:
+#
+#   [Medium] Storage Account geo-replication disabled
+#   Path: resource > azurerm_storage_account[site] > account_replication_type
+#   File: main.tf
+#
+# That whole "resource > ... > attribute" string (without the file
+# prefix) is what goes in the path key.
 
 version: v1.0.0
 ignore:
@@ -15,7 +24,7 @@ ignore:
   # storage bill isn't earning its keep. Reassess if we ever serve
   # content that isn't reproducible from source.
   SNYK-CC-AZURE-649:
-    - '*':
+    - 'resource > azurerm_storage_account[site] > account_replication_type':
         reason: >-
           LRS chosen for portfolio cost. Site content is recoverable
           from git; GRS doubles cost without earning its keep. Matches

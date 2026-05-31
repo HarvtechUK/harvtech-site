@@ -123,8 +123,12 @@ jobs:
       - name: Snyk IaC test
         # `|| true` keeps the job green so we can see findings before
         # committing to enforcement. Ratchet once triage is complete.
+        # --policy-path is explicit (rather than relying on auto-load)
+        # because Snyk IaC's path matcher is finicky — see .snyk for
+        # the resource-path format that actually matches.
         run: |
           snyk iac test \
+            --policy-path=.snyk \
             --sarif-file-output=snyk-iac.sarif \
             infra/ dns/ || true
         env:
