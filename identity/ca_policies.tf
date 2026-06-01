@@ -101,18 +101,9 @@ resource "azuread_conditional_access_policy" "admin_phishing_resistant_mfa" {
     users {
       included_users = ["All"]
       excluded_users = local.break_glass_exclusions
-      # Target privileged role holders. These are the role-template IDs
-      # of the most-privileged Entra roles.
-      included_roles = [
-        "62e90394-69f5-4237-9190-012177145e10", # Global Administrator
-        "194ae4cb-b126-40b2-bd5b-6091b380977d", # Security Administrator
-        "f28a1f50-f6e7-4571-818b-6a12f2af6b6c", # SharePoint Administrator
-        "29232cdf-9323-42fd-ade2-1d097af3e4de", # Exchange Administrator
-        "729827e3-9c14-49f7-bb1b-9608f156bbb8", # Helpdesk Administrator
-        "b0f54661-2d74-4c50-afa3-1ec803f12efe", # Billing Administrator
-        "fe930be7-5e62-47db-91af-98c3a49a38b1", # User Administrator
-        "c4e39bd9-1100-46d3-8c65-fb160da0071f", # Authentication Administrator
-      ]
+      # Privileged role holders, listed in terraform.tfvars so tightening
+      # or relaxing the set is a tfvars edit, not a resource code change.
+      included_roles = var.phishing_resistant_admin_roles
     }
   }
 
@@ -183,10 +174,9 @@ resource "azuread_conditional_access_policy" "admin_signin_frequency" {
     users {
       included_users = ["All"]
       excluded_users = local.break_glass_exclusions
-      included_roles = [
-        "62e90394-69f5-4237-9190-012177145e10", # Global Administrator
-        "194ae4cb-b126-40b2-bd5b-6091b380977d", # Security Administrator
-      ]
+      # Tighter subset than CA003 — only the two roles with broadest
+      # reach. Source of truth in terraform.tfvars.
+      included_roles = var.frequent_reauth_admin_roles
     }
   }
 

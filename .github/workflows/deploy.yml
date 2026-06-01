@@ -26,6 +26,11 @@ jobs:
         working-directory: infra
     outputs:
       storage_account_name: ${{ steps.tfout.outputs.storage_account_name }}
+    # TFVARS picks which environment values feed the plan. Today we have
+    # one env (prd); adding dev/staging is a matter of another *.tfvars
+    # file + a matrix or environment-conditioned value here.
+    env:
+      TFVARS: prd.tfvars
     steps:
       - uses: actions/checkout@v6
 
@@ -50,7 +55,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var-file=$TFVARS
 
       - name: Terraform apply
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -116,6 +121,7 @@ jobs:
       ARM_CLIENT_ID: ${{ vars.AZURE_IDENTITY_CLIENT_ID }}
       ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      TFVARS: prd.tfvars
     steps:
       - uses: actions/checkout@v6
 
@@ -140,7 +146,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var-file=$TFVARS
 
       - name: Terraform apply
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

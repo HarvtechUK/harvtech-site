@@ -10,6 +10,13 @@
 #
 # Mode: Prevention. Toggle to "Detection" if a deploy triggers false
 # positives; rerunning apply with `mode = "Detection"` is a fast escape hatch.
+#
+# Structure:
+#   - "Block path" rules (WordPress, dotfile, admin-panel) iterate
+#     var.waf_block_rules via a dynamic block. Same shape across all three,
+#     so adding a fourth category is a one-line tfvars edit.
+#   - Rate-limit rule has a different shape (RateLimitRule type, threshold
+#     fields) so it stays as its own static custom_rule block.
 resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
   name                = local.waf_policy_name
   resource_group_name = azurerm_resource_group.site.name
@@ -17,75 +24,30 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
   enabled             = true
   mode                = "Prevention"
 
-  # Block WordPress / PHP scans. The site is static HTML — there is no
-  # /wp-admin, no PHP. Any request matching these is a scanner.
-  custom_rule {
-    name     = "blockWordPressAndPhpScans"
-    enabled  = true
-    priority = 10
-    type     = "MatchRule"
-    action   = "Block"
+  # Iterates var.waf_block_rules (defined in prd.tfvars). Each entry
+  # has a name, priority, and a list of substrings to block on in
+  # the RequestUri. Adding a new probe category = one new list entry.
+  #
+  # for_each over the list (not a map) preserves the tfvars ordering,
+  # which keeps Terraform's plan diff stable — converting to a
+  # map-by-name would alphabetise, churning the rendered position of
+  # each rule even though Azure evaluates by `priority` not order.
+  dynamic "custom_rule" {
+    for_each = var.waf_block_rules
+    content {
+      name     = custom_rule.value.name
+      enabled  = true
+      priority = custom_rule.value.priority
+      type     = "MatchRule"
+      action   = "Block"
 
-    match_condition {
-      match_variable     = "RequestUri"
-      operator           = "Contains"
-      negation_condition = false
-      transforms         = ["Lowercase"]
-      match_values = [
-        "/wp-admin",
-        "/wp-login",
-        "/wp-content",
-        "/wp-includes",
-        "/xmlrpc.php",
-        ".php",
-      ]
-    }
-  }
-
-  # Block obvious leaked-secret/source-control probes.
-  custom_rule {
-    name     = "blockDotfileAndVcsProbes"
-    enabled  = true
-    priority = 20
-    type     = "MatchRule"
-    action   = "Block"
-
-    match_condition {
-      match_variable     = "RequestUri"
-      operator           = "Contains"
-      negation_condition = false
-      transforms         = ["Lowercase"]
-      match_values = [
-        "/.env",
-        "/.git",
-        "/.aws",
-        "/.ssh",
-        "/config.json",
-        "/credentials",
-      ]
-    }
-  }
-
-  # Block common admin-panel discovery paths the static site doesn't serve.
-  custom_rule {
-    name     = "blockAdminPanelProbes"
-    enabled  = true
-    priority = 30
-    type     = "MatchRule"
-    action   = "Block"
-
-    match_condition {
-      match_variable     = "RequestUri"
-      operator           = "Contains"
-      negation_condition = false
-      transforms         = ["Lowercase"]
-      match_values = [
-        "/phpmyadmin",
-        "/adminer",
-        "/manager/html",
-        "/server-status",
-        "/server-info",
-      ]
+      match_condition {
+        match_variable     = "RequestUri"
+        operator           = "Contains"
+        negation_condition = false
+        transforms         = ["Lowercase"]
+        match_values       = custom_rule.value.match_values
+      }
     }
   }
 
@@ -111,7 +73,9 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
   tags = var.tags
 }
 
-# Binds the WAF policy to the custom domains on this profile.
+# Binds the WAF policy to every custom domain in var.custom_domains via
+# a dynamic block — adding a new domain to the tfvars map automatically
+# extends WAF coverage to it. No need to remember to update this file too.
 resource "azurerm_cdn_frontdoor_security_policy" "this" {
   name                     = local.waf_security_policy
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
@@ -123,12 +87,11 @@ resource "azurerm_cdn_frontdoor_security_policy" "this" {
       association {
         patterns_to_match = ["/*"]
 
-        domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.apex.id
-        }
-
-        domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.www.id
+        dynamic "domain" {
+          for_each = azurerm_cdn_frontdoor_custom_domain.this
+          content {
+            cdn_frontdoor_domain_id = domain.value.id
+          }
         }
       }
     }
