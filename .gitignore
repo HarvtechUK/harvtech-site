@@ -4,6 +4,11 @@
 *.tfstate.*
 *.tfvars
 *.tfvars.json
+# ...but our environment-config tfvars (no secrets, by design — see
+# the file-top comments for what they contain) ARE checked in. The
+# *.tfvars block above stays as a safety net so anyone adding a
+# new tfvars file has to opt it in explicitly.
+!**/prd.tfvars
 .terraform.lock.hcl.bak
 crash.log
 

@@ -52,10 +52,17 @@ resource "azurerm_cdn_frontdoor_origin" "storage_web" {
 }
 
 # --- Custom domains ---
-resource "azurerm_cdn_frontdoor_custom_domain" "apex" {
-  name                     = "harvtech-co-uk"
+# Iterated over var.custom_domains (defined in terraform.tfvars) so adding
+# a new domain is a one-line tfvars edit, not a new resource block. The
+# map key (apex / www / ...) is the Terraform address suffix and must
+# stay stable across renames or the custom domain will be destroyed and
+# re-created — which would re-trigger the FD validation TXT dance.
+resource "azurerm_cdn_frontdoor_custom_domain" "this" {
+  for_each = var.custom_domains
+
+  name                     = each.value.name
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  host_name                = local.apex_domain
+  host_name                = each.value.host_name
 
   tls {
     certificate_type = "ManagedCertificate"
@@ -63,15 +70,16 @@ resource "azurerm_cdn_frontdoor_custom_domain" "apex" {
   }
 }
 
-resource "azurerm_cdn_frontdoor_custom_domain" "www" {
-  name                     = "www-harvtech-co-uk"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  host_name                = local.www_domain
-
-  tls {
-    certificate_type = "ManagedCertificate"
-    minimum_version  = "TLS12"
-  }
+# `moved` blocks preserve the existing state addresses across the rename
+# from the old per-domain resources to the for_each map. Without these,
+# Terraform would plan a destroy-and-recreate for both domains.
+moved {
+  from = azurerm_cdn_frontdoor_custom_domain.apex
+  to   = azurerm_cdn_frontdoor_custom_domain.this["apex"]
+}
+moved {
+  from = azurerm_cdn_frontdoor_custom_domain.www
+  to   = azurerm_cdn_frontdoor_custom_domain.this["www"]
 }
 
 # --- Rules engine: www -> apex (301 redirect) ---
@@ -122,20 +130,26 @@ resource "azurerm_cdn_frontdoor_route" "default" {
   supported_protocols    = ["Http", "Https"]
 
   cdn_frontdoor_custom_domain_ids = [
-    azurerm_cdn_frontdoor_custom_domain.apex.id,
-    azurerm_cdn_frontdoor_custom_domain.www.id,
+    for cd in azurerm_cdn_frontdoor_custom_domain.this : cd.id
   ]
   link_to_default_domain = true
 }
 
 # --- Associate custom domains with the route ---
 # Required for Azure to consider the domain "in use" on this route.
-resource "azurerm_cdn_frontdoor_custom_domain_association" "apex" {
-  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.apex.id
+# Same for_each + map key pattern as the custom_domain resources above.
+resource "azurerm_cdn_frontdoor_custom_domain_association" "this" {
+  for_each = var.custom_domains
+
+  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.this[each.key].id
   cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.default.id]
 }
 
-resource "azurerm_cdn_frontdoor_custom_domain_association" "www" {
-  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.www.id
-  cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.default.id]
+moved {
+  from = azurerm_cdn_frontdoor_custom_domain_association.apex
+  to   = azurerm_cdn_frontdoor_custom_domain_association.this["apex"]
+}
+moved {
+  from = azurerm_cdn_frontdoor_custom_domain_association.www
+  to   = azurerm_cdn_frontdoor_custom_domain_association.this["www"]
 }
