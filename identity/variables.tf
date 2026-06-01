@@ -1,9 +1,3 @@
-variable "tenant_id" {
-  description = "Entra tenant ID. Defaults to the tenant the SP is federated against."
-  type        = string
-  default     = "f180423f-2b59-49dd-9319-7c35c1f3e6a4"
-}
-
 variable "break_glass_upn" {
   description = "User principal name of the break-glass account. EXCLUDED from every CA policy in this stack so a misconfigured rule can never lock out the tenant."
   type        = string
