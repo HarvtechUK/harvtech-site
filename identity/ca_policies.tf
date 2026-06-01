@@ -150,7 +150,11 @@ resource "azuread_conditional_access_policy" "geo_block" {
 
     locations {
       included_locations = ["All"]
-      excluded_locations = [azuread_named_location.allowed_countries.id]
+      # `.object_id` returns just the UUID; `.id` returns the full Graph
+      # URL path (/identity/conditionalAccess/namedLocations/<uuid>) which
+      # CA policy expressions reject with a misleading
+      # "NamedLocation ... does not exist" error.
+      excluded_locations = [azuread_named_location.allowed_countries.object_id]
     }
   }
 
