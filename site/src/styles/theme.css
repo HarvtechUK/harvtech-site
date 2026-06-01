@@ -1,29 +1,39 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens. Palette and utility shapes are modelled on the Tailcast
- * theme (https://github.com/matt765/Tailcast, MIT) — the colours are
- * tuned slightly for a "secure platform engineering" feel rather than
- * a SaaS landing page. Original credit goes to Mateusz Wyrębek.
+ * Design tokens. Palette is the Mercedes-AMG Petronas F1 W13 livery:
+ *   black bodywork, Petronas teal as the primary brand accent, silver
+ *   secondary, Mercedes dark grey for subtle text, and a small dark-red
+ *   detail (the airbox inscription on the real car) used sparingly.
+ *
+ * Utility-class shapes (container, eyebrow, card, badges, hero gradient)
+ * still derive from Tailcast (https://github.com/matt765/Tailcast, MIT)
+ * — only the colour tokens have changed. Original Tailcast credit stands.
  */
 
 @theme {
   /* Accent colours */
-  --color-primary: rgb(99, 102, 241);            /* indigo-500 */
-  --color-primary-hover: rgb(114, 116, 243);
-  --color-secondary: rgb(161, 163, 247);
+  --color-primary: rgb(0, 161, 155);                /* Petronas teal #00A19B */
+  --color-primary-hover: rgb(0, 181, 173);          /* slightly brighter */
+  --color-secondary: rgb(200, 204, 206);            /* Mercedes silver #C8CCCE */
+
+  /* Detail accent — used SPARINGLY for small high-signal moments.
+     The W13's red inscription is a single thin line; treat this token
+     the same way. If you find yourself reaching for it on more than a
+     couple of UI surfaces at once, you're probably overusing it. */
+  --color-accent-red: rgb(128, 20, 43);             /* W13 red detail #80142B */
 
   /* Text */
   --color-text-primary: rgb(255, 255, 255);
   --color-text-hero: rgb(230, 230, 230);
   --color-text-muted: rgb(174, 178, 183);
-  --color-text-subtle: rgb(120, 124, 132);
+  --color-text-subtle: rgb(86, 95, 100);            /* Mercedes dark grey #565F64 */
 
-  /* Backgrounds — graded dark surface */
-  --color-bg-1: rgb(23, 24, 27);
-  --color-bg-2: rgb(30, 31, 35);
-  --color-bg-3: rgb(40, 41, 46);
-  --color-bg-3-hover: rgb(47, 48, 54);
+  /* Backgrounds — pure black surface, graded for layered depth */
+  --color-bg-1: rgb(0, 0, 0);                       /* Mercedes carbon black */
+  --color-bg-2: rgb(20, 20, 20);
+  --color-bg-3: rgb(31, 32, 36);                    /* slightly lifted card background */
+  --color-bg-3-hover: rgb(40, 41, 46);
 
   /* Borders */
   --color-border-strong: rgb(255 255 255 / 0.15);
@@ -66,9 +76,9 @@
   @apply text-text-muted text-base leading-relaxed;
 }
 
-/* Hero title — white-to-lilac vertical gradient, copied from Tailcast */
+/* Hero title — white-to-silver vertical gradient (W13 paintwork) */
 .hero-gradient {
-  background: -webkit-linear-gradient(white, rgb(180, 173, 209));
+  background: -webkit-linear-gradient(white, rgb(200, 204, 206));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -98,6 +108,14 @@
 }
 .badge-neutral {
   @apply bg-bg-3 text-text-muted rounded-full px-3 py-1 text-xs font-medium;
+}
+.badge-accent {
+  /* Reserved for THE high-signal pill on a page — e.g. the "Live"
+     marker on the showcase. Don't sprinkle these around. */
+  @apply rounded-full px-3 py-1 text-xs font-semibold;
+  background: rgb(128 20 43 / 0.18);
+  color: rgb(228 142 158);   /* lightened red, readable on the dark BG */
+  border: 1px solid rgb(128 20 43 / 0.45);
 }
 
 /* Inline code */
