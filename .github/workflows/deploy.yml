@@ -30,7 +30,7 @@ jobs:
     # one env (prd); adding dev/staging is a matter of another *.tfvars
     # file + a matrix or environment-conditioned value here.
     env:
-      TFVARS: prd.tfvars
+      TFVARS: env/prd.tfvars
     steps:
       - uses: actions/checkout@v6
 
@@ -121,7 +121,7 @@ jobs:
       ARM_CLIENT_ID: ${{ vars.AZURE_IDENTITY_CLIENT_ID }}
       ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      TFVARS: prd.tfvars
+      TFVARS: env/prd.tfvars
     steps:
       - uses: actions/checkout@v6
 
