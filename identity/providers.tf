@@ -6,6 +6,13 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 3.5"
     }
+    # `time_sleep` for working around Microsoft Graph's eventual-consistency
+    # window between Named Location creation and the CA policies that
+    # reference them — see ca_policies.tf.
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
   }
 }
 

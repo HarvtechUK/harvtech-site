@@ -15,3 +15,18 @@ resource "azuread_named_location" "allowed_countries" {
     include_unknown_countries_and_regions = false
   }
 }
+
+# Microsoft Graph has an eventual-consistency window between creating a
+# Named Location and being able to reference it from a CA policy — on
+# a fresh apply, Terraform hits a 400 "NamedLocation ... does not exist
+# in the directory" if the policy create races the location's
+# propagation. 60 seconds of sleep after the location is created is
+# enough headroom on every empirical run we've seen.
+#
+# Only adds delay on the FIRST apply (when the location is being
+# created); subsequent re-applies see the location and the sleep
+# resource already in state and skip both.
+resource "time_sleep" "wait_for_named_location" {
+  depends_on      = [azuread_named_location.allowed_countries]
+  create_duration = "60s"
+}

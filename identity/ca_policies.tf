@@ -126,9 +126,15 @@ resource "azuread_conditional_access_policy" "admin_phishing_resistant_mfa" {
 #    Uses the Named Location defined in main.tf. Sign-ins from countries
 #    NOT in the allowlist get blocked outright. If Alex travels, add the
 #    destination to var.allowed_country_codes BEFORE leaving.
+#
+#    depends_on the time_sleep so Terraform waits for Graph to propagate
+#    the Named Location before creating the policy that references it
+#    (see main.tf for the race condition this prevents).
 resource "azuread_conditional_access_policy" "geo_block" {
   display_name = "CA004 - Block sign-ins from outside allowed countries"
   state        = var.policy_state
+
+  depends_on = [time_sleep.wait_for_named_location]
 
   conditions {
     client_app_types = ["all"]
