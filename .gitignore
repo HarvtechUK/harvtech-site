@@ -16,6 +16,10 @@ crash.log
 node_modules/
 dist/
 .astro/
+
+# SARIF outputs from local scanner runs (Checkov, Trivy, etc.) — they
+# get re-generated on every run and don't belong in source.
+*.sarif
 .DS_Store
 .env
 .env.local
