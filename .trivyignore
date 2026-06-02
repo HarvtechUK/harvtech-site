@@ -31,3 +31,9 @@ AZU-0061
 # Deliberately accepted as a known trade-off of the Standard SKU.
 AZU-0012
 
+# Data Factory public access disabled. Mirror of Checkov CKV_AZURE_104
+# — fixing requires Managed VNet IR + private endpoints, ~£20+/mo. ADF
+# stays public for the IaC-pattern demo. Productionisation path
+# documented in /docs/architecture/data-platform-hld.
+AZU-0035
+

@@ -60,7 +60,13 @@ jobs:
           scan-ref: .
           format: sarif
           output: trivy.sarif
-          exit-code: '0'  # soft fail; ratchet later
+          exit-code: '0' # soft fail; ratchet later
+          # Skip node_modules — local Trivy runs find Dockerfiles inside
+          # dev deps (e.g. yaml-language-server) which we don't build or
+          # run as containers. CI doesn't `npm install` before Trivy so
+          # the issue is only local-noise, but excluding the path keeps
+          # the scan identical between CI and local.
+          skip-dirs: site/node_modules
 
       - name: Upload Trivy SARIF
         if: always() && hashFiles('trivy.sarif') != ''
@@ -78,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stack: [infra, dns, identity]
+        stack: [infra, dns, identity, data-platform]
     steps:
       - uses: actions/checkout@v6
 
