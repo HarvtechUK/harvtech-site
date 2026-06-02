@@ -36,7 +36,7 @@ resource "azurerm_storage_account" "datalake" {
   # scoped to a single SA). Default is false; setting it explicitly so
   # Checkov CKV_AZURE_244 confirms intent rather than relying on the
   # provider default.
-  is_local_user_enabled = false
+  local_user_enabled = false
 
   # Double-encrypt at rest. Free flag, no operational cost.
   infrastructure_encryption_enabled = true
