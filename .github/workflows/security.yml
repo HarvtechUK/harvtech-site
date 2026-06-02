@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stack: [infra, dns, identity]
+        stack: [infra, dns, identity, data-platform]
     steps:
       - uses: actions/checkout@v6
 
