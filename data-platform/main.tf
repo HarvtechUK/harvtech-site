@@ -32,6 +32,12 @@ resource "azurerm_storage_account" "datalake" {
   # auth flow. Belt-and-braces alongside shared_access_key_enabled=false.
   default_to_oauth_authentication = true
 
+  # Storage-account "local users" (SFTP-style user-and-password identities
+  # scoped to a single SA). Default is false; setting it explicitly so
+  # Checkov CKV_AZURE_244 confirms intent rather than relying on the
+  # provider default.
+  is_local_user_enabled = false
+
   # Double-encrypt at rest. Free flag, no operational cost.
   infrastructure_encryption_enabled = true
 
