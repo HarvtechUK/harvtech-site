@@ -52,3 +52,49 @@ skip-check:
   # Vault management overhead, an additional Key Vault to maintain, and
   # rotation responsibility that's not earning its keep here.
   - CKV2_AZURE_1
+
+  # --- data-platform/ suppressions ---
+  # All of these are the "would need VNet + Private Link + Premium SKU"
+  # family of findings on the data services. Each fix is structurally
+  # similar (deploy private DNS + private endpoint + VNet integration)
+  # and each adds £20-40/mo per service. For a portfolio that's
+  # demonstrating the IaC PATTERN, the cost can't be justified — same
+  # call we made for the site SA. Productionisation path is documented
+  # in /docs/architecture/data-platform-hld.
+
+  # Data Factory: public network access disabled requires a Managed
+  # VNet IR + private endpoints. Cost. The IaC stub stays public for now.
+  - CKV_AZURE_104
+
+  # Data Factory: source control via Git. There are no pipelines in the
+  # ADF stub yet, so nothing to source-control. When pipelines land
+  # they'll go in a sibling repo under git integration.
+  - CKV_AZURE_103
+
+  # Cosmos DB: customer-managed keys. Same reasoning as CKV2_AZURE_1 for
+  # storage — MS-managed keys are fine for portfolio scope, CMK adds
+  # Key Vault management cost.
+  - CKV_AZURE_100
+
+  # Cosmos DB: restricted access via IP rules / VNet. Needs VNet.
+  - CKV_AZURE_99
+
+  # Cosmos DB: disable public network access. Same — needs private
+  # endpoints to remain reachable from the ingestion pipeline.
+  - CKV_AZURE_101
+
+  # Cosmos DB: VNet filter restricts management plane. Needs VNet.
+  - CKV_AZURE_132
+
+  # Databricks: data-plane <-> control-plane Private Link. Premium tier
+  # feature (~£175/mo workspace uplift before any compute). Standard
+  # tier with public access is the right portfolio trade-off.
+  - CKV_AZURE_158
+
+  # Data Factory: encrypted with customer-managed key. Same CMK
+  # reasoning as CKV_AZURE_100.
+  - CKV2_AZURE_15
+
+  # Blob service read logging. Same as CKV_AZURE_33 — deferred to the
+  # planned Diagnostic Settings + Log Analytics workspace.
+  - CKV2_AZURE_21
