@@ -9,8 +9,11 @@ import { glob } from 'astro/loaders';
  * is also derived from the folder name as a safety belt, but the
  * frontmatter `category` is the source of truth.
  *
- * status: drafts and deprecated docs are still indexable by URL but the
- *   /docs landing page filters them out so the index stays clean.
+ * status: drafts, deprecated, and superseded docs are still indexable by
+ *   URL but the /docs landing page filters them out so the index stays
+ *   clean. "superseded" is the standard ADR vocabulary for "this decision
+ *   has been re-made elsewhere" — semantically distinct from "deprecated"
+ *   (rotting / will be removed) even though both hide from the index.
  */
 const docs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
@@ -20,7 +23,7 @@ const docs = defineCollection({
     category: z.enum(['architecture', 'decisions', 'how-to', 'tools']),
     order: z.number().default(100),
     updated: z.coerce.date(),
-    status: z.enum(['living', 'draft', 'deprecated']).default('living'),
+    status: z.enum(['living', 'draft', 'deprecated', 'superseded']).default('living'),
   }),
 });
 

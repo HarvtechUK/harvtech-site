@@ -39,6 +39,7 @@ const statusBadge: Record<string, { label: string; cls: string }> = {
   living: { label: 'Living document', cls: 'badge-primary' },
   draft: { label: 'Draft', cls: 'badge-neutral' },
   deprecated: { label: 'Deprecated', cls: 'badge-neutral' },
+  superseded: { label: 'Superseded', cls: 'badge-neutral' },
 };
 const sb = statusBadge[doc.data.status];
 ---

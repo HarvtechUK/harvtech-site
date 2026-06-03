@@ -1,11 +1,16 @@
 ---
 title: '"Cloud" not "Azure" in the headline'
-description: Why the public-facing positioning is deliberately broader than the day-job stack.
+description: Why the public-facing positioning was originally broader than the day-job stack.
 category: decisions
 order: 30
-updated: 2026-05-30
-status: living
+updated: 2026-06-03
+status: superseded
 ---
+
+> **Superseded by [Well-architected Azure landing zone positioning](/docs/decisions/well-architected-landing-zone-positioning).**
+> Kept as a historical record of the earlier decision. The reasoning below was correct for the broad
+> "generic cloud" framing; the site has since shifted to lead with a specific concept — *Azure landing zone* — that
+> earns putting Azure back in the headline. See the new ADR for the trade-off.
 
 ## Context
 
