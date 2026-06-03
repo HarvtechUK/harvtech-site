@@ -121,6 +121,6 @@ For the bigger decisions, see the `decisions/` category — each ADR captures th
 ## What's not here yet
 
 - Diagrams — this doc is text-only for v1. Adding Mermaid via remark plugin is a follow-up.
-- Real secure-AI-landing-zone lab — planned as a separate repo, with this site hosting its case study and writeup.
+- Reference Azure landing zone lab — planned as a separate repo, with this site hosting its case study and writeup. AI (Azure OpenAI / Foundry) drops in as one demonstrated workload on top, alongside data and app-tier examples.
 - Diagnostic Settings to a Log Analytics workspace — closes two Checkov/Trivy suppressions (storage logging and queue logging) when it lands.
 - `infrastructure_encryption_enabled = true` on the storage account — requires SA replacement, currently bundled with the SP RBAC modernisation work for safe coordination.

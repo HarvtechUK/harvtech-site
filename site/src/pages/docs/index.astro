@@ -83,6 +83,9 @@ const byCategory = Object.fromEntries(
                       {d.data.status === 'deprecated' && (
                         <span class="badge-neutral mt-3 inline-block">Deprecated</span>
                       )}
+                      {d.data.status === 'superseded' && (
+                        <span class="badge-neutral mt-3 inline-block">Superseded</span>
+                      )}
                     </a>
                   </li>
                 ))}
