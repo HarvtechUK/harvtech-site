@@ -22,14 +22,22 @@ resource "azurerm_data_factory" "this" {
   tags = var.tags
 }
 
-# Pre-grant ADF's managed identity Storage Blob Data Reader on the
-# datalake so future pipelines reading from raw/cleansed/curated
-# don't fail on first run while RBAC propagates. Reader (not
-# Contributor) is intentional — pipelines should READ raw, WRITE
-# to cleansed/curated, and the write-grants get attached when the
-# write-side pipelines land.
-resource "azurerm_role_assignment" "adf_datalake_reader" {
-  scope                = azurerm_storage_account.datalake.id
-  role_definition_name = "Storage Blob Data Reader"
-  principal_id         = azurerm_data_factory.this.identity[0].principal_id
-}
+# NOTE: ADF's managed identity should eventually be granted Storage Blob
+# Data Reader on the datalake so future pipelines can authenticate via
+# Entra rather than connection strings. That role assignment is
+# deliberately NOT in this stack — the data-platform SP has Contributor
+# at subscription scope, which lacks the Microsoft.Authorization/
+# roleAssignments/write permission required to manage RBAC.
+#
+# The right fix is to grant the SP User Access Administrator scoped to
+# rg-harvtech-data-prod-uks (so it can manage roles within its own
+# blast radius but nowhere else), then re-introduce this resource:
+#
+#   resource "azurerm_role_assignment" "adf_datalake_reader" {
+#     scope                = azurerm_storage_account.datalake.id
+#     role_definition_name = "Storage Blob Data Reader"
+#     principal_id         = azurerm_data_factory.this.identity[0].principal_id
+#   }
+#
+# Tracked as a follow-up — same RBAC tape-fix backlog item as the
+# Storage Blob Data Contributor grant on the site SA.

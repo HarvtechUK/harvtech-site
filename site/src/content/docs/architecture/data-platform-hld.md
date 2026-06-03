@@ -70,12 +70,13 @@ The analytics side and the OLTP side aren't connected in this demo — adding a 
 ### Azure Data Factory
 
 - **Stub only**. The workspace resource is free; cost only accrues when pipelines actually run.
-- **SystemAssigned identity** pre-granted `Storage Blob Data Reader` on the datalake — when future pipelines land, they auth via Entra rather than connection strings.
+- **SystemAssigned identity** set up — when future pipelines land, they auth via Entra rather than connection strings.
+- The corresponding `Storage Blob Data Reader` grant on the datalake is **not yet in Terraform**: the deploy SP only has Contributor at subscription scope, which doesn't include `Microsoft.Authorization/roleAssignments/write`. The fix (granting the SP User Access Administrator scoped to the data-platform RG so it can manage RBAC inside its blast radius) is tracked as a follow-up — see comment in `adf.tf` for the resource block to re-introduce once the SP is elevated.
 - **Public managed IR** — cheapest option, fine for a portfolio demo. A real engagement would use a Self-Hosted IR or Managed VNet IR depending on the network story.
 
 ### Databricks workspace
 
-- **Standard tier**. Workspace itself has no ongoing cost; cost lives in clusters when they run.
+- **Premium tier**. Azure deprecated the Standard tier for new workspaces in mid-2026 — Premium is the only choice now. Workspace itself still has no ongoing cost; cost lives in clusters when they run.
 - **Managed RG name pinned** so it doesn't get a different GUID suffix on every recreate.
 - **No clusters / cluster policies in code** — would be the next layer if real workloads landed.
 - **Public network access**. A real engagement would use VNet injection plus Private Link to the Databricks control plane.

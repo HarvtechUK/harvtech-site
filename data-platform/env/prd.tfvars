@@ -27,6 +27,9 @@ cosmos_databases = {
 # Cosmos free-tier slot is unburnt on this subscription, so claim it.
 enable_cosmos_free_tier = true
 
-# Standard tier — enough for a portfolio demo. Premium adds Unity
-# Catalog and finer RBAC, neither needed without real users.
-databricks_sku = "standard"
+# Premium tier. Azure deprecated Standard tier for new Databricks
+# workspaces in mid-2026 — only Premium can be provisioned now.
+# Workspace itself is still free (cost is in DBUs when compute runs);
+# the only practical impact of forced Premium is a slightly higher
+# DBU rate IF we ever run clusters. We don't.
+databricks_sku = "premium"

@@ -9,7 +9,7 @@ Terraform stack for the Azure data-platform showcase: a medallion-style data lak
 | **ADLS Gen2** | `azurerm_storage_account.datalake` + 3 containers (`raw`, `cleansed`, `curated`) | Lakehouse foundation. Bronze/silver/gold medallion layout, HNS on. |
 | **Cosmos DB** | `azurerm_cosmosdb_account.this` + database + container | OLTP / API-backing store. Free-tier discount claimed (1000 RU/s + 25 GB free for life). |
 | **Data Factory** | `azurerm_data_factory.this` | Orchestrator stub — no pipelines yet, but the workspace exists and has a SystemAssigned identity pre-granted Storage Blob Data Reader on the datalake. |
-| **Databricks workspace** | `azurerm_databricks_workspace.this` | Lakehouse compute layer. Standard SKU, no clusters running. |
+| **Databricks workspace** | `azurerm_databricks_workspace.this` | Lakehouse compute layer. Premium SKU (Azure deprecated Standard for new workspaces in 2026), no clusters running. |
 
 ## Why this exists
 
