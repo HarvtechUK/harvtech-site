@@ -1,0 +1,52 @@
+---
+/**
+ * HarvTech brand lockup: W13-teal slash motif (same geometry as
+ * /public/favicon.svg, inlined so it can pick up currentColor on hover or
+ * theme changes) + "HarvTech" wordmark in Space Grotesk 600.
+ *
+ * Used in the site header. The favicon at /public/favicon.svg stays
+ * standalone for the browser-tab use case — duplicating the five paths
+ * here is the trade for an inline, theme-able SVG without an extra HTTP
+ * request on every page load.
+ */
+
+interface Props {
+  /** Pixel height of the icon. Wordmark scales from this. */
+  size?: number;
+  /** Optional extra classes for the outer span. */
+  class?: string;
+}
+
+const { size = 24, class: extraClass = '' } = Astro.props;
+---
+
+<span class:list={['inline-flex items-center gap-2.5', extraClass]}>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    class="text-primary flex-shrink-0"
+    fill="currentColor"
+  >
+    <path d="M7.000 4L10.800 4L5.602 20L1.802 20Z" />
+    <path d="M11.600 4L15.400 4L10.202 20L6.402 20Z" />
+    <path d="M16.200 4L20.000 4L14.802 20L11.002 20Z" />
+    <path d="M16.200 4L22.000 4L20.766 7.8L14.966 7.8Z" />
+    <path d="M6.993 11.1L11.393 11.1L10.809 12.9L6.409 12.9Z" />
+  </svg>
+  <span class="logo-wordmark text-text-primary text-lg leading-none tracking-tight">
+    HarvTech
+  </span>
+</span>
+
+<style>
+  .logo-wordmark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    /* Space Grotesk runs slightly wide at default tracking; pull it in a
+       hair so the wordmark sits tight against the icon. */
+    letter-spacing: -0.01em;
+  }
+</style>
