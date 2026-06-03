@@ -44,6 +44,10 @@
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  /* Display face for the brand wordmark only — Inter handles all body / UI
+     copy. Loaded as a single weight (600) in BaseLayout to keep the extra
+     bandwidth to one woff2. */
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 
   /* Breakpoints (Tailcast adds an xs) */
   --breakpoint-xs: 530px;

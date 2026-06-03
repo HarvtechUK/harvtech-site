@@ -1,4 +1,6 @@
 ---
+import Logo from './Logo.astro';
+
 const nav = [
   { href: '/approach', label: 'Approach' },
   { href: '/showcase', label: 'Showcase' },
@@ -12,8 +14,8 @@ const here = Astro.url.pathname;
 
 <header class="border-border-faintest sticky top-0 z-40 border-b bg-bg-1/85 backdrop-blur">
   <div class="container-page flex items-center justify-between py-4">
-    <a href="/" class="text-text-primary text-lg font-bold tracking-tight">
-      HarvTech
+    <a href="/" class="rounded-md transition hover:opacity-90" aria-label="HarvTech — home">
+      <Logo />
     </a>
 
     <nav aria-label="Primary" class="hidden gap-2 md:flex">
