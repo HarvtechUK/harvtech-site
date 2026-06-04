@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" width="180" height="40" role="img" aria-label="HarvTech">
+  <!--
+    HarvTech standalone vector lockup.
+    Icon and wordmark are both Petronas teal (#00A19B) — readable on white,
+    light-grey, and dark backgrounds.
+    For the site header (dark bg, white wordmark) use Logo.astro instead.
+
+    Icon: original favicon paths scaled from 24×24 master to 40×40 (×1.667).
+    Wordmark: Space Grotesk 600, 26 px; falls back to Inter / system-ui.
+  -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&amp;display=swap');
+    .lw { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-weight: 600; }
+  </style>
+
+  <!-- Icon: favicon paths scaled ×1.667 to fill a 40×40 area -->
+  <g transform="scale(1.667)" fill="#00A19B" aria-hidden="true">
+    <path d="M7.000 4L10.800 4L5.602 20L1.802 20Z"/>
+    <path d="M11.600 4L15.400 4L10.202 20L6.402 20Z"/>
+    <path d="M16.200 4L20.000 4L14.802 20L11.002 20Z"/>
+    <path d="M16.200 4L22.000 4L20.766 7.8L14.966 7.8Z"/>
+    <path d="M6.993 11.1L11.393 11.1L10.809 12.9L6.409 12.9Z"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text
+    class="lw"
+    x="52"
+    y="28"
+    font-size="26"
+    letter-spacing="-0.5"
+    fill="#00A19B"
+  >HarvTech</text>
+</svg>
