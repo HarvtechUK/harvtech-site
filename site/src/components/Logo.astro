@@ -1,23 +1,22 @@
 ---
 /**
- * HarvTech brand lockup: W13-teal slash motif (same geometry as
- * /public/favicon.svg, inlined so it can pick up currentColor on hover or
- * theme changes) + "HarvTech" wordmark in Space Grotesk 600.
+ * HarvTech brand lockup: original favicon icon (inline SVG so it picks up
+ * the teal theme token via currentColor) + "HarvTech" wordmark in Space
+ * Grotesk 600.
  *
- * Used in the site header. The favicon at /public/favicon.svg stays
- * standalone for the browser-tab use case — duplicating the five paths
- * here is the trade for an inline, theme-able SVG without an extra HTTP
- * request on every page load.
+ * The same icon paths live in /public/favicon.svg (standalone, no CSS).
+ * /public/logo.svg is the self-contained vector lockup for external use
+ * (README, CV, social cards etc.).
  */
 
 interface Props {
-  /** Pixel height of the icon. Wordmark scales from this. */
+  /** Pixel height of the icon square. */
   size?: number;
-  /** Optional extra classes for the outer span. */
+  /** Optional extra Tailwind classes on the outer span. */
   class?: string;
 }
 
-const { size = 24, class: extraClass = '' } = Astro.props;
+const { size = 28, class: extraClass = '' } = Astro.props;
 ---
 
 <span class:list={['inline-flex items-center gap-2.5', extraClass]}>
@@ -36,7 +35,7 @@ const { size = 24, class: extraClass = '' } = Astro.props;
     <path d="M16.200 4L22.000 4L20.766 7.8L14.966 7.8Z" />
     <path d="M6.993 11.1L11.393 11.1L10.809 12.9L6.409 12.9Z" />
   </svg>
-  <span class="logo-wordmark text-text-primary text-lg leading-none tracking-tight">
+  <span class="logo-wordmark text-text-primary text-lg leading-none">
     HarvTech
   </span>
 </span>
@@ -45,8 +44,6 @@ const { size = 24, class: extraClass = '' } = Astro.props;
   .logo-wordmark {
     font-family: var(--font-display);
     font-weight: 600;
-    /* Space Grotesk runs slightly wide at default tracking; pull it in a
-       hair so the wordmark sits tight against the icon. */
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 </style>
