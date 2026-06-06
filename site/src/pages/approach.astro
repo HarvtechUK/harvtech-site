@@ -1,31 +1,215 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const phases = [
+  {
+    number: '01',
+    title: 'Discovery',
+    duration: 'Day 1–3',
+    body: 'We start by understanding your environment — what you have, where you want to be, and what\'s blocking you. For new builds that means translating business and regulatory requirements into architecture decisions. For existing platforms it means an honest assessment of what works, what doesn\'t, and what carries risk.',
+    outputs: [
+      'Current-state architecture review',
+      'Regulatory and compliance requirements captured',
+      'Scope and phasing agreed in writing',
+    ],
+  },
+  {
+    number: '02',
+    title: 'Design & build',
+    duration: 'Weeks 1–N',
+    body: 'Everything is Infrastructure as Code from day one. Architecture Decision Records capture the trade-offs and the reasoning — so you can understand and challenge every call we make. CI/CD pipelines are secured before code lands in any environment. Security and compliance controls are baked into the design, not retrofitted at the end.',
+    outputs: [
+      'Terraform modules, reviewed and tested in CI',
+      'OIDC-federated CI/CD pipelines — no long-lived secrets',
+      'ADRs for every significant design decision',
+      'Security scanning integrated into every pull request',
+    ],
+  },
+  {
+    number: '03',
+    title: 'Handover & knowledge transfer',
+    duration: 'Final sprint',
+    body: 'No black boxes. Every engagement ends with documentation, runbooks, and architecture guides delivered alongside the code. Your team inherits something they can understand, maintain, and extend — with the reasoning intact so future decisions are made in context.',
+    outputs: [
+      'HLD and architecture documentation',
+      'Operational runbooks',
+      'Terraform state and secrets handover guide',
+      'Optional: knowledge-transfer sessions with your team',
+    ],
+  },
+];
+
+const standards = [
+  {
+    name: 'Microsoft Cloud Adoption Framework (CAF)',
+    detail: 'Landing zone design, subscription structure, and migration methodology — assess, replicate, migrate, optimise.',
+  },
+  {
+    name: 'Azure Well-Architected Framework (WAF)',
+    detail: 'Five-pillar quality assessment across Reliability, Security, Cost Optimisation, Operational Excellence, and Performance Efficiency.',
+  },
+  {
+    name: 'CIS Azure Foundations Benchmark',
+    detail: 'Security baseline hardening to Level 1 and Level 2 controls, integrated with Defender for Cloud.',
+  },
+  {
+    name: 'Microsoft Zero Trust security model',
+    detail: 'Verify explicitly, least-privilege access, assume breach — applied to identity, network, and workload layers.',
+  },
+  {
+    name: 'Regulatory frameworks',
+    detail: 'FCA, DORA, PCI DSS, ISO 27001, and Lloyd\'s of London market requirements mapped to Azure controls.',
+  },
+];
 ---
 
 <BaseLayout
   title="Approach — HarvTech"
-  description="How I work: contract engagements, security-first delivery, IaC standards."
+  description="How HarvTech delivers Azure platform engagements — discovery, design and build, handover. CAF, WAF, and regulatory frameworks applied throughout."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Approach</p>
     <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
-      How I work.
+      Structured delivery.<br />Honest trade-offs.
     </h1>
     <p class="body-muted max-w-2xl text-lg">
-      Long-form write-up coming soon. It'll cover the engagement model
-      (freelance, day rate, notice periods), how I scope a piece of
-      platform work, and the defaults I bring to a new client — IaC
-      from day one, CI/CD without long-lived secrets, security findings
-      triaged with reasoning rather than rubber-stamped.
+      Every engagement follows the same three-phase structure &mdash;
+      Discovery, Design &amp; Build, Handover. The phases scale to the
+      size of the work, but the principles don&rsquo;t change: everything
+      in code, every decision documented, nothing handed over that
+      can&rsquo;t be maintained by your team.
     </p>
-    <p class="body-muted mt-6 max-w-2xl text-sm">
-      In the meantime, see the
-      <a href="/showcase" class="text-secondary hover:text-text-primary underline-offset-2 hover:underline">
-        showcase
-      </a> for what that looks like in practice, or
-      <a href="mailto:alex@harvtech.co.uk" class="text-secondary hover:text-text-primary underline-offset-2 hover:underline">
-        email me
-      </a> directly.
-    </p>
+  </section>
+
+  <!-- Engagement phases -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="space-y-6">
+        {
+          phases.map((phase) => (
+            <div class="card p-8 md:p-10">
+              <div class="grid gap-8 md:grid-cols-[180px_1fr]">
+                <div>
+                  <p class="font-display text-5xl font-bold leading-none text-primary opacity-30">
+                    {phase.number}
+                  </p>
+                  <p class="title-card mt-3">{phase.title}</p>
+                  <p class="text-text-subtle mt-1 text-xs font-semibold uppercase tracking-wider">
+                    {phase.duration}
+                  </p>
+                </div>
+                <div>
+                  <p class="body-muted mb-5 leading-relaxed">{phase.body}</p>
+                  <ul class="space-y-2">
+                    {phase.outputs.map((o) => (
+                      <li class="text-text-hero flex gap-3 text-sm">
+                        <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                        <span>{o}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Standards -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">Standards we apply</p>
+      <h2 class="title-section mb-10 max-w-3xl">
+        Industry frameworks, not invented process.
+      </h2>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          standards.map((s) => (
+            <div class="card p-6">
+              <p class="title-card mb-1">{s.name}</p>
+              <p class="body-muted text-sm">{s.detail}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Commitments + engagement formats -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="grid gap-10 lg:grid-cols-2">
+        <div>
+          <p class="eyebrow mb-4">Our commitment</p>
+          <h2 class="title-section mb-6">No black boxes. No surprises.</h2>
+          <div class="space-y-5">
+            {[
+              ['Everything in code', 'No undocumented manual steps. If it\'s not in Terraform and a CI/CD pipeline, it doesn\'t exist.'],
+              ['Decisions are visible', 'Every significant architectural choice has an ADR — context, options considered, reasoning, consequences.'],
+              ['Security by default', 'Security controls are designed in, not added later. Findings are documented with reasoning, not silently accepted.'],
+              ['You own it afterwards', 'Handover is a first-class deliverable, not an afterthought. Your team can operate and extend everything we build.'],
+            ].map(([heading, detail]) => (
+              <div class="flex gap-4">
+                <span aria-hidden="true" class="text-primary mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                <div>
+                  <p class="text-text-primary text-sm font-semibold">{heading}</p>
+                  <p class="body-muted mt-0.5 text-sm">{detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="card p-8">
+          <p class="title-card mb-5">Engagement formats</p>
+          <div class="space-y-5">
+            {[
+              ['Fixed-scope project', 'Discovery through handover. Scoped and priced upfront. Suits landing zones, security reviews, and defined migration phases.'],
+              ['Ongoing retainer', 'Regular day-rate engagement for organisations that need senior Azure expertise without a full-time hire.'],
+              ['Well-Architected review', 'Scored assessment against Microsoft\'s five pillars, delivered as a written remediation roadmap. No ongoing commitment required.'],
+            ].map(([title, desc]) => (
+              <div class="border-border-faintest border-t pt-5 first:border-0 first:pt-0">
+                <p class="text-text-primary mb-1 text-sm font-semibold">{title}</p>
+                <p class="body-muted text-sm">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="card p-10 md:p-14">
+        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p class="eyebrow mb-3">Ready to start?</p>
+            <h2 class="title-section mb-4">Tell us about your platform.</h2>
+            <p class="body-muted max-w-2xl">
+              A short conversation is usually enough to scope an engagement.
+              Drop us an email with where you are and where you want to be.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 md:items-end">
+            <a href="mailto:alex@harvtech.co.uk" class="btn-primary w-full justify-center md:w-auto">
+              alex@harvtech.co.uk
+            </a>
+            <a
+              href="https://www.linkedin.com/in/alexander-harvey-39433619"
+              rel="noopener"
+              target="_blank"
+              class="btn-secondary w-full justify-center md:w-auto"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>
