@@ -2,108 +2,70 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 
-const capabilities = [
+const engagementModes = [
   {
-    title: 'Cloud platform engineering',
-    body: 'Landing zone design, subscription / account structure, hub-spoke networking, identity foundations, RBAC. CAF-aligned on Azure; equivalent patterns on AWS and GCP.',
+    title: 'Greenfield builds',
+    eyebrow: 'Starting fresh',
+    body: 'Building something new? We start with the right foundations — CAF-aligned landing zone, identity, networking, and security baseline — before the first workload lands. No technical debt inherited, no retrofitting later.',
   },
   {
-    title: 'Terraform at scale',
-    body: 'Multi-stack repos, remote state with OIDC-federated CI/CD, cross-stack references via terraform_remote_state, declarative imports for legacy resources.',
+    title: 'Brownfield modernisation',
+    eyebrow: 'Existing platforms',
+    body: 'Platform grown organically and showing its age? We assess what you have, identify the security and architectural debt, and deliver a pragmatic remediation roadmap that improves things without breaking production.',
   },
   {
-    title: 'DevSecOps in CI/CD',
-    body: 'IaC security scanning (Checkov, Trivy, tflint) with SARIF flowing into Code Scanning. Dependabot, branch protection, deliberate suppressions with documented reasoning.',
-  },
-  {
-    title: 'Edge security',
-    body: 'Azure Front Door with WAF custom rules and managed rule sets, custom-domain TLS, rate limiting, network-rule origin restriction within Standard SKU limits.',
-  },
-  {
-    title: 'Identity and access',
-    body: 'Entra ID Conditional Access, Identity Protection (P2), phishing-resistant MFA rollouts, federated credentials for GitHub Actions, workload identities.',
-  },
-  {
-    title: 'Operations and SRE',
-    body: 'Diagnostic settings, Log Analytics, Defender for Cloud, alerting, runbooks, on-call. Postmortems that teach the team, not blame the operator.',
+    title: 'Cloud migrations',
+    eyebrow: 'On-premises or cross-cloud',
+    body: 'Moving from on-premises or another cloud? The CAF Migration Factory gives you a structured, repeatable approach — assess, replicate, migrate, optimise — with documented decisions at every stage.',
   },
 ];
 
-const featureBullets = [
-  'Two Terraform stacks (infra + dns) with state in a dedicated platform RG',
-  'GitHub Actions federated to Azure via OIDC — no long-lived secrets',
-  'Front Door Standard + WAF custom rules; site origin locked down where the SKU permits',
-  'Checkov + Trivy + tflint emitting SARIF to GitHub Code Scanning',
-  'Branch protection with required CI checks; admin bypass logged in audit trail',
-  'Dependabot auto-rebasing weekly across GitHub Actions and Terraform providers',
+const services = [
+  {
+    title: 'Azure landing zones',
+    body: 'CAF-aligned platform foundations — subscription structure, hub-spoke networking, DNS, identity, governance policies, and security baseline. Built for scale from day one, not bolted on later.',
+  },
+  {
+    title: 'Security & remediation',
+    body: 'Harden your Azure environment against real threats. Entra ID Conditional Access, phishing-resistant MFA, Defender for Cloud, WAF, private endpoints, and a prioritised remediation backlog for existing gaps.',
+  },
+  {
+    title: 'Compliance & governance',
+    body: 'Azure Policy guardrails aligned to your regulatory obligations — FCA, DORA, PCI DSS, ISO 27001, and Lloyd\'s market requirements. Continuous compliance built into the platform, not a point-in-time audit.',
+  },
+  {
+    title: 'Well-Architected reviews',
+    body: 'Assess your platform against Microsoft\'s five pillars: Reliability, Security, Cost Optimisation, Operational Excellence, Performance Efficiency. You get a scored report and a prioritised remediation roadmap.',
+  },
+  {
+    title: 'DevSecOps & automation',
+    body: 'Terraform IaC, OIDC-federated CI/CD with no long-lived secrets, automated security scanning (Checkov, Trivy, tflint), and branch-protection policies. Infrastructure as auditable, reviewable code.',
+  },
+  {
+    title: 'Data platform engineering',
+    body: 'ADLS Gen2 lakehouse with medallion architecture, Databricks, Data Factory, Cosmos DB. Governed data foundations that feed analytics, AI, and reporting workloads without creating a compliance blind spot.',
+  },
 ];
 ---
 
-<BaseLayout title="HarvTech — Well-architected Azure landing zones">
+<BaseLayout title="HarvTech — Azure platform engineering consultancy">
   <Hero />
 
-  <!-- Featured project: this site, in the open -->
+  <!-- Engagement modes -->
   <section class="border-border-faintest border-y">
     <div class="container-page py-20">
-      <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
-        <div>
-          <p class="eyebrow mb-4">Featured / Open source</p>
-          <h2 class="title-section mb-4">
-            This site, built in the open.
-          </h2>
-          <p class="body-muted">
-            Every Terraform module, every workflow, every WAF rule that runs
-            <span class="code-inline">harvtech.co.uk</span> is in a public GitHub
-            repo. It's a working portfolio piece — and a candid record of trade-offs
-            (cost, SKU choice, accepted-with-reasoning security findings) rather
-            than a polished pretence that everything was right first time.
-          </p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <a
-              href="https://github.com/HarvtechUK/harvtech-site"
-              rel="noopener"
-              target="_blank"
-              class="btn-secondary text-sm"
-            >
-              View the repository
-            </a>
-            <a href="/showcase" class="btn-secondary text-sm">
-              Read the case study
-            </a>
-          </div>
-        </div>
-
-        <div class="card p-7">
-          <p class="title-card mb-4">What's running underneath</p>
-          <ul class="space-y-3">
-            {
-              featureBullets.map((b) => (
-                <li class="text-text-hero flex gap-3 text-sm leading-relaxed">
-                  <span aria-hidden="true" class="text-secondary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current"></span>
-                  <span>{b}</span>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Capability grid -->
-  <section>
-    <div class="container-page py-20">
-      <p class="eyebrow mb-4">What I do</p>
+      <p class="eyebrow mb-4">How we engage</p>
       <h2 class="title-section mb-12 max-w-3xl">
-        Platform and security work for teams shipping to the cloud.
+        Greenfield, brownfield, or migration &mdash; we&rsquo;ve done all three.
       </h2>
 
-      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div class="grid gap-5 md:grid-cols-3">
         {
-          capabilities.map((c) => (
-            <div class="card p-6">
-              <p class="title-card mb-2">{c.title}</p>
-              <p class="body-muted text-sm">{c.body}</p>
+          engagementModes.map((m) => (
+            <div class="card p-7">
+              <p class="eyebrow mb-3">{m.eyebrow}</p>
+              <p class="title-card mb-3">{m.title}</p>
+              <p class="body-muted text-sm">{m.body}</p>
             </div>
           ))
         }
@@ -111,18 +73,101 @@ const featureBullets = [
     </div>
   </section>
 
-  <!-- Contact CTA -->
+  <!-- Services -->
+  <section>
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What we do</p>
+      <h2 class="title-section mb-12 max-w-3xl">
+        Platform, security, and compliance — end to end.
+      </h2>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {
+          services.map((s) => (
+            <div class="card p-6">
+              <p class="title-card mb-2">{s.title}</p>
+              <p class="body-muted text-sm">{s.body}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        <a href="/approach" class="btn-secondary text-sm">
+          How we work &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Credibility -->
+  <section class="border-border-faintest border-y">
+    <div class="container-page py-20">
+      <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p class="eyebrow mb-4">Why HarvTech</p>
+          <h2 class="title-section mb-4">
+            Senior expertise, without the consultancy overhead.
+          </h2>
+          <p class="body-muted mb-4">
+            HarvTech is led by Alex Harvey &mdash; 25 years in IT, the
+            last seven focused on Microsoft Azure at Lloyd&rsquo;s of
+            London market insurers Tokio Marine Kiln and Brit Insurance.
+            The work included enterprise landing zones, Entra ID hardening,
+            Conditional Access, Defender for Cloud, and Terraform-first
+            delivery across regulated environments.
+          </p>
+          <p class="body-muted">
+            You get senior hands-on delivery &mdash; not a project manager
+            fronting a junior team. Everything we build is documented,
+            in code, and handed over with the reasoning intact.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="/cv" class="btn-secondary text-sm">
+              View background &rarr;
+            </a>
+            <a href="/showcase" class="btn-secondary text-sm">
+              See the showcase &rarr;
+            </a>
+          </div>
+        </div>
+
+        <div class="card p-7">
+          <p class="title-card mb-5">Standards we work to</p>
+          <ul class="space-y-3">
+            {[
+              'Microsoft Cloud Adoption Framework (CAF)',
+              'Azure Well-Architected Framework (WAF)',
+              'CIS Azure Foundations Benchmark',
+              'Microsoft Zero Trust security model',
+              'FCA, DORA, PCI DSS, ISO 27001',
+              'Infrastructure as Code — Terraform, azurerm 4.x',
+              'GitOps with OIDC-federated CI/CD pipelines',
+            ].map((item) => (
+              <li class="text-text-hero flex gap-3 text-sm leading-relaxed">
+                <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
   <section class="border-border-faintest border-t">
     <div class="container-page py-20">
       <div class="card p-10 md:p-14">
         <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
           <div>
-            <p class="eyebrow mb-3">Engagements</p>
-            <h2 class="title-section mb-4">Available for contract work.</h2>
+            <p class="eyebrow mb-3">Get started</p>
+            <h2 class="title-section mb-4">Let&rsquo;s talk about your platform.</h2>
             <p class="body-muted max-w-2xl">
-              Freelance, UK-based, hybrid or fully remote. Recent contracts at
-              Tokio Marine Kiln and Brit Insurance — happy to talk about either,
-              and about where I'd take a similar engagement next.
+              Whether you need a landing zone built from scratch, a security
+              audit and remediation plan, or a migration to Azure &mdash;
+              get in touch and we&rsquo;ll scope it together.
+              UK-based, hybrid or fully remote.
             </p>
           </div>
           <div class="flex flex-col gap-3 md:items-end">

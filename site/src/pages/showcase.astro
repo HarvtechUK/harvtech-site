@@ -1,81 +1,136 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const projects = [
+  {
+    status: 'Live',
+    title: 'harvtech.co.uk — site & infrastructure',
+    summary: 'This site, built and operated in the open.',
+    description:
+      'The full stack behind harvtech.co.uk — Astro + Tailwind static site served from Azure Storage $web, behind Front Door Standard with WAF custom rules and managed rule sets. Two Terraform stacks (site and DNS) with shared state in a dedicated platform resource group. GitHub Actions CI/CD federated to Azure via OIDC — no long-lived secrets anywhere in the pipeline. Security scanning on every PR: Checkov, Trivy, tflint, and Snyk Open Source, all emitting SARIF to GitHub Code Scanning.',
+    tags: ['Azure', 'Terraform', 'Astro', 'Front Door + WAF', 'GitHub Actions', 'OIDC', 'Checkov', 'Trivy'],
+    links: [
+      { label: 'View repository', href: 'https://github.com/HarvtechUK/harvtech-site', external: true },
+      { label: 'Read the architecture', href: '/docs/architecture/site-infra-hld', external: false },
+    ],
+    highlight: true,
+  },
+  {
+    status: 'Live',
+    title: 'Azure data platform',
+    summary: 'Medallion lakehouse on ADLS Gen2, Cosmos DB, Databricks, and Data Factory.',
+    description:
+      'Reference IaC for an Azure data platform — ADLS Gen2 with a medallion architecture (raw, cleansed, curated layers), Cosmos DB on the free tier for operational data, Data Factory as orchestrator, and a Databricks Premium workspace. All storage hardened: local auth disabled, infrastructure encryption enabled, OAuth-only access, network rules. The platform stays under £1/month by deploying the resources without running active workloads — the Terraform patterns are the showcase, drawn from real-world data engineering delivery.',
+    tags: ['Azure', 'Terraform', 'ADLS Gen2', 'Databricks', 'Cosmos DB', 'Data Factory', 'Entra ID'],
+    links: [
+      { label: 'Read the HLD', href: '/docs/architecture/data-platform-hld', external: false },
+      { label: 'View the Terraform', href: 'https://github.com/HarvtechUK/harvtech-site/tree/main/data-platform', external: true },
+    ],
+    highlight: false,
+  },
+  {
+    status: 'In progress',
+    title: 'Reference Azure landing zone',
+    summary: 'A production-grade landing zone in Terraform, with AI as a demonstrated workload.',
+    description:
+      'A well-architected Azure landing zone in Terraform — hub-spoke networking, private endpoints throughout, Entra ID Conditional Access policies, Defender for Cloud with DINE policies, image scanning in CI, and WAF at the edge. AI (Azure OpenAI / Foundry) and data workloads drop in on top as demonstrated platform tenants. The goal is a reference architecture you can clone and adapt, not a contrived demo. Coming as a separate public repo with this site as its case-study home.',
+    tags: ['Azure', 'Terraform', 'Hub-spoke', 'Entra ID', 'Defender for Cloud', 'Azure OpenAI', 'WAF'],
+    links: [],
+    highlight: false,
+  },
+];
 ---
 
 <BaseLayout
   title="Showcase — HarvTech"
-  description="Working portfolio pieces — this site, a reference Azure landing zone, the data platform, and more."
+  description="HarvTech working portfolio — Azure platform engineering, data platform, and landing zone reference architecture. Source on GitHub, trade-offs written up in plain English."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Showcase</p>
     <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
-      Working portfolio.
+      Proof of practice.
     </h1>
-    <p class="body-muted mb-12 max-w-2xl text-lg">
-      Public projects, with the source on GitHub and the trade-offs
-      written up in plain English. Detailed case studies dropping in
-      one by one.
+    <p class="body-muted mb-16 max-w-2xl text-lg">
+      Real infrastructure, in public repos. Every project here is live or
+      in active development &mdash; the source code, the architecture
+      decisions, and the honest record of what worked first time and what
+      didn&rsquo;t.
     </p>
 
-    <div class="grid gap-5 md:grid-cols-2">
-      <div class="card p-7">
-        <span class="badge-accent mb-3 inline-block">Live</span>
-        <p class="title-card mt-3 mb-2">harvtech.co.uk infrastructure</p>
-        <p class="body-muted mb-4 text-sm">
-          This site. Astro + Tailwind output, served from Azure Storage
-          $web, behind Front Door with WAF. Terraform across two stacks
-          with OIDC-federated CI/CD. The git history is intentionally
-          honest about what worked first time and what didn't.
-        </p>
-        <a
-          href="https://github.com/HarvtechUK/harvtech-site"
-          rel="noopener"
-          target="_blank"
-          class="btn-secondary text-sm"
-        >
-          View the repo
-        </a>
-      </div>
+    <div class="space-y-6">
+      {
+        projects.map((p) => (
+          <div class:list={['card p-8 md:p-10', p.highlight && 'border-primary/20 border']}>
+            <!-- Header row -->
+            <div class="mb-5 flex flex-wrap items-start gap-3">
+              <span
+                class:list={[
+                  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                  p.status === 'Live'
+                    ? 'bg-primary/15 text-primary'
+                    : 'bg-bg-3 text-text-muted',
+                ]}
+              >
+                {p.status === 'Live' ? '● Live' : '◌ In progress'}
+              </span>
+            </div>
 
-      <div class="card p-7">
-        <span class="badge-accent mb-3 inline-block">Live</span>
-        <p class="title-card mt-3 mb-2">Azure data platform</p>
-        <p class="body-muted mb-4 text-sm">
-          ADLS Gen2 lakehouse (medallion raw/cleansed/curated), Cosmos
-          DB on the free tier, Data Factory orchestrator stub, and a
-          Databricks workspace. Stays under £1/month by deploying the
-          resources without running the workloads — the IaC pattern is
-          the showcase, drawn from prior real-world experience.
-        </p>
-        <div class="flex flex-wrap gap-2">
-          <a
-            href="/docs/architecture/data-platform-hld"
-            class="btn-secondary text-sm"
-          >
-            Read the HLD
-          </a>
-          <a
-            href="https://github.com/HarvtechUK/harvtech-site/tree/main/data-platform"
-            rel="noopener"
-            target="_blank"
-            class="btn-secondary text-sm"
-          >
-            View the Terraform
-          </a>
+            <h2 class="title-card mb-1 text-xl">{p.title}</h2>
+            <p class="text-secondary mb-4 text-sm font-medium">{p.summary}</p>
+            <p class="body-muted mb-6 text-sm leading-relaxed">{p.description}</p>
+
+            <!-- Tech stack tags -->
+            <div class="mb-6 flex flex-wrap gap-2">
+              {p.tags.map((tag) => (
+                <span class="bg-bg-3 text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <!-- Links -->
+            {p.links.length > 0 && (
+              <div class="flex flex-wrap gap-3">
+                {p.links.map((link) => (
+                  <a
+                    href={link.href}
+                    rel={link.external ? 'noopener' : undefined}
+                    target={link.external ? '_blank' : undefined}
+                    class="btn-secondary text-sm"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="card p-10 md:p-14">
+        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p class="eyebrow mb-3">Work with us</p>
+            <h2 class="title-section mb-4">Need something like this for your organisation?</h2>
+            <p class="body-muted max-w-2xl">
+              Every project above started with a conversation about the
+              problem. Let&rsquo;s have that conversation about yours.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 md:items-end">
+            <a href="mailto:alex@harvtech.co.uk" class="btn-primary w-full justify-center md:w-auto">
+              Get in touch
+            </a>
+            <a href="/approach" class="btn-secondary w-full justify-center md:w-auto">
+              How we work &rarr;
+            </a>
+          </div>
         </div>
-      </div>
-
-      <div class="card p-7">
-        <p class="eyebrow mb-3">In progress</p>
-        <p class="title-card mb-2">Reference Azure landing zone</p>
-        <p class="body-muted text-sm">
-          A well-architected landing zone in Terraform &mdash; hub-spoke
-          networking, private endpoints, Entra Conditional Access,
-          Defender for Cloud, image scanning, and WAF at the edge. AI
-          (Azure OpenAI / Foundry) drops in as one demonstrated workload
-          on top, alongside data and app-tier examples. Coming as a
-          separate repo with this site as its case-study home.
-        </p>
       </div>
     </div>
   </section>
