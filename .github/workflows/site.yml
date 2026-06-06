@@ -1,0 +1,140 @@
+name: Site
+
+# Triggered only when site/ files change. No IaC in this stack so
+# Checkov/Trivy/tflint don't apply — only Snyk (npm deps) and the
+# Astro build.
+#
+# deploy-site reads the storage account name from infra Terraform state
+# at deploy time rather than hard-coding it.
+#
+# feat/* ──PR──→ dev   Stage 1 only  (Snyk + build)
+# dev    ──PR──→ main  Stage 1 only  (no Terraform plan for site stack)
+# main   push          Stage 1 + deploy
+# workflow_dispatch    Stage 1 + deploy (from main only)
+# schedule             Stage 1 only  (nightly Snyk CVE sweep)
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'site/**'
+      - '.github/workflows/site.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'site/**'
+      - '.github/workflows/site.yml'
+  schedule:
+    - cron: '37 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+# ── Stage 1: Validation ───────────────────────────────────────────────────────
+
+jobs:
+
+  snyk:
+    name: Snyk (Open Source)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: snyk/actions/setup@master
+      - name: Snyk test
+        run: |
+          snyk test \
+            --sarif-file-output=../snyk-deps.sarif \
+            --severity-threshold=low || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('snyk-deps.sarif') != ''
+        with:
+          sarif_file: snyk-deps.sarif
+          category: snyk-deps
+
+  build-site:
+    name: Build site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Astro build
+        run: npm run build
+      - name: Upload dist artifact
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          retention-days: 1
+          if-no-files-found: error
+
+# ── Stage 2: Deploy (main only) ──────────────────────────────────────────────
+
+  deploy-site:
+    name: Deploy site content
+    needs: [snyk, build-site]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get storage account name from infra state
+        id: sa
+        working-directory: infra
+        run: |
+          terraform init
+          echo "name=$(terraform output -raw storage_account_name)" >> $GITHUB_OUTPUT
+
+      - name: Upload site to $web container
+        uses: azure/cli@v3
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage blob upload-batch \
+              --account-name "${{ steps.sa.outputs.name }}" \
+              --source ./dist \
+              --destination '$web' \
+              --overwrite \
+              --auth-mode login

@@ -1,0 +1,164 @@
+name: Infra
+
+# Triggered only when infra/ files change (or shared scanner config / this
+# file itself). Changes to site/, dns/, identity/, data-platform/ have no
+# effect here.
+#
+# feat/* ──PR──→ dev   Stage 1 only  (validate · scan)
+# dev    ──PR──→ main  Stage 1 + Stage 2 plan (no apply)
+# main   push          Stage 1 + Stage 2 plan + apply
+# workflow_dispatch    Stage 1 + Stage 2 plan + apply (from main only)
+# schedule             Stage 1 only  (nightly CVE sweep)
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'infra/**'
+      - '.checkov.yaml'
+      - '.trivyignore'
+      - '.tflint.hcl'
+      - '.github/workflows/infra.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'infra/**'
+      - '.checkov.yaml'
+      - '.trivyignore'
+      - '.tflint.hcl'
+      - '.github/workflows/infra.yml'
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+# ── Stage 1: Validation (no Azure credentials) ───────────────────────────────
+
+jobs:
+
+  checkov:
+    name: Checkov (infra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          directory: infra
+          output_format: cli,sarif
+          output_file_path: console,checkov.sarif
+          soft_fail: true
+          config_file: .checkov.yaml
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('checkov.sarif') != ''
+        with:
+          sarif_file: checkov.sarif
+          category: checkov-infra
+
+  trivy:
+    name: Trivy (infra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: infra
+          format: sarif
+          output: trivy.sarif
+          exit-code: '0'
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy.sarif') != ''
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-infra
+
+  tflint:
+    name: tflint (infra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - name: Init tflint plugins
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tflint
+        run: tflint --format sarif --chdir infra > tflint-infra.sarif || true
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('tflint-infra.sarif') != ''
+        with:
+          sarif_file: tflint-infra.sarif
+          category: tflint-infra
+
+  validate-terraform:
+    name: Validate Terraform (infra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Terraform init (no backend)
+        run: terraform -chdir=infra init -backend=false
+      - name: Terraform fmt check
+        run: terraform -chdir=infra fmt -check -recursive
+      - name: Terraform validate
+        run: terraform -chdir=infra validate
+
+# ── Stage 2: Plan & Apply (main branch only) ─────────────────────────────────
+
+  terraform-site:
+    name: Terraform site
+    needs: [checkov, trivy, tflint, validate-terraform]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    env:
+      TFVARS: env/prd.tfvars
+    outputs:
+      storage_account_name: ${{ steps.tfout.outputs.storage_account_name }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform plan
+        run: terraform plan -out=tfplan -var-file=$TFVARS
+      - name: Terraform apply
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: terraform apply -auto-approve tfplan
+      - name: Capture outputs
+        id: tfout
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: |
+          echo "storage_account_name=$(terraform output -raw storage_account_name)" >> $GITHUB_OUTPUT
