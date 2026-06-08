@@ -1,0 +1,153 @@
+name: Data Platform
+
+# Triggered only when data-platform/ files change.
+#
+# feat/* ──PR──→ dev   Stage 1 only
+# dev    ──PR──→ main  Stage 1 + Stage 2 plan
+# main   push          Stage 1 + Stage 2 plan + apply
+# workflow_dispatch    Stage 1 + Stage 2 plan + apply (from main only)
+# schedule             Stage 1 only
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'data-platform/**'
+      - '.checkov.yaml'
+      - '.trivyignore'
+      - '.tflint.hcl'
+      - '.github/workflows/data-platform.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'data-platform/**'
+      - '.checkov.yaml'
+      - '.trivyignore'
+      - '.tflint.hcl'
+      - '.github/workflows/data-platform.yml'
+  schedule:
+    - cron: '32 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+# ── Stage 1: Validation (no Azure credentials) ───────────────────────────────
+
+jobs:
+
+  checkov:
+    name: Checkov (data-platform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          directory: data-platform
+          output_format: cli,sarif
+          output_file_path: console,checkov.sarif
+          soft_fail: true
+          config_file: .checkov.yaml
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('checkov.sarif') != ''
+        with:
+          sarif_file: checkov.sarif
+          category: checkov-data-platform
+
+  trivy:
+    name: Trivy (data-platform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: data-platform
+          format: sarif
+          output: trivy.sarif
+          exit-code: '0'
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy.sarif') != ''
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-data-platform
+
+  tflint:
+    name: tflint (data-platform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - name: Init tflint plugins
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tflint
+        run: tflint --format sarif --chdir data-platform > tflint-data-platform.sarif || true
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('tflint-data-platform.sarif') != ''
+        with:
+          sarif_file: tflint-data-platform.sarif
+          category: tflint-data-platform
+
+  validate-terraform:
+    name: Validate Terraform (data-platform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Terraform init (no backend)
+        run: terraform -chdir=data-platform init -backend=false
+      - name: Terraform fmt check
+        run: terraform -chdir=data-platform fmt -check -recursive
+      - name: Terraform validate
+        run: terraform -chdir=data-platform validate
+
+# ── Stage 2: Plan & Apply (main branch only) ─────────────────────────────────
+
+  terraform-data-platform:
+    name: Terraform data-platform
+    needs: [checkov, trivy, tflint, validate-terraform]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: data-platform
+    env:
+      TFVARS: env/prd.tfvars
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform plan
+        run: terraform plan -out=tfplan -var-file=$TFVARS
+      - name: Terraform apply
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: terraform apply -auto-approve tfplan

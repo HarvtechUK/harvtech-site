@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { services } from '../../data/services';
+
+export function getStaticPaths() {
+  return services.map((s) => ({
+    params: { slug: s.slug },
+    props: { service: s },
+  }));
+}
+
+const { service: s } = Astro.props;
+---
+
+<BaseLayout
+  title={`${s.title} — HarvTech`}
+  description={s.summary}
+>
+  <!-- Hero -->
+  <section class="container-page py-20">
+    <a
+      href="/services"
+      class="text-text-subtle hover:text-primary mb-8 inline-flex items-center gap-1.5 text-sm font-medium transition"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M8.5 3L5 7L8.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      All services
+    </a>
+
+    <p class="eyebrow mb-4">{s.eyebrow}</p>
+    <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
+      {s.tagline}
+    </h1>
+    <p class="body-muted max-w-2xl text-lg">
+      {s.summary}
+    </p>
+  </section>
+
+  <!-- Offerings -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What&rsquo;s included</p>
+      <h2 class="title-section mb-10 max-w-2xl">
+        {s.offerings.length === 1 ? 'The service' : `${s.offerings.length} areas of focus.`}
+      </h2>
+
+      <div class="grid gap-5 md:grid-cols-2">
+        {
+          s.offerings.map((o) => (
+            <div class="card p-7">
+              <p class="title-card mb-3">{o.title}</p>
+              <p class="body-muted text-sm leading-relaxed">{o.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Deliverables -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1fr]">
+        <div>
+          <p class="eyebrow mb-4">What we deliver</p>
+          <h2 class="title-section mb-6">
+            Concrete outputs. Nothing vague.
+          </h2>
+          <p class="body-muted max-w-xl">
+            Every engagement ends with tangible, owned deliverables &mdash;
+            not a slide deck that gathers dust. The outputs below are typical
+            for a {s.title} engagement; scope is agreed during discovery.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="/approach" class="btn-secondary text-sm">
+              How we work &rarr;
+            </a>
+          </div>
+        </div>
+
+        <div class="card p-8">
+          <ul class="space-y-4">
+            {
+              s.deliverables.map((d) => (
+                <li class="flex gap-3 text-sm">
+                  <span
+                    aria-hidden="true"
+                    class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current"
+                  />
+                  <span class="text-text-hero leading-relaxed">{d}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Other services -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">Other services</p>
+      <h2 class="title-section mb-8">More from HarvTech.</h2>
+
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {
+          services
+            .filter((other) => other.slug !== s.slug)
+            .map((other) => (
+              <a
+                href={`/services/${other.slug}`}
+                class="card group block p-6 transition hover:border-primary/30"
+              >
+                <p class="eyebrow mb-2 text-xs">{other.eyebrow}</p>
+                <p class="title-card group-hover:text-primary text-base transition-colors">
+                  {other.title}
+                </p>
+              </a>
+            ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="card p-10 md:p-14">
+        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p class="eyebrow mb-3">Ready to get started?</p>
+            <h2 class="title-section mb-4">
+              Tell us about your {s.title.toLowerCase()} needs.
+            </h2>
+            <p class="body-muted max-w-2xl">
+              A short conversation is usually enough to scope an engagement.
+              Drop us an email with where you are and where you need to be.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 md:items-end">
+            <a
+              href="mailto:alex@harvtech.co.uk"
+              class="btn-primary w-full justify-center md:w-auto"
+            >
+              alex@harvtech.co.uk
+            </a>
+            <a
+              href="https://www.linkedin.com/in/alexander-harvey-39433619"
+              rel="noopener"
+              target="_blank"
+              class="btn-secondary w-full justify-center md:w-auto"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
