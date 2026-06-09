@@ -5,9 +5,10 @@ const nav = [
   { href: '/services', label: 'Services' },
   { href: '/approach', label: 'Approach' },
   { href: '/showcase', label: 'Showcase' },
-  { href: '/docs', label: 'Docs' },
-  { href: '/writing', label: 'Writing' },
-  { href: '/cv', label: 'CV' },
+  { href: '/contact',  label: 'Contact' },
+  { href: '/docs',     label: 'Docs' },
+  { href: '/writing',  label: 'Writing' },
+  { href: '/cv',       label: 'CV' },
 ];
 
 const here = Astro.url.pathname;
@@ -41,7 +42,7 @@ const here = Astro.url.pathname;
     </nav>
 
     <a
-      href="mailto:alex@harvtech.co.uk"
+      href="/contact"
       class="btn-primary hidden text-sm md:inline-flex"
     >
       Get in touch
