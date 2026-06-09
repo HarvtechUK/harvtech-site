@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { services } from '../../data/services';
+---
+
+<BaseLayout
+  title="Services — HarvTech"
+  description="HarvTech Azure platform engineering services — Security Hardening, Greenfield Platform Builds, Cloud Migrations, Networking, and FinOps. Senior hands-on delivery, CAF and WAF aligned."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Services</p>
+    <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
+      Everything we do.<br />Done properly.
+    </h1>
+    <p class="body-muted max-w-2xl text-lg">
+      Five service lines covering the full lifecycle of an Azure platform &mdash;
+      from laying the foundations to securing, migrating, networking, and
+      controlling costs. Each engagement is senior, hands-on, and delivered
+      in code.
+    </p>
+  </section>
+
+  <!-- Service cards -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="space-y-5">
+        {
+          services.map((s) => (
+            <a
+              href={`/services/${s.slug}`}
+              class="card group block p-8 transition hover:border-primary/30 md:p-10"
+            >
+              <div class="grid gap-8 md:grid-cols-[1fr_auto]">
+                <div>
+                  <p class="eyebrow mb-3">{s.eyebrow}</p>
+                  <h2 class="title-card mb-2 text-xl group-hover:text-primary transition-colors">
+                    {s.title}
+                  </h2>
+                  <p class="body-muted mb-5 max-w-2xl text-sm leading-relaxed">
+                    {s.summary}
+                  </p>
+
+                  <!-- Sub-offering chips -->
+                  <div class="flex flex-wrap gap-2">
+                    {s.offerings.map((o) => (
+                      <span class="bg-bg-3 text-text-muted rounded px-2.5 py-1 text-xs font-medium">
+                        {o.title}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div class="flex items-center md:pl-8">
+                  <span class="text-text-subtle group-hover:text-primary transition-colors text-sm font-medium whitespace-nowrap">
+                    Learn more &rarr;
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="card p-10 md:p-14">
+        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p class="eyebrow mb-3">Not sure where to start?</p>
+            <h2 class="title-section mb-4">Let&rsquo;s scope it together.</h2>
+            <p class="body-muted max-w-2xl">
+              Most engagements start with a short discovery conversation.
+              Tell us where your platform is and where you need it to be &mdash;
+              we&rsquo;ll help you work out which service line fits.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 md:items-end">
+            <a href="mailto:alex@harvtech.co.uk" class="btn-primary w-full justify-center md:w-auto">
+              alex@harvtech.co.uk
+            </a>
+            <a href="/approach" class="btn-secondary w-full justify-center md:w-auto">
+              How we work &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

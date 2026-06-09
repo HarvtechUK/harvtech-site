@@ -1,0 +1,165 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy Policy — HarvTech"
+  description="HARVTECH LTD privacy policy — how we collect, use, and protect your personal data under UK GDPR."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Legal</p>
+    <h1 class="title-display mb-4 hero-gradient leading-tight">Privacy Policy</h1>
+    <p class="body-muted text-sm">Last updated: June 2026</p>
+  </section>
+
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-16">
+      <div class="prose-policy max-w-3xl space-y-10">
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">1. Who we are</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            HARVTECH LTD (&ldquo;HarvTech&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a company registered in England and
+            Wales under company number 13134225. Our registered office is at 31 Wellington Street,
+            Hertford, England, SG14 3AN.
+          </p>
+          <p class="body-muted text-sm leading-relaxed">
+            We are the data controller for the personal data described in this policy. If you have
+            any questions or wishes to exercise your rights, contact us at{' '}
+            <a href="mailto:alex@harvtech.co.uk" class="text-primary hover:underline">
+              alex@harvtech.co.uk
+            </a>.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">2. What data we collect and why</h2>
+
+          <div class="space-y-5">
+            <div>
+              <p class="text-text-primary text-sm font-semibold mb-1">Enquiry and contact data</p>
+              <p class="body-muted text-sm leading-relaxed">
+                When you email us or contact us via LinkedIn, we process your name, email address,
+                organisation name (where provided), and the content of your message.
+              </p>
+              <p class="body-muted text-sm leading-relaxed mt-2">
+                <span class="text-text-hero font-medium">Legal basis:</span> legitimate interests &mdash;
+                to respond to your enquiry and assess whether we can help.
+              </p>
+            </div>
+
+            <div class="border-border-faintest border-t pt-5">
+              <p class="text-text-primary text-sm font-semibold mb-1">Engagement and contract data</p>
+              <p class="body-muted text-sm leading-relaxed">
+                If we enter a contract, we process contact details, project correspondence,
+                invoicing information, and any other data necessary to deliver the agreed services.
+              </p>
+              <p class="body-muted text-sm leading-relaxed mt-2">
+                <span class="text-text-hero font-medium">Legal basis:</span> contractual necessity.
+              </p>
+            </div>
+
+            <div class="border-border-faintest border-t pt-5">
+              <p class="text-text-primary text-sm font-semibold mb-1">Website visits</p>
+              <p class="body-muted text-sm leading-relaxed">
+                This website does not use tracking cookies, third-party analytics, or advertising.
+                We do not collect or store any browsing data.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">3. How long we keep your data</h2>
+          <div class="space-y-3">
+            {[
+              ['Enquiry data (no contract follows)', '2 years from last contact'],
+              ['Contract correspondence and project materials', '7 years from end of engagement (HMRC requirement)'],
+              ['Invoices and financial records', '7 years from the relevant financial year end'],
+            ].map(([category, retention]) => (
+              <div class="flex gap-4 text-sm">
+                <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
+                <span class="body-muted">
+                  <span class="text-text-hero font-medium">{category}:</span> {retention}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">4. Who we share data with</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            We do not sell, rent, or share your personal data with third parties for marketing
+            purposes.
+          </p>
+          <p class="body-muted text-sm leading-relaxed">
+            We may share data with our professional advisers (accountants, legal counsel) where
+            necessary, and only under appropriate confidentiality obligations. We may also disclose
+            data where required to do so by law or by a regulatory authority.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">5. Your rights</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            Under UK GDPR you have the right to:
+          </p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            {[
+              ['Access', 'Request a copy of the personal data we hold about you.'],
+              ['Rectification', 'Ask us to correct inaccurate or incomplete data.'],
+              ['Erasure', 'Request deletion of your data in certain circumstances.'],
+              ['Objection', 'Object to processing based on legitimate interests.'],
+              ['Restriction', 'Ask us to restrict how we use your data while a dispute is resolved.'],
+              ['Portability', 'Receive your data in a structured, machine-readable format.'],
+            ].map(([right, desc]) => (
+              <div class="bg-bg-2 rounded-lg p-4">
+                <p class="text-text-primary text-xs font-semibold uppercase tracking-wider mb-1">{right}</p>
+                <p class="body-muted text-xs leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <p class="body-muted text-sm leading-relaxed">
+            To exercise any right, email{' '}
+            <a href="mailto:alex@harvtech.co.uk" class="text-primary hover:underline">
+              alex@harvtech.co.uk
+            </a>. We will respond within 30 days.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">6. Complaints</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            If you are unhappy with how we have handled your personal data, you have the right to
+            lodge a complaint with the Information Commissioner&rsquo;s Office (ICO):
+          </p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex gap-3">
+              <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+              <span class="body-muted">Website: <a href="https://ico.org.uk" rel="noopener" target="_blank" class="text-primary hover:underline">ico.org.uk</a></span>
+            </li>
+            <li class="flex gap-3">
+              <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+              <span class="body-muted">Telephone: 0303 123 1113</span>
+            </li>
+          </ul>
+          <p class="body-muted text-sm leading-relaxed">
+            We would appreciate the opportunity to address your concern directly before you contact
+            the ICO.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">7. Changes to this policy</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            We may update this policy from time to time. The &ldquo;last updated&rdquo; date at the
+            top of this page reflects the most recent revision. Continued use of this website
+            following any update constitutes acceptance of the revised policy.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</BaseLayout>
