@@ -9,6 +9,10 @@
  *
  * Two identical sets of logos sit side-by-side in the track; animating
  * left by 50% (one set width) creates a seamless infinite loop.
+ *
+ * Hovering pauses the strip and reveals a tooltip beneath each logo
+ * describing how HarvTech uses that technology. The tooltip sits in
+ * .marquee-outer's padding-bottom area so it isn't clipped.
  */
 
 import {
@@ -33,25 +37,26 @@ interface Logo {
   name: string;
   body: string;
   viewBox: string;
+  tooltip: string;
 }
 
 // simple-icons helper: wrap the path in a <path> element
 const si = (icon: { path: string }): string => `<path d="${icon.path}"/>`;
 
 const logos: Logo[] = [
-  { name: 'Microsoft Azure',    body: icons['azure-icon'].body,       viewBox: '0 0 256 256' },
-  { name: 'Terraform',          body: si(siTerraform),                viewBox: '0 0 24 24' },
-  { name: 'GitHub',             body: si(siGithub),                   viewBox: '0 0 24 24' },
-  { name: 'GitHub Actions',     body: si(siGithubactions),            viewBox: '0 0 24 24' },
-  { name: 'Snyk',               body: si(siSnyk),                     viewBox: '0 0 24 24' },
-  { name: 'Databricks',         body: si(siDatabricks),               viewBox: '0 0 24 24' },
-  { name: 'Docker',             body: si(siDocker),                   viewBox: '0 0 24 24' },
-  { name: 'Kubernetes',         body: si(siKubernetes),               viewBox: '0 0 24 24' },
-  { name: 'HashiCorp',          body: si(siHashicorp),                viewBox: '0 0 24 24' },
-  { name: 'Astro',              body: si(siAstro),                    viewBox: '0 0 24 24' },
-  { name: 'Tailwind CSS',       body: si(siTailwindcss),              viewBox: '0 0 24 24' },
-  { name: 'Ansible',            body: si(siAnsible),                  viewBox: '0 0 24 24' },
-  { name: 'Palo Alto Networks', body: si(siPaloaltonetworks),         viewBox: '0 0 24 24' },
+  { name: 'Microsoft Azure',    body: icons['azure-icon'].body,  viewBox: '0 0 256 256', tooltip: 'Primary cloud platform across all engagements' },
+  { name: 'Terraform',          body: si(siTerraform),           viewBox: '0 0 24 24',   tooltip: 'All infrastructure defined as code via azurerm 4.x' },
+  { name: 'GitHub',             body: si(siGithub),              viewBox: '0 0 24 24',   tooltip: 'Source control, PR workflows, and collaboration' },
+  { name: 'GitHub Actions',     body: si(siGithubactions),       viewBox: '0 0 24 24',   tooltip: 'OIDC-federated CI/CD — validate, plan, and apply' },
+  { name: 'Snyk',               body: si(siSnyk),                viewBox: '0 0 24 24',   tooltip: 'Open-source and IaC vulnerability scanning on every PR' },
+  { name: 'Databricks',         body: si(siDatabricks),          viewBox: '0 0 24 24',   tooltip: 'Unified analytics and data platform on Azure' },
+  { name: 'Docker',             body: si(siDocker),              viewBox: '0 0 24 24',   tooltip: 'Container packaging for application workloads' },
+  { name: 'Kubernetes',         body: si(siKubernetes),          viewBox: '0 0 24 24',   tooltip: 'Container orchestration on AKS' },
+  { name: 'HashiCorp',          body: si(siHashicorp),           viewBox: '0 0 24 24',   tooltip: 'Terraform for IaC; Vault for secrets management' },
+  { name: 'Astro',              body: si(siAstro),               viewBox: '0 0 24 24',   tooltip: 'Static-site framework powering this site' },
+  { name: 'Tailwind CSS',       body: si(siTailwindcss),         viewBox: '0 0 24 24',   tooltip: 'Utility-first CSS framework' },
+  { name: 'Ansible',            body: si(siAnsible),             viewBox: '0 0 24 24',   tooltip: 'Configuration management and automation' },
+  { name: 'Palo Alto Networks', body: si(siPaloaltonetworks),    viewBox: '0 0 24 24',   tooltip: 'Network security, firewall policy, and micro-segmentation' },
 ];
 ---
 
@@ -83,13 +88,14 @@ const logos: Logo[] = [
       {[0, 1].map(() => (
         <div class="flex items-center">
           {logos.map((logo) => (
-            <div class="mx-10 flex flex-shrink-0 items-center justify-center">
+            <div class="logo-wrapper mx-10 flex flex-shrink-0 items-center justify-center">
               <svg
                 viewBox={logo.viewBox}
                 class="logo-icon h-9 w-auto"
                 fill="currentColor"
                 set:html={logo.body}
               />
+              <span class="logo-tooltip">{logo.tooltip}</span>
             </div>
           ))}
         </div>
@@ -102,6 +108,15 @@ const logos: Logo[] = [
   @keyframes marquee {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
+  }
+
+  /*
+   * padding-bottom creates space inside the overflow:hidden clip rect so
+   * the tooltip (position:absolute, top: 100%+gap) is visible below the
+   * logos without escaping the container.
+   */
+  .marquee-outer {
+    padding-bottom: 52px;
   }
 
   .marquee-track {
@@ -119,10 +134,44 @@ const logos: Logo[] = [
   .logo-icon {
     filter: brightness(0) invert(1);
     opacity: 0.55;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, filter 0.2s ease;
   }
 
   .marquee-outer:hover .logo-icon {
-    opacity: 0.85;
+    opacity: 0.7;
+  }
+
+  /* Brighten the specific logo being hovered */
+  .logo-wrapper:hover .logo-icon {
+    opacity: 1 !important;
+  }
+
+  /* ── Tooltip ────────────────────────────────────────────────────── */
+
+  .logo-wrapper {
+    position: relative;
+  }
+
+  .logo-tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: #c9c9c9;
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 30;
+  }
+
+  .logo-wrapper:hover .logo-tooltip {
+    opacity: 1;
   }
 </style>
