@@ -1,0 +1,171 @@
+---
+/**
+ * TechMarquee — full-width scrolling strip of technology logos.
+ *
+ * All logos use single-path clean SVGs (simple-icons 24×24), so the
+ * CSS brightness/invert filter produces clean white silhouettes with
+ * no filled background shapes. Azure uses the clean outline variant
+ * from @iconify-json/logos (azure-icon) for the same reason.
+ *
+ * Two identical sets of logos sit side-by-side in the track; animating
+ * left by 50% (one set width) creates a seamless infinite loop.
+ *
+ * Hovering pauses the strip and reveals a tooltip beneath each logo
+ * describing how HarvTech uses that technology. The tooltip sits in
+ * .marquee-outer's padding-bottom area so it isn't clipped.
+ */
+
+import {
+  siTerraform,
+  siGithub,
+  siGithubactions,
+  siAstro,
+  siTailwindcss,
+  siSnyk,
+  siTrivy,
+  siDatabricks,
+  siHashicorp,
+} from 'simple-icons';
+
+import logosJson from '@iconify-json/logos/icons.json';
+const { icons } = logosJson as { icons: Record<string, { body: string }> };
+
+interface Logo {
+  name: string;
+  body: string;
+  viewBox: string;
+  tooltip: string;
+}
+
+// simple-icons helper: wrap the path in a <path> element
+const si = (icon: { path: string }): string => `<path d="${icon.path}"/>`;
+
+const logos: Logo[] = [
+  { name: 'Microsoft Azure',    body: icons['azure-icon'].body,  viewBox: '0 0 256 256', tooltip: 'Primary cloud platform across all engagements' },
+  { name: 'Terraform',          body: si(siTerraform),           viewBox: '0 0 24 24',   tooltip: 'All infrastructure defined as code via azurerm 4.x' },
+  { name: 'GitHub',             body: si(siGithub),              viewBox: '0 0 24 24',   tooltip: 'Source control, PR workflows, and collaboration' },
+  { name: 'GitHub Actions',     body: si(siGithubactions),       viewBox: '0 0 24 24',   tooltip: 'OIDC-federated CI/CD — validate, plan, and apply' },
+  { name: 'Snyk',               body: si(siSnyk),                viewBox: '0 0 24 24',   tooltip: 'Open-source and IaC vulnerability scanning on every PR' },
+  { name: 'Trivy',              body: si(siTrivy),               viewBox: '0 0 24 24',   tooltip: 'Container and IaC vulnerability scanning in CI' },
+  { name: 'Databricks',         body: si(siDatabricks),          viewBox: '0 0 24 24',   tooltip: 'Unified analytics and data platform on Azure' },
+  { name: 'HashiCorp',          body: si(siHashicorp),           viewBox: '0 0 24 24',   tooltip: 'Terraform for IaC; Vault for secrets management' },
+  { name: 'Astro',              body: si(siAstro),               viewBox: '0 0 24 24',   tooltip: 'Static-site framework powering this site' },
+  { name: 'Tailwind CSS',       body: si(siTailwindcss),         viewBox: '0 0 24 24',   tooltip: 'Utility-first CSS framework' },
+];
+---
+
+<section
+  class="border-border-faintest border-y py-12"
+  aria-label="Technology stack"
+>
+  <p class="eyebrow mb-8 text-center">Built with</p>
+
+  <!-- Overflow wrapper -->
+  <div class="marquee-outer relative overflow-hidden">
+
+    <!-- Left fade -->
+    <div
+      class="pointer-events-none absolute inset-y-0 left-0 z-10 w-28"
+      style="background: linear-gradient(to right, rgb(0,0,0), transparent)"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Right fade -->
+    <div
+      class="pointer-events-none absolute inset-y-0 right-0 z-10 w-28"
+      style="background: linear-gradient(to left, rgb(0,0,0), transparent)"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Two identical sets — track animates to -50% for seamless loop -->
+    <div class="marquee-track flex items-center" aria-hidden="true">
+      {[0, 1].map(() => (
+        <div class="flex items-center">
+          {logos.map((logo) => (
+            <div class="logo-wrapper mx-10 flex flex-shrink-0 items-center justify-center">
+              <svg
+                viewBox={logo.viewBox}
+                class="logo-icon h-9 w-auto"
+                fill="currentColor"
+                set:html={logo.body}
+              />
+              <span class="logo-tooltip">{logo.tooltip}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /*
+   * padding-bottom creates space inside the overflow:hidden clip rect so
+   * the tooltip (position:absolute, top: 100%+gap) is visible below the
+   * logos without escaping the container.
+   */
+  .marquee-outer {
+    padding-bottom: 52px;
+  }
+
+  .marquee-track {
+    width: max-content;
+    animation: marquee 45s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-outer:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* White silhouettes — brightness(0) collapses all colour to black,
+     invert(1) flips to white. opacity softens the result. */
+  .logo-icon {
+    filter: brightness(0) invert(1);
+    opacity: 0.55;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  .marquee-outer:hover .logo-icon {
+    opacity: 0.7;
+  }
+
+  /* Brighten the specific logo being hovered */
+  .logo-wrapper:hover .logo-icon {
+    opacity: 1 !important;
+  }
+
+  /* ── Tooltip ────────────────────────────────────────────────────── */
+
+  .logo-wrapper {
+    position: relative;
+  }
+
+  .logo-tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: #c9c9c9;
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 30;
+  }
+
+  .logo-wrapper:hover .logo-tooltip {
+    opacity: 1;
+  }
+</style>
