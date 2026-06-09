@@ -4,14 +4,34 @@ const year = 2026;
 
 <footer class="border-border-faintest mt-20 border-t">
   <div class="container-page grid gap-10 py-12 md:grid-cols-3">
+
+    <!-- Brand -->
     <div>
       <p class="text-text-primary text-lg font-bold tracking-tight">HarvTech</p>
       <p class="body-muted mt-2 max-w-xs text-sm">
         Azure platform engineering consultancy &mdash; landing zones,
         migrations, security &amp; compliance.
       </p>
+      <a href="/contact" class="btn-primary mt-5 inline-flex text-sm">
+        Get in touch
+      </a>
     </div>
 
+    <!-- Navigation -->
+    <div>
+      <p class="eyebrow mb-3">Pages</p>
+      <ul class="space-y-2 text-sm">
+        <li><a href="/services"  class="text-text-hero hover:text-text-primary transition">Services</a></li>
+        <li><a href="/approach"  class="text-text-hero hover:text-text-primary transition">Approach</a></li>
+        <li><a href="/showcase"  class="text-text-hero hover:text-text-primary transition">Showcase</a></li>
+        <li><a href="/contact"   class="text-text-hero hover:text-text-primary transition">Contact</a></li>
+        <li><a href="/docs"      class="text-text-hero hover:text-text-primary transition">Docs</a></li>
+        <li><a href="/writing"   class="text-text-hero hover:text-text-primary transition">Writing</a></li>
+        <li><a href="/cv"        class="text-text-hero hover:text-text-primary transition">CV</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact + social -->
     <div>
       <p class="eyebrow mb-3">Contact</p>
       <ul class="space-y-2 text-sm">
@@ -40,39 +60,39 @@ const year = 2026;
             rel="noopener"
             target="_blank"
           >
-            GitHub (this site's source)
+            GitHub
           </a>
         </li>
       </ul>
     </div>
-
-    <div>
-      <p class="eyebrow mb-3">Pages</p>
-      <ul class="space-y-2 text-sm">
-        <li><a href="/approach" class="text-text-hero hover:text-text-primary transition">Approach</a></li>
-        <li><a href="/showcase" class="text-text-hero hover:text-text-primary transition">Showcase</a></li>
-        <li><a href="/docs" class="text-text-hero hover:text-text-primary transition">Docs</a></li>
-        <li><a href="/writing" class="text-text-hero hover:text-text-primary transition">Writing</a></li>
-        <li><a href="/cv" class="text-text-hero hover:text-text-primary transition">CV</a></li>
-      </ul>
-    </div>
   </div>
 
+  <!-- Legal strip -->
   <div class="border-border-faintest border-t">
-    <div class="container-page text-text-subtle flex flex-col gap-2 py-4 text-xs md:flex-row md:items-center md:justify-between">
-      <p>&copy; {year} Alex Harvey. Hosted on Azure, served from this very repo.</p>
-      <p>
-        Theme tokens derived from
-        <a
-          href="https://github.com/matt765/Tailcast"
-          rel="noopener"
-          target="_blank"
-          class="hover:text-text-primary underline-offset-2 hover:underline"
-        >
-          Tailcast
-        </a>
-        (MIT).
+    <div class="container-page py-5 space-y-2">
+      <p class="text-text-subtle text-xs">
+        HARVTECH LTD &mdash; Registered in England &amp; Wales No.&nbsp;13134225.
+        VAT No.&nbsp;GB&nbsp;368&nbsp;4459&nbsp;53.
+        Registered office: 31 Wellington Street, Hertford, England, SG14&nbsp;3AN.
       </p>
+      <div class="text-text-subtle flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+        <p>&copy; {year} HARVTECH LTD. All rights reserved.</p>
+        <a href="/privacy" class="hover:text-text-primary underline-offset-2 hover:underline transition">Privacy Policy</a>
+        <a href="/terms"   class="hover:text-text-primary underline-offset-2 hover:underline transition">Terms of Engagement</a>
+        <span class="hidden md:inline text-text-subtle/40">&bull;</span>
+        <p class="text-text-subtle/60">
+          Theme derived from
+          <a
+            href="https://github.com/matt765/Tailcast"
+            rel="noopener"
+            target="_blank"
+            class="hover:text-text-primary underline-offset-2 hover:underline"
+          >
+            Tailcast
+          </a>
+          (MIT). Hosted on Azure.
+        </p>
+      </div>
     </div>
   </div>
 </footer>
