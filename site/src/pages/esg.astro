@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="ESG & Sustainability Statement — HarvTech"
+  description="HARVTECH LTD environmental, social and governance commitments — our approach to sustainability, social responsibility and governance as a UK technology consultancy."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Responsibility</p>
+    <h1 class="title-display mb-4 hero-gradient leading-tight">ESG &amp; Sustainability Statement</h1>
+    <p class="body-muted text-sm">Last updated: June 2026 · Reviewed annually</p>
+    <p class="mt-4">
+      <a href="/policies/harvtech-esg-sustainability-statement.pdf" class="text-primary hover:underline text-sm" rel="noopener" target="_blank">
+        Download PDF
+      </a>
+    </p>
+  </section>
+
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-16">
+      <div class="prose-policy max-w-3xl space-y-10">
+
+        <div class="card p-8 space-y-4">
+          <p class="body-muted text-sm leading-relaxed">
+            HARVTECH LTD (&ldquo;HarvTech&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a UK-based technology and Azure
+            platform engineering consultancy. Although we are a small organisation, we believe that
+            operating responsibly &mdash; for the environment, for people, and through sound governance
+            &mdash; is fundamental to the way we work and to the trust our clients place in us. This
+            statement sets out our approach and our commitments.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">1. Our approach</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            As a lean, digitally-native consultancy we have a naturally low environmental footprint.
+            Rather than treat ESG as a reporting exercise, we focus on practical, proportionate actions
+            that we can genuinely deliver as a business of our size, and we will scale our commitments as
+            the company grows.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">2. Environmental responsibility</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            We are committed to minimising the environmental impact of our operations. In practice this
+            means:
+          </p>
+          <div class="space-y-3">
+            {[
+              'Operating as a remote-first, paperless business to avoid the emissions and waste associated with fixed office space and commuting.',
+              'Preferring cloud and hosting providers that publish renewable-energy and net-zero commitments.',
+              'Extending the life of IT hardware and disposing of redundant equipment responsibly through certified WEEE recycling channels.',
+              'Minimising business travel and defaulting to remote collaboration; choosing lower-carbon options where travel is unavoidable.',
+              'Building software and advising clients in ways that favour efficient, sustainable use of computing resources.',
+            ].map((item) => (
+              <div class="flex gap-4 text-sm">
+                <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
+                <span class="body-muted leading-relaxed">{item}</span>
+              </div>
+            ))}
+          </div>
+          <div class="bg-bg-2 rounded-lg p-5 space-y-2">
+            <p class="text-text-primary text-sm font-semibold">Emissions measurement</p>
+            <p class="body-muted text-sm leading-relaxed">
+              HarvTech has not yet formally baselined its Scope 1, 2 and 3 greenhouse-gas emissions. Given
+              our remote, equipment-light operating model our direct (Scope 1) and energy (Scope 2)
+              emissions are minimal. We intend to introduce simple emissions tracking and, as the business
+              grows, to set a reduction pathway aligned with the UK&rsquo;s net-zero ambitions.
+            </p>
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">3. Social responsibility</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            People &mdash; our clients, our future colleagues, and the communities we work in &mdash; are
+            central to our business. We are committed to:
+          </p>
+          <div class="space-y-3">
+            {[
+              'Treating everyone we work with fairly, respectfully and without discrimination of any kind.',
+              'Upholding human rights and fair labour practices across our own operations and supply chain (see our Modern Slavery Statement and Supplier Code of Conduct).',
+              'Protecting client and personal data in line with UK GDPR and the Data Protection Act 2018, and maintaining strong information-security practices.',
+              'Supporting continuous professional development and, as we grow, building an inclusive, flexible workplace from the outset.',
+            ].map((item) => (
+              <div class="flex gap-4 text-sm">
+                <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
+                <span class="body-muted leading-relaxed">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">4. Governance</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            We hold ourselves to high standards of integrity and legal compliance. This includes:
+          </p>
+          <div class="space-y-3">
+            {[
+              'Complying with all applicable UK laws and regulations relevant to our business.',
+              'Maintaining a zero-tolerance approach to bribery and corruption, consistent with the Bribery Act 2010.',
+              'Identifying and managing conflicts of interest transparently.',
+              'Maintaining appropriate professional indemnity and public liability insurance.',
+              'Keeping clear, accurate records and meeting our obligations to Companies House and HMRC.',
+            ].map((item) => (
+              <div class="flex gap-4 text-sm">
+                <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
+                <span class="body-muted leading-relaxed">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">5. Disclosure standards</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            HarvTech is a small enterprise and falls below the size thresholds that bring companies into
+            scope of formal sustainability disclosure frameworks such as the ISSB standards (IFRS S1/S2),
+            the TCFD recommendations, the EU Corporate Sustainability Reporting Directive (CSRD) and the EU
+            Corporate Sustainability Due Diligence Directive (CSDDD). We therefore do not currently report
+            against these standards. We monitor developments in sustainability reporting and aim to align
+            with their underlying principles &mdash; transparency, accountability and proportionate due
+            diligence &mdash; where it is practical for a business of our size to do so.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">6. Review</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            This statement is reviewed at least annually, and sooner if there is a material change to our
+            business, and is approved by the director of HARVTECH LTD.
+          </p>
+          <p class="body-muted text-sm leading-relaxed">
+            Approved by <span class="text-text-hero font-medium">Alex Harvey</span>, Director, HARVTECH LTD.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</BaseLayout>
