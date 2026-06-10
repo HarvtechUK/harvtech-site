@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Ethical Procurement & Supplier Code of Conduct — HarvTech"
+  description="HARVTECH LTD ethical procurement and supplier code of conduct — the standards we expect of suppliers on legal compliance, labour and human rights, environment and business ethics."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Responsibility</p>
+    <h1 class="title-display mb-4 hero-gradient leading-tight">Ethical Procurement &amp; Supplier Code of Conduct</h1>
+    <p class="body-muted text-sm">Last updated: June 2026 · Reviewed annually</p>
+    <p class="mt-4">
+      <a href="/policies/harvtech-supplier-code-of-conduct.pdf" class="text-primary hover:underline text-sm" rel="noopener" target="_blank">
+        Download PDF
+      </a>
+    </p>
+  </section>
+
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-16">
+      <div class="prose-policy max-w-3xl space-y-10">
+
+        <div class="card p-8 space-y-4">
+          <p class="body-muted text-sm leading-relaxed">
+            HARVTECH LTD (&ldquo;HarvTech&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) expects the suppliers and subcontractors we
+            work with to share our commitment to lawful, ethical and responsible business. This Code sets
+            out the standards we apply when selecting and managing our supply chain, and the conduct we
+            expect of those who supply to us.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">1. Purpose and scope</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            This Code applies to all suppliers, subcontractors and partners providing goods or services to
+            HARVTECH LTD. It establishes our expectations on legal compliance, labour and human rights,
+            environmental responsibility and business ethics, and forms part of how we make purchasing
+            decisions.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">2. Compliance with laws</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            Suppliers must comply with all applicable local, national and international laws and
+            regulations, including those relating to employment, health and safety, data protection,
+            anti-bribery (including the UK Bribery Act 2010) and tax.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">3. Fair labour practices</h2>
+          <div class="space-y-3">
+            {[
+              'Employment must be freely chosen; no forced, bonded or compulsory labour.',
+              'No use of child labour; workers must meet the minimum legal working age.',
+              'Fair wages that meet at least legal minimums, and lawful working hours.',
+              'Safe and healthy working conditions, and freedom from discrimination and harassment.',
+            ].map((item) => (
+              <div class="flex gap-4 text-sm">
+                <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
+                <span class="body-muted leading-relaxed">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">4. Human rights &amp; modern slavery</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            Suppliers must uphold internationally recognised human rights and take active steps to ensure
+            that modern slavery, servitude and human trafficking do not occur in their own operations or
+            supply chains, consistent with the Modern Slavery Act 2015. Suppliers should be able to
+            demonstrate their approach on request and must report any concerns to us promptly. See also our
+            <a href="/modern-slavery" class="text-primary hover:underline">Modern Slavery Statement</a>.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">5. Environmental responsibility</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            Suppliers are expected to manage and reduce their environmental impact, comply with
+            environmental legislation, and support sustainability through responsible use of resources,
+            energy and waste management &mdash; including responsible disposal and recycling of electronic
+            equipment.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">6. Business ethics &amp; data protection</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            Suppliers must act with integrity, avoid bribery and corruption in all forms, manage conflicts
+            of interest transparently, and protect any confidential or personal data they handle in line
+            with UK GDPR and the Data Protection Act 2018.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">7. Wider supply chain</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            We expect suppliers to apply equivalent standards to their own suppliers and subcontractors, so
+            that these principles extend through the wider supply chain.
+          </p>
+        </div>
+
+        <div class="card p-8 space-y-4">
+          <h2 class="title-card text-lg">8. Oversight and review</h2>
+          <p class="body-muted text-sm leading-relaxed">
+            HarvTech applies proportionate due diligence when selecting suppliers, favouring established and
+            reputable providers, and reserves the right to ask suppliers to evidence their compliance with
+            this Code. We will address any breach constructively and, where necessary, by ending the
+            relationship. This Code is reviewed at least annually and is approved by the director of
+            HARVTECH LTD.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</BaseLayout>
