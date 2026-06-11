@@ -11,20 +11,9 @@ variable "project" {
 }
 
 variable "environment" {
-  description = "Environment short name. Drives prd.tfvars selection too."
+  description = "Environment short code. Matches the env/<code>.tfvars file naming this stack already uses."
   type        = string
-  default     = "prod"
-}
-
-variable "tags" {
-  description = "Tags applied to every resource managed by this stack."
-  type        = map(string)
-  default = {
-    project     = "harvtech-data-platform"
-    managed_by  = "terraform"
-    repo        = "HarvtechUK/harvtech-site"
-    cost_centre = "personal"
-  }
+  default     = "prd"
 }
 
 # --- Values driven by env/prd.tfvars ---

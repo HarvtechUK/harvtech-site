@@ -1,7 +1,7 @@
 resource "azurerm_resource_group" "site" {
   name     = local.rg_name
   location = var.location
-  tags     = var.tags
+  tags     = module.tags.tags
 }
 
 resource "azurerm_storage_account" "site" {
@@ -15,12 +15,11 @@ resource "azurerm_storage_account" "site" {
   allow_nested_items_to_be_public = false
   https_traffic_only_enabled      = true
 
-  # NOTE: infrastructure_encryption_enabled = true (Trivy AZU-0061) is
-  # deliberately omitted here — it forces SA replacement, which would
-  # blow away the SP's manually-granted Storage Blob Data Contributor
-  # role assignment and break the deploy-site step. Bundled into the
-  # planned "SA modernization" commit that does the AZU-0012 service-tag
-  # restriction alongside, with coordinated RBAC re-grant.
+  # Double-encrypt at rest (closes Trivy AZU-0061). Settable only at
+  # create time — enabled here because the naming-convention rename is
+  # already replacing this SA, so the deferred "SA modernization" cost
+  # (RBAC re-grant for the deploy SP) is being paid in the same change.
+  infrastructure_encryption_enabled = true
 
   # Disable legacy shared-access keys. The CI/CD deploy step authenticates
   # via Entra (`az storage blob upload-batch --auth-mode login`) and the
@@ -73,5 +72,5 @@ resource "azurerm_storage_account" "site" {
   # consciously accepted and suppressed in .trivyignore with this
   # reasoning recorded.
 
-  tags = var.tags
+  tags = module.tags.tags
 }

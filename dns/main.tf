@@ -8,7 +8,7 @@ data "azurerm_resource_group" "dns" {
 resource "azurerm_dns_zone" "harvtech_co_uk" {
   name                = "harvtech.co.uk"
   resource_group_name = data.azurerm_resource_group.dns.name
-  tags                = var.tags
+  tags                = module.tags.tags
 }
 
 # --- Microsoft 365 mail records ---
@@ -24,7 +24,7 @@ resource "azurerm_dns_mx_record" "apex" {
     exchange   = "harvtech-co-uk.mail.protection.outlook.com"
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # SPF for Exchange Online.
@@ -38,7 +38,7 @@ resource "azurerm_dns_txt_record" "spf" {
     value = "v=spf1 include:spf.protection.outlook.com -all"
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # Outlook autodiscover.
@@ -49,5 +49,5 @@ resource "azurerm_dns_cname_record" "autodiscover" {
   ttl                 = 3600
   record              = "autodiscover.outlook.com"
 
-  tags = var.tags
+  tags = module.tags.tags
 }

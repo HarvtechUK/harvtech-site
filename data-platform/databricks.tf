@@ -26,5 +26,5 @@ resource "azurerm_databricks_workspace" "this" {
   # plane.
   public_network_access_enabled = true
 
-  tags = var.tags
+  tags = module.tags.tags
 }

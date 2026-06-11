@@ -5,13 +5,13 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
   name                = local.fd_profile_name
   resource_group_name = azurerm_resource_group.site.name
   sku_name            = "Standard_AzureFrontDoor"
-  tags                = var.tags
+  tags                = module.tags.tags
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
   name                     = local.fd_endpoint_name
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  tags                     = var.tags
+  tags                     = module.tags.tags
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "site" {

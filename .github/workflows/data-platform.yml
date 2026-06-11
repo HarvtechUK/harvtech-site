@@ -13,6 +13,7 @@ on:
     branches: [main, dev]
     paths:
       - 'data-platform/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'
@@ -21,6 +22,7 @@ on:
     branches: [main, dev]
     paths:
       - 'data-platform/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'
