@@ -1,7 +1,7 @@
 resource "azurerm_resource_group" "this" {
   name     = local.rg_name
   location = var.location
-  tags     = var.tags
+  tags     = module.tags.tags
 }
 
 # --- ADLS Gen2 storage account ---
@@ -55,7 +55,7 @@ resource "azurerm_storage_account" "datalake" {
     expiration_action = "Log"
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # Medallion layers — raw (bronze), cleansed (silver), curated (gold).

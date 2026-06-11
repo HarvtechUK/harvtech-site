@@ -1,9 +1,9 @@
 locals {
-  # --- Core naming ---
-  rg_name       = "rg-${var.project}-data-${var.environment}-uks"
-  datalake_name = "st${var.project}data${var.environment}uks01"
-  cosmos_name   = "cosmos-${var.project}-data-${var.environment}-uks"
-  adf_name      = "adf-${var.project}-data-${var.environment}-uks"
-  databricks_ws = "dbw-${var.project}-data-${var.environment}-uks"
-  databricks_rg = "rg-databricks-managed-${var.project}-data-${var.environment}-uks"
+  # --- Core naming (from the shared convention module) ---
+  rg_name       = module.naming.resource_group
+  datalake_name = module.naming.storage_account
+  cosmos_name   = module.naming.cosmosdb_account
+  adf_name      = module.naming.data_factory
+  databricks_ws = module.naming.databricks_workspace
+  databricks_rg = module.naming.databricks_managed_resource_group
 }

@@ -15,6 +15,7 @@ on:
     branches: [main, dev]
     paths:
       - 'infra/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'
@@ -23,6 +24,7 @@ on:
     branches: [main, dev]
     paths:
       - 'infra/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'

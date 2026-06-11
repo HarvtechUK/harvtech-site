@@ -25,7 +25,7 @@ resource "azurerm_dns_a_record" "apex_alias" {
   ttl                 = 3600
   target_resource_id  = data.terraform_remote_state.site.outputs.frontdoor_endpoint_id
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # TXT for Front Door custom-domain ownership validation (apex).
@@ -41,7 +41,7 @@ resource "azurerm_dns_txt_record" "apex_dnsauth" {
     value = data.terraform_remote_state.site.outputs.apex_validation_token
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # --- www (www.harvtech.co.uk) — redirects to apex via FD rules engine ---
@@ -53,7 +53,7 @@ resource "azurerm_dns_cname_record" "www" {
   ttl                 = 3600
   record              = data.terraform_remote_state.site.outputs.frontdoor_endpoint_hostname
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 resource "azurerm_dns_txt_record" "www_dnsauth" {
@@ -66,5 +66,5 @@ resource "azurerm_dns_txt_record" "www_dnsauth" {
     value = data.terraform_remote_state.site.outputs.www_validation_token
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
