@@ -142,8 +142,14 @@ const engagementModes = [
   <!-- CTA -->
   <section class="border-border-faintest border-t">
     <div class="container-page py-20">
-      <div class="card p-10 md:p-14">
-        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+      <div class="card relative overflow-hidden p-10 md:p-14">
+        <!-- Teal corner glow — mirrors the hero treatment -->
+        <div
+          class="pointer-events-none absolute -right-24 -top-24 h-80 w-80"
+          style="background: radial-gradient(circle, rgb(0 161 155 / 0.16) 0%, transparent 70%)"
+          aria-hidden="true"
+        ></div>
+        <div class="relative grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
           <div>
             <p class="eyebrow mb-3">Get started</p>
             <h2 class="title-section mb-4">Let&rsquo;s talk about your platform.</h2>
