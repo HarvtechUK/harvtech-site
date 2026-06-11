@@ -33,7 +33,7 @@ resource "azurerm_cosmosdb_account" "this" {
   # to the site storage account.
   local_authentication_disabled = true
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # Databases + containers driven by var.cosmos_databases. The nested

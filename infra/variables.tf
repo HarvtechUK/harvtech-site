@@ -11,20 +11,9 @@ variable "project" {
 }
 
 variable "environment" {
-  description = "Environment short name"
+  description = "Environment short code. Matches the env/<code>.tfvars convention and the platform bootstrap naming (rg-platform-prd-uks-01)."
   type        = string
-  default     = "prod"
-}
-
-variable "tags" {
-  description = "Tags applied to all resources"
-  type        = map(string)
-  default = {
-    project     = "harvtech-site"
-    managed_by  = "terraform"
-    repo        = "HarvtechUK/harvtech-site"
-    cost_centre = "personal"
-  }
+  default     = "prd"
 }
 
 # --- Inputs driving the for_each loops; values live in terraform.tfvars ---

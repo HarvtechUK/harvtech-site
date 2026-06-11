@@ -11,14 +11,6 @@ AZU-0058
 # own commit.
 AZU-0057
 
-# Infrastructure encryption (double encryption at rest). Closing this
-# requires destroying and recreating the storage account, which would
-# break the SP's manually-granted Storage Blob Data Contributor role
-# assignment. Deferred to the "SA modernization" commit that handles
-# AZU-0012 (service-tag restriction) at the same time, where we can
-# coordinate the RBAC re-grant cleanly.
-AZU-0061
-
 # Default network action deny + restricted origin. Microsoft.Cdn/profiles
 # (Front Door, any SKU) is NOT in the supported resource type list for
 # storage account resource instance rules — see

@@ -70,7 +70,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
     }
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # Binds the WAF policy to every custom domain in var.custom_domains via

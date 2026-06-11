@@ -18,6 +18,7 @@ on:
     branches: [main, dev]
     paths:
       - 'dns/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'
@@ -26,6 +27,7 @@ on:
     branches: [main, dev]
     paths:
       - 'dns/**'
+      - 'modules/**'
       - '.checkov.yaml'
       - '.trivyignore'
       - '.tflint.hcl'

@@ -19,7 +19,7 @@ resource "azurerm_data_factory" "this" {
     type = "SystemAssigned"
   }
 
-  tags = var.tags
+  tags = module.tags.tags
 }
 
 # NOTE: ADF's managed identity should eventually be granted Storage Blob
@@ -30,7 +30,7 @@ resource "azurerm_data_factory" "this" {
 # roleAssignments/write permission required to manage RBAC.
 #
 # The right fix is to grant the SP User Access Administrator scoped to
-# rg-harvtech-data-prod-uks (so it can manage roles within its own
+# rg-harvtech-data-prd-uks-01 (so it can manage roles within its own
 # blast radius but nowhere else), then re-introduce this resource:
 #
 #   resource "azurerm_role_assignment" "adf_datalake_reader" {
