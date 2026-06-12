@@ -48,3 +48,8 @@ output "custom_domain_validation_tokens" {
   description = "Validation tokens for every custom domain managed here, keyed by var.custom_domains key."
   sensitive   = true
 }
+
+output "log_analytics_workspace_id" {
+  value       = azurerm_log_analytics_workspace.site.id
+  description = "Workspace receiving Front Door and storage diagnostics. Other stacks can point their diagnostic settings here via terraform_remote_state rather than growing their own workspaces."
+}

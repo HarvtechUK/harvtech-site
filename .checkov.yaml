@@ -28,10 +28,15 @@ skip-check:
   # allow_nested_items_to_be_public = false).
   - CKV_AZURE_59
 
-  # Storage logging is deferred — proper fix is a Log Analytics workspace
-  # plus Diagnostic Settings, which deserves its own commit (introduces new
-  # resources). Tracking as a follow-up; revisit and remove this skip once
-  # diag settings land.
+  # Queue-service Storage Analytics logging. Storage logging now ships
+  # to Log Analytics via Diagnostic Settings (infra/observability.tf) —
+  # but this check only recognises the classic `queue_properties.logging`
+  # block, which (a) covers queue services none of our storage accounts
+  # use, and (b) needs the shared-key data-plane access we deliberately
+  # disabled (CKV2_AZURE_40). Suppressed as not-applicable rather than
+  # deferred. The blob-service sibling (CKV2_AZURE_21) understands diag
+  # settings: the site SA now satisfies it, and the data-platform SA
+  # carries a scoped inline skip with its own reasoning.
   - CKV_AZURE_33
 
   # Geo-redundant replication doubles the storage cost. For a static
@@ -94,7 +99,3 @@ skip-check:
   # Data Factory: encrypted with customer-managed key. Same CMK
   # reasoning as CKV_AZURE_100.
   - CKV2_AZURE_15
-
-  # Blob service read logging. Same as CKV_AZURE_33 — deferred to the
-  # planned Diagnostic Settings + Log Analytics workspace.
-  - CKV2_AZURE_21

@@ -14,6 +14,13 @@ resource "azurerm_resource_group" "this" {
 # infrastructure_encryption_enabled = true at create time without a
 # replacement-and-RBAC-redo dance.
 resource "azurerm_storage_account" "datalake" {
+  # checkov:skip=CKV2_AZURE_21:Blob-read logging deferred with the rest of this stub's productionisation backlog
+  #
+  # The proper fix is Diagnostic Settings to a Log Analytics workspace.
+  # The site stack now has exactly that (infra/observability.tf) and
+  # exports its workspace id for reuse — wiring this stub's diagnostics
+  # there sits in the same backlog as its VNet/Private Link items (see
+  # /docs/architecture/data-platform-hld).
   name                = local.datalake_name
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location

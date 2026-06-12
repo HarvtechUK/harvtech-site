@@ -6,9 +6,14 @@
 # .checkov.yaml for the same trade-off).
 AZU-0058
 
-# Storage Analytics logging is deferred. Same as CKV_AZURE_33 — proper
-# fix is Diagnostic Settings to a Log Analytics workspace, which is its
-# own commit.
+# Storage logging IS enabled — blob-service reads/writes/deletes ship
+# to Log Analytics via Diagnostic Settings (infra/observability.tf).
+# This check only recognises classic Storage Analytics logging (the
+# legacy `queue_properties.logging` block), which is the deprecated
+# mechanism and would also require the shared-key data-plane access we
+# deliberately disabled. Verified empirically: the finding persists
+# with diag settings in place, so it stays suppressed as a
+# false-positive-against-the-modern-control rather than a deferral.
 AZU-0057
 
 # Default network action deny + restricted origin. Microsoft.Cdn/profiles
