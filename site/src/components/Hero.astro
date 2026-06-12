@@ -1,31 +1,60 @@
 ---
-// Home page hero — consultancy positioning.
+// Home page hero — consultancy positioning. Text left, VS Code-style
+// editor window right (the "imagery" is proof-of-competence, not stock
+// photos). Teal and silver radial glows add depth behind both columns.
+import CodeWindow from './CodeWindow.astro';
 ---
 
 <section class="relative overflow-hidden">
-  <div class="container-page py-20 md:py-28 lg:py-32">
-    <div class="max-w-3xl">
-      <p class="eyebrow mb-6">Azure cloud consultancy</p>
+  <!-- Background glows — pure CSS radial gradients, no assets.
+       Teal behind the code window, a fainter silver wash behind the
+       headline. pointer-events-none so they never intercept clicks. -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    aria-hidden="true"
+  >
+    <div
+      class="absolute -top-32 right-[-10%] h-[34rem] w-[34rem]"
+      style="background: radial-gradient(circle, rgb(0 161 155 / 0.14) 0%, rgb(0 161 155 / 0.05) 40%, transparent 70%)"
+    ></div>
+    <div
+      class="absolute -left-40 top-24 h-[28rem] w-[28rem]"
+      style="background: radial-gradient(circle, rgb(200 204 206 / 0.07) 0%, transparent 65%)"
+    ></div>
+  </div>
 
-      <h1 class="title-display hero-gradient mb-6 leading-[1.05]">
-        Azure platform<br />engineering, done right.
-      </h1>
+  <div class="container-page relative py-20 md:py-28 lg:py-32">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
+      <div class="max-w-3xl">
+        <p class="eyebrow mb-6">Azure cloud consultancy</p>
 
-      <p class="body-muted max-w-2xl text-lg">
-        HarvTech helps organisations design, build and secure Azure cloud
-        platforms &mdash; whether you&rsquo;re starting from scratch,
-        migrating workloads, or hardening what you already have.
-        Well-Architected and CAF-aligned, with security and compliance
-        built in from day one.
-      </p>
+        <h1 class="hero-gradient mb-6 text-4xl font-bold tracking-tight leading-[1.08] text-balance md:text-5xl">
+          Azure platform engineering, done right.
+        </h1>
 
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a href="mailto:alex@harvtech.co.uk" class="btn-primary text-base">
-          Talk to us
-        </a>
-        <a href="/showcase" class="btn-secondary text-base">
-          See our work
-        </a>
+        <p class="body-muted max-w-2xl text-lg">
+          HarvTech helps organisations design, build and secure Azure cloud
+          platforms &mdash; whether you&rsquo;re starting from scratch,
+          migrating workloads, or hardening what you already have.
+          Well-Architected and CAF-aligned, with security and compliance
+          built in from day one.
+        </p>
+
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a href="mailto:alex@harvtech.co.uk" class="btn-primary text-base">
+            Talk to us
+          </a>
+          <a href="/showcase" class="btn-secondary text-base">
+            See our work
+          </a>
+        </div>
+      </div>
+
+      <!-- min-w-0 lets the code window's pre shrink below its
+           min-content width and scroll internally, instead of
+           blowing the grid track out past the viewport on mobile -->
+      <div class="min-w-0">
+        <CodeWindow />
       </div>
     </div>
   </div>
