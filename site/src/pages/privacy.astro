@@ -62,8 +62,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div class="border-border-faintest border-t pt-5">
               <p class="text-text-primary text-sm font-semibold mb-1">Website visits</p>
               <p class="body-muted text-sm leading-relaxed">
-                This website does not use tracking cookies, third-party analytics, or advertising.
-                We do not collect or store any browsing data.
+                This website does not use cookies, client-side analytics scripts, third-party
+                trackers, or advertising. No tracking code runs in your browser.
+              </p>
+              <p class="body-muted text-sm leading-relaxed mt-2">
+                Our content delivery network (Azure Front Door) records server-side access logs
+                when you request a page. These include your IP address, the page requested, the
+                date and time, the referring page, and your browser&rsquo;s user-agent string. We
+                use them to keep the site secure (detecting and blocking malicious traffic) and to
+                produce aggregate visit statistics &mdash; counts of pages viewed, not profiles of
+                individual visitors. Logs are stored in the United Kingdom and deleted
+                automatically after 30 days.
+              </p>
+              <p class="body-muted text-sm leading-relaxed mt-2">
+                <span class="text-text-hero font-medium">Legal basis:</span> legitimate interests &mdash;
+                maintaining the security of the site and understanding, in aggregate, how it is used.
               </p>
             </div>
           </div>
@@ -76,6 +89,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               ['Enquiry data (no contract follows)', '2 years from last contact'],
               ['Contract correspondence and project materials', '7 years from end of engagement (HMRC requirement)'],
               ['Invoices and financial records', '7 years from the relevant financial year end'],
+              ['Server-side access logs', 'deleted automatically after 30 days'],
             ].map(([category, retention]) => (
               <div class="flex gap-4 text-sm">
                 <span class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" aria-hidden="true" />
