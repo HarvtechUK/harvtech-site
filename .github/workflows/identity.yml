@@ -31,6 +31,14 @@ on:
     - cron: '27 6 * * *'
   workflow_dispatch:
 
+# Serialise runs of this workflow — concurrent runs race each other for
+# the Terraform state lock (seen when several Dependabot merges landed
+# in quick succession). Queued, not cancelled: every push still gets
+# its run, just one at a time.
+concurrency:
+  group: identity-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   id-token: write
   contents: read
