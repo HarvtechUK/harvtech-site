@@ -1,0 +1,66 @@
+---
+/**
+ * CodeWindow — VS Code-style editor window used as the hero visual.
+ *
+ * Static markup, no syntax-highlighting dependency: the HCL snippet is
+ * hand-spanned with theme colours so the palette stays inside the brand
+ * system (teal keywords, silver strings, dark-grey comments). The one
+ * red element is the tab's unsaved-changes dot — the W13 "red detail"
+ * token used the way the theme docs intend: once, and small.
+ *
+ * The snippets live in frontmatter strings rendered via set:html —
+ * literal HCL/shell braces in the template would trip Astro's
+ * expression parser.
+ */
+
+const editorHtml = `<span class="text-primary">module</span> <span class="text-secondary">"your_platform"</span> {
+  <span class="text-text-hero">source</span>   = <span class="text-secondary">"harvtech/well-architected/azure"</span>
+  <span class="text-text-hero">version</span>  = <span class="text-secondary">"~&gt; 25.0"</span>  <span class="text-text-subtle"># years of experience, pinned</span>
+
+  <span class="text-text-hero">security</span>   = <span class="text-secondary">"built-in"</span> <span class="text-text-subtle"># not bolted on</span>
+  <span class="text-text-hero">documented</span> = <span class="text-primary">true</span>       <span class="text-text-subtle"># yes, really</span>
+
+  <span class="text-primary">lifecycle</span> {
+    <span class="text-text-hero">prevent_destroy</span> = <span class="text-primary">true</span>  <span class="text-text-subtle"># your uptime, protected</span>
+  }
+}`;
+
+const terminalHtml = `<span class="text-primary">$</span> <span class="text-text-hero">terraform apply</span><br />
+<span class="text-text-muted">Apply complete! Resources: 1 added, 0 changed, 0 destroyed.</span><br />
+<span class="text-text-subtle"># the only thing we destroy is technical debt</span><span class="cursor-blink text-primary">▍</span>`;
+---
+
+<div class="code-window border-border-medium bg-bg-2/90 w-full rounded-xl border shadow-2xl backdrop-blur-sm" aria-hidden="true">
+  <!-- Title bar -->
+  <div class="border-border-subtle flex items-center gap-2 border-b px-4 py-3">
+    <span class="h-3 w-3 rounded-full bg-[#ff5f57] opacity-70"></span>
+    <span class="h-3 w-3 rounded-full bg-[#febc2e] opacity-70"></span>
+    <span class="h-3 w-3 rounded-full bg-[#28c840] opacity-70"></span>
+    <div class="border-border-subtle bg-bg-3/60 ml-4 flex items-center gap-2 rounded-md border px-3 py-1">
+      <span class="font-mono text-xs text-text-muted">platform.tf</span>
+      <span class="bg-accent-red h-2 w-2 rounded-full" title="unsaved changes"></span>
+    </div>
+  </div>
+
+  <!-- Editor pane -->
+  <pre class="overflow-x-auto px-5 py-4 font-mono text-[0.8rem] leading-relaxed"><code set:html={editorHtml} /></pre>
+
+  <!-- Terminal pane -->
+  <div class="border-border-subtle border-t px-5 py-4">
+    <p class="font-mono text-[0.8rem] leading-relaxed" set:html={terminalHtml} />
+  </div>
+</div>
+
+<style>
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .cursor-blink {
+    animation: blink 1.1s steps(1) infinite;
+  }
+  /* Respect reduced-motion: solid cursor, no blink */
+  @media (prefers-reduced-motion: reduce) {
+    .cursor-blink { animation: none; }
+  }
+</style>
