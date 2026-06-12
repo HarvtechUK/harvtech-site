@@ -4,6 +4,7 @@ locals {
   storage_name    = module.naming.storage_account
   fd_profile_name = module.naming.cdn_frontdoor_profile
   waf_policy_name = module.naming.cdn_frontdoor_firewall_policy
+  law_name        = module.naming.log_analytics_workspace
 
   # --- Custom domains ---
   apex_domain = "harvtech.co.uk"
@@ -24,4 +25,11 @@ locals {
   waf_security_policy  = "sp-${var.project}-${var.environment}"
   waf_rate_limit_name  = "ratelimitperip"
   waf_rate_limit_count = 100 # requests per minute per client IP
+
+  # --- Observability ---
+  # Diagnostic settings are sub-resources of their target (same
+  # invisible-in-cost-reports reasoning as the FD child names above),
+  # so they stay descriptive rather than CAF-patterned.
+  diag_frontdoor_name = "diag-frontdoor-to-law"
+  diag_blob_name      = "diag-blob-to-law"
 }
