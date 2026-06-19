@@ -7,6 +7,7 @@ directory:
   - dns
   - identity
   - data-platform
+  - portal-platform
 
 # Soft fail keeps the workflow green even when checks fail — we'll ratchet
 # this to fail-on-high after we've worked through the deferred items
@@ -98,3 +99,29 @@ skip-check:
   # Blob service read logging. Same as CKV_AZURE_33 — deferred to the
   # planned Diagnostic Settings + Log Analytics workspace.
   - CKV2_AZURE_21
+
+  # --- portal-platform/ suppressions ---
+
+  # Functions runtime storage uses a shared key for AzureWebJobsStorage.
+  # The Consumption (Y1) plan requires a key for the runtime content
+  # share — managed-identity AzureWebJobsStorage is a Flex Consumption
+  # feature, not available on Y1. This SA holds NO business data; all
+  # client data is in Cosmos, reached keyless via the Function App's
+  # managed identity. Revisit when moving to Flex Consumption.
+  - CKV2_AZURE_40
+
+  # Function App / App Service Plan failover instance count. N/A on the
+  # Consumption plan — it scales 0→N automatically; there is no minimum
+  # instance count to set.
+  - CKV_AZURE_212
+
+  # App Service Plan zone redundancy. Not available on the Consumption
+  # plan, and a single-region portal for a low-traffic LOB app doesn't
+  # justify the higher tier. Same single-region cost trade as elsewhere.
+  - CKV_AZURE_225
+
+  # Function App public network access. The API is the linked backend
+  # for the Static Web App and is reached over the public edge with auth
+  # enforced in front; locking it to Private Link needs VNet integration
+  # (cost), same family as the Cosmos/ADF public-access trades above.
+  - CKV_AZURE_221

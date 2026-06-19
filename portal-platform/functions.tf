@@ -21,6 +21,24 @@ resource "azurerm_storage_account" "functions" {
   https_traffic_only_enabled      = true
   allow_nested_items_to_be_public = false
 
+  # Soft-delete blobs and containers for 7 days — cheap insurance on the
+  # runtime store. Matches the site SA. (CKV2_AZURE_38)
+  blob_properties {
+    delete_retention_policy {
+      days = 7
+    }
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  # Cap any SAS lifetime even though we don't mint SAS tokens — defence
+  # in depth. Matches the site SA. (CKV2_AZURE_41)
+  sas_policy {
+    expiration_period = "00.01:00:00" # 1 hour max
+    expiration_action = "Log"
+  }
+
   tags = module.tags.tags
 }
 
