@@ -7,10 +7,10 @@
 # Right for a low-traffic line-of-business app. (Serverless and free
 # tier are mutually exclusive; free tier is already claimed by the
 # data-platform account anyway.)
-resource "azurerm_cosmosdb_account" "this" {
+resource "azurerm_cosmosdb_account" "portal" {
   name                = module.naming.cosmosdb_account
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.portal.name
+  location            = azurerm_resource_group.portal.location
 
   offer_type = "Standard"
   kind       = "GlobalDocumentDB" # Core (SQL) API
@@ -24,7 +24,7 @@ resource "azurerm_cosmosdb_account" "this" {
   }
 
   geo_location {
-    location          = azurerm_resource_group.this.location
+    location          = azurerm_resource_group.portal.location
     failover_priority = 0
   }
 
@@ -42,18 +42,18 @@ resource "azurerm_cosmosdb_account" "this" {
 
 resource "azurerm_cosmosdb_sql_database" "portal" {
   name                = "portal"
-  resource_group_name = azurerm_resource_group.this.name
-  account_name        = azurerm_cosmosdb_account.this.name
+  resource_group_name = azurerm_resource_group.portal.name
+  account_name        = azurerm_cosmosdb_account.portal.name
 }
 
 # clients / users / engagements / timesheets — see docs/architecture/portal-hld.md.
 # engagements & timesheets partition by /clientId for per-tenant isolation.
-resource "azurerm_cosmosdb_sql_container" "this" {
+resource "azurerm_cosmosdb_sql_container" "portal" {
   for_each = var.portal_containers
 
   name                = each.key
-  resource_group_name = azurerm_resource_group.this.name
-  account_name        = azurerm_cosmosdb_account.this.name
+  resource_group_name = azurerm_resource_group.portal.name
+  account_name        = azurerm_cosmosdb_account.portal.name
   database_name       = azurerm_cosmosdb_sql_database.portal.name
   partition_key_paths = [each.value.partition_key_path]
 }

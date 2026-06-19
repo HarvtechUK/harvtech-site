@@ -8,7 +8,7 @@
 # westeurope. (The edge is global regardless.)
 resource "azurerm_static_web_app" "portal" {
   name                = module.naming.static_web_app
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azurerm_resource_group.portal.name
   location            = "westeurope"
   sku_tier            = var.static_web_app_sku
   sku_size            = var.static_web_app_sku

@@ -1,6 +1,6 @@
 output "resource_group_name" {
   description = "Resource group holding the portal platform."
-  value       = azurerm_resource_group.this.name
+  value       = azurerm_resource_group.portal.name
 }
 
 output "static_web_app_default_hostname" {
@@ -25,10 +25,10 @@ output "function_app_default_hostname" {
 
 output "cosmos_account_name" {
   description = "Portal Cosmos account name."
-  value       = azurerm_cosmosdb_account.this.name
+  value       = azurerm_cosmosdb_account.portal.name
 }
 
 output "cosmos_endpoint" {
   description = "Portal Cosmos endpoint (not a secret — access is via Entra RBAC, no keys)."
-  value       = azurerm_cosmosdb_account.this.endpoint
+  value       = azurerm_cosmosdb_account.portal.endpoint
 }
