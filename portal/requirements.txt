@@ -1,0 +1,12 @@
+# Python dependencies for the portal app.
+#
+# Install them into a virtual environment with:
+#     pip install -r requirements.txt
+#
+# The version ranges below mean "any compatible release in this line".
+# Once you're happy, `pip freeze > requirements.lock.txt` records the
+# EXACT versions you tested with, so a deploy can't drift underneath you.
+
+fastapi>=0.115,<1.0        # the web framework
+uvicorn[standard]>=0.30,<1.0  # the ASGI server that actually runs the app
+# (pydantic comes bundled with fastapi — no need to list it separately yet)

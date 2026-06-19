@@ -1,0 +1,15 @@
+# Python virtual environment — never commit this; it's recreated from
+# requirements.txt on any machine.
+.venv/
+venv/
+
+# Python bytecode caches and build artefacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Locked dependency snapshot is fine to commit if you make one, but the
+# editor/OS noise below is not.
+.DS_Store
