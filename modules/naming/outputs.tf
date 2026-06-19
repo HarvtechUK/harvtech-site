@@ -47,6 +47,26 @@ output "key_vault" {
   value       = "kv${local.compact}"
 }
 
+output "static_web_app" {
+  description = "Static Web App name (stapp-…)."
+  value       = "stapp-${local.hyphenated}"
+}
+
+output "function_app" {
+  description = "Function App name (func-…)."
+  value       = "func-${local.hyphenated}"
+}
+
+output "app_service_plan" {
+  description = "App Service / Function plan name (asp-…)."
+  value       = "asp-${local.hyphenated}"
+}
+
+output "application_insights" {
+  description = "Application Insights name (appi-…)."
+  value       = "appi-${local.hyphenated}"
+}
+
 output "log_analytics_workspace" {
   description = "Log Analytics workspace name (log-…)."
   value       = "log-${local.hyphenated}"
