@@ -1,0 +1,14 @@
+# Keep the build context (and the image) small and clean: nothing here is
+# needed to run the app, and some of it shouldn't ship in an image.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.git/
+.gitignore
+.dockerignore
+README.md
+.DS_Store

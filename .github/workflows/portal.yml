@@ -1,0 +1,88 @@
+name: Portal
+
+# Build + deploy the FastAPI portal container.
+#
+# feat/* ──PR──→ dev   build only (validates the Dockerfile builds)
+# dev    ──PR──→ main  build only
+# main   push          build → push to ACR → update the Container App
+# workflow_dispatch    same as a main push (from main only)
+#
+# Deploy prerequisites (the Container App + registry come from the
+# portal-platform Terraform stack; the CI service principal needs, on
+# the portal resource group / registry):
+#   - AcrPush         to build & push the image into ACR
+#   - Container Apps Contributor   to update the running revision
+# Grant once, e.g.:
+#   az role assignment create --assignee <AZURE_CLIENT_ID> \
+#     --role AcrPush --scope <acr resource id>
+#   az role assignment create --assignee <AZURE_CLIENT_ID> \
+#     --role "Container Apps Contributor" --scope <portal rg id>
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'portal/**'
+      - '.github/workflows/portal.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'portal/**'
+      - '.github/workflows/portal.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: portal-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+# Resource names are deterministic from the naming module — no need to
+# read Terraform state to find them.
+env:
+  ACR: crharvtechportalprduks01
+  APP: ca-harvtech-portal-prd-uks-01
+  RG: rg-harvtech-portal-prd-uks-01
+  IMAGE: portal
+
+jobs:
+  # ── Stage 1: build the image (every branch / PR) ──────────────────────────
+  # Proves the Dockerfile builds. No Azure, no push — just a local build on
+  # the runner, so a broken Dockerfile fails the PR before it can merge.
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build the container image
+        run: docker build -t ${{ env.IMAGE }}:${{ github.sha }} ./portal
+
+  # ── Stage 2: push + deploy (main only) ────────────────────────────────────
+  deploy:
+    name: Deploy to Container Apps
+    needs: build
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # az acr build runs the Docker build inside ACR Tasks (server-side),
+      # so we don't need to push from the runner or handle registry creds —
+      # the OIDC login already authenticates us.
+      - name: Build & push image in ACR
+        run: az acr build --registry "$ACR" --image "$IMAGE:${{ github.sha }}" ./portal
+      - name: Roll the Container App to the new image
+        run: |
+          az containerapp update \
+            --name "$APP" \
+            --resource-group "$RG" \
+            --image "$ACR.azurecr.io/$IMAGE:${{ github.sha }}"
