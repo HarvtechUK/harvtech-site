@@ -47,19 +47,19 @@ output "key_vault" {
   value       = "kv${local.compact}"
 }
 
-output "static_web_app" {
-  description = "Static Web App name (stapp-…)."
-  value       = "stapp-${local.hyphenated}"
+output "container_registry" {
+  description = "Container Registry name (cr… compact — ACR names are alphanumeric only, 5–50 chars)."
+  value       = "cr${local.compact}"
 }
 
-output "function_app" {
-  description = "Function App name (func-…)."
-  value       = "func-${local.hyphenated}"
+output "container_app_environment" {
+  description = "Container Apps Environment name (cae-…)."
+  value       = "cae-${local.hyphenated}"
 }
 
-output "app_service_plan" {
-  description = "App Service / Function plan name (asp-…)."
-  value       = "asp-${local.hyphenated}"
+output "container_app" {
+  description = "Container App name (ca-…)."
+  value       = "ca-${local.hyphenated}"
 }
 
 output "application_insights" {

@@ -101,27 +101,26 @@ skip-check:
   - CKV2_AZURE_21
 
   # --- portal-platform/ suppressions ---
+  # The portal's Container Registry is Basic SKU (~£4/mo). Every finding
+  # below is a Premium-tier-only (~£40/mo) or Defender-for-Cloud feature
+  # that Basic simply doesn't expose. For a low-traffic, single-client
+  # portal pulling its own first-party image, Basic is the right trade —
+  # the same call already made for Front Door Standard and Databricks
+  # Standard. Images are pulled keylessly via the app's managed identity.
 
-  # Functions runtime storage uses a shared key for AzureWebJobsStorage.
-  # The Consumption (Y1) plan requires a key for the runtime content
-  # share — managed-identity AzureWebJobsStorage is a Flex Consumption
-  # feature, not available on Y1. This SA holds NO business data; all
-  # client data is in Cosmos, reached keyless via the Function App's
-  # managed identity. Revisit when moving to Flex Consumption.
-  - CKV2_AZURE_40
-
-  # Function App / App Service Plan failover instance count. N/A on the
-  # Consumption plan — it scales 0→N automatically; there is no minimum
-  # instance count to set.
-  - CKV_AZURE_212
-
-  # App Service Plan zone redundancy. Not available on the Consumption
-  # plan, and a single-region portal for a low-traffic LOB app doesn't
-  # justify the higher tier. Same single-region cost trade as elsewhere.
-  - CKV_AZURE_225
-
-  # Function App public network access. The API is the linked backend
-  # for the Static Web App and is reached over the public edge with auth
-  # enforced in front; locking it to Private Link needs VNet integration
-  # (cost), same family as the Cosmos/ADF public-access trades above.
-  - CKV_AZURE_221
+  # ACR public network access / private endpoints — Premium only.
+  - CKV_AZURE_139
+  # Image vulnerability scanning (Defender for container registries).
+  - CKV_AZURE_163
+  # Quarantine + scan + verify images on push — Premium/Defender.
+  - CKV_AZURE_164
+  # Geo-replicated registry — Premium; single-region by design here.
+  - CKV_AZURE_165
+  # Content trust / signed images — Premium only.
+  - CKV_AZURE_166
+  # Retention policy for untagged manifests — Premium only.
+  - CKV_AZURE_167
+  # Zone-redundant registry — Premium + zones.
+  - CKV_AZURE_233
+  # Dedicated data endpoints — Premium only.
+  - CKV_AZURE_237

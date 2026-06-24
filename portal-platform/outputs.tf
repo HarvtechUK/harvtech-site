@@ -3,24 +3,24 @@ output "resource_group_name" {
   value       = azurerm_resource_group.portal.name
 }
 
-output "static_web_app_default_hostname" {
-  description = "SWA default hostname (*.azurestaticapps.net). The dns/ stack points the portal CNAME at this."
-  value       = azurerm_static_web_app.portal.default_host_name
+output "container_registry_login_server" {
+  description = "ACR login server (e.g. crharvtechportalprduks01.azurecr.io) — the deploy workflow pushes the image here."
+  value       = azurerm_container_registry.portal.login_server
 }
 
-output "static_web_app_id" {
-  description = "Resource ID of the Static Web App."
-  value       = azurerm_static_web_app.portal.id
+output "container_registry_name" {
+  description = "Container Registry name."
+  value       = azurerm_container_registry.portal.name
 }
 
-output "function_app_name" {
-  description = "Function App name (the portal API)."
-  value       = azurerm_linux_function_app.api.name
+output "container_app_name" {
+  description = "Container App name — the deploy workflow updates its image to ship a release."
+  value       = azurerm_container_app.portal.name
 }
 
-output "function_app_default_hostname" {
-  description = "Function App default hostname."
-  value       = azurerm_linux_function_app.api.default_hostname
+output "container_app_fqdn" {
+  description = "Public ingress hostname of the Container App. The dns/ stack points portal.harvtech.co.uk at this (Phase 1.5)."
+  value       = azurerm_container_app.portal.ingress[0].fqdn
 }
 
 output "cosmos_account_name" {

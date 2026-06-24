@@ -26,39 +26,44 @@ already working).
                           portal.harvtech.co.uk
                                   │
                     ┌─────────────▼─────────────┐
-                    │   Azure Static Web App     │  static portal UI (Astro)
-                    │   (Standard)               │  + built-in auth at the edge
-                    └─────────────┬─────────────┘
-                       linked backend │ (/api/*)
-                    ┌─────────────▼─────────────┐
-                    │   Azure Function App       │  API — runs in OUR subscription
-                    │   (Linux, consumption)     │  system-assigned managed identity
-                    └─────────────┬─────────────┘
-                   managed identity │ (data-plane RBAC, no keys)
-                    ┌─────────────▼─────────────┐
-                    │   Cosmos DB (SQL API)      │  clients / users / engagements / timesheets
-                    └───────────────────────────┘
+                    │   Azure Container App      │  one FastAPI app (Python):
+                    │   (scale to zero)          │  API + server-rendered UI
+                    └──────┬──────────────┬──────┘  system-assigned managed identity
+            pull image     │              │  data-plane RBAC, no keys
+       ┌─────────▼────────┐ │     ┌────────▼──────────┐
+       │ Container        │ │     │ Cosmos DB (SQL)   │  clients / users /
+       │ Registry (Basic) │ │     │ (serverless)      │  engagements / timesheets
+       └──────────────────┘ │     └───────────────────┘
+                            │
+              built & pushed by the deploy workflow
 
       Identity: Microsoft Entra External ID (CIAM) — customer sign-in,
-      isolated from the corporate Entra tenant.
+      isolated from the corporate Entra tenant. The app handles the OIDC
+      flow itself (MSAL for Python).
 ```
 
 **Why these choices:**
 
-- **Static Web Apps** gives us authentication *as configuration* rather
-  than code. As a security consultancy, using battle-tested auth we
-  didn't write is the right reputational call — rolling our own login is
-  the fastest way to a CVE with our name on it.
-- **Linked Function App in our own subscription** (not SWA's free managed
-  Functions) so the API can use a **system-assigned managed identity** to
-  reach Cosmos with **no connection strings or keys anywhere** —
-  consistent with the no-local-auth stance already taken on Cosmos
-  (`local_authentication_disabled = true`) and the site storage account.
+- **Container Apps + FastAPI** — the app is built in Python (a deliberate
+  learning goal), so a single containerised FastAPI app serving both the
+  API and the server-rendered UI is the most cohesive, transferable shape.
+  Scales to zero when idle (pay nothing at rest), and we get Docker +
+  Container Apps experience that's directly useful to clients.
+- **System-assigned managed identity** does double duty: it pulls the
+  image from our registry (AcrPull) and reaches Cosmos (data-plane RBAC),
+  so there are **no keys or connection strings anywhere** — consistent
+  with the no-local-auth stance on Cosmos and the site storage account.
+- **Container Registry, Basic SKU** — first-party image, pulled keylessly;
+  Premium features (geo-replication, scanning, content trust) aren't worth
+  ~10× the cost for one low-traffic app.
 - **Entra External ID** (the CIAM successor to Azure AD B2C) keeps client
   user accounts in a dedicated customer directory, isolated from the
-  HarvTech corporate tenant and its break-glass / CA policies.
+  HarvTech corporate tenant and its break-glass / CA policies. Because the
+  app owns the OIDC flow, the login code is ours — but it's standard MSAL,
+  not hand-rolled crypto.
 - **Cosmos SQL API** — already understood and provisioned in this repo;
-  cheap at this volume; partitioning gives clean per-tenant isolation.
+  cheap (serverless) at this volume; partitioning gives clean per-tenant
+  isolation.
 
 ## 3. Data model (Cosmos SQL API, database `portal`)
 
@@ -141,45 +146,36 @@ follow this.
 
 | Component | Tier | ~£/mo |
 |---|---|---|
-| Static Web App | Standard (needed for linked backend) | ~£7 |
-| Function App | Linux consumption | ~£0 (free grant) |
-| Cosmos DB | see decision D1 | £0–5 |
+| Container App | Consumption, scale-to-zero | ~£0–5 |
+| Container Registry | Basic | ~£4 |
+| Cosmos DB | Serverless (dedicated account) | ~£0–5 |
+| Log Analytics + App Insights | Pay-as-you-go, low volume | ~£0–2 |
 | Entra External ID | first 50k MAU free | £0 |
-| **Total** | | **~£7–12/mo** |
+| **Total** | | **~£8–16/mo** |
 
-## 7. Open decisions (need Alex's call before Phase 1 build)
+## 7. Decisions (resolved)
 
-**D1 — Where does portal data live?**
-The free-tier Cosmos slot is already claimed by the `data-platform`
-stack (framed as an analytics *demo*). Two options:
-- **(a) Reuse the data-platform Cosmos account** — £0, but mixes real
-  client PII + financial records (7-yr retention) into the demo platform.
-- **(b) Dedicated serverless Cosmos account in the portal stack**
-  *(recommended)* — clean separation of real client data from the demo,
-  proper blast-radius isolation, pay-per-use (~£a few/mo at this volume).
-  Loses free tier, but the separation is the defensible posture for data
-  you're legally accountable for.
-
-**D2 — Identity: External ID vs B2B guests?**
-- **(a) Entra External ID** *(recommended for "reusable platform")* —
-  proper customer directory, sign-up/sign-in flows, scales to many
-  clients. Needs interactive tenant setup (see runbook).
-- **(b) B2B guest accounts in the corporate tenant** — lighter, free, but
-  every client user becomes a guest in HarvTech's own tenant. Fine for a
-  handful of clients; doesn't scale as cleanly.
-
-**D3 — Subdomain confirm:** `portal.harvtech.co.uk` (vs `app.` / `clients.`).
+- **D1 — Data store:** dedicated **serverless Cosmos account** in the
+  portal stack. Real client PII / financial records get their own blast
+  radius, separate from the analytics-demo data platform.
+- **D2 — Identity:** **Entra External ID** (CIAM) — reusable across many
+  clients. Interactive tenant setup in the runbook.
+- **D3 — Subdomain:** `portal.harvtech.co.uk`.
+- **Stack/runtime** (decided once the app went Python): **FastAPI**,
+  containerised, on **Azure Container Apps** — not the originally-sketched
+  Static Web App + Functions. One Python app, Docker, scale-to-zero.
 
 ## 8. Phased delivery
 
-| Phase | What | Who | Blocked by |
-|---|---|---|---|
-| 0 | This HLD + External ID runbook | done | — |
-| 1 | `portal-platform` Terraform stack (SWA, Function App + MI, Cosmos RBAC, DNS, workflow) | Claude | D1, D2, D3 |
-| 2 | Wire External ID auth (app regs, SWA config, role mapping) | Claude + Alex (tenant) | runbook done |
-| 3 | API — Functions, managed identity to Cosmos, role/clientId scoping | Claude | 1, 2 |
-| 4 | Portal UI — dashboard, submit, approve, PDF export | Claude | 3 |
-| 5 | Onboarding flow + seed first client (40 days @ £650) | Claude + Alex | 4 |
+| Phase | What | Status |
+|---|---|---|
+| 0 | This HLD + External ID runbook | done |
+| 1 | `portal-platform` Terraform stack (Container Apps, ACR, Cosmos + MI RBAC, observability) | done |
+| 1.5 | Bind `portal.harvtech.co.uk` to the Container App + dns CNAME | after 1 applies |
+| App | FastAPI app — models, API, Cosmos data layer, Jinja UI | in progress (built; see `portal/`) |
+| 2 | Wire Entra External ID auth + per-client role scoping | after runbook + app |
+| Deploy | Dockerfile + build/push to ACR + deploy workflow | next |
+| 5 | Onboarding flow + seed first client (40 days @ £650) | after deploy |
 
 Each phase is its own PR through `dev → main`, same as every other
 change in this repo. Nothing touches the live marketing site.

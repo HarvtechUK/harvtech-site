@@ -16,23 +16,6 @@ variable "environment" {
   default     = "prd"
 }
 
-variable "portal_hostname" {
-  description = "Custom domain the portal is served on. Bound to the Static Web App as a custom domain; the matching CNAME is created by the dns/ stack from this stack's remote state."
-  type        = string
-  default     = "portal.harvtech.co.uk"
-}
-
-variable "static_web_app_sku" {
-  description = "Static Web App SKU. Standard is required for a linked (bring-your-own) Function App backend — Free only supports SWA-managed Functions, which can't use a managed identity to our Cosmos account."
-  type        = string
-  default     = "Standard"
-
-  validation {
-    condition     = contains(["Free", "Standard"], var.static_web_app_sku)
-    error_message = "static_web_app_sku must be Free or Standard."
-  }
-}
-
 variable "portal_containers" {
   description = <<-EOT
     Cosmos SQL containers for the portal database, keyed by container
