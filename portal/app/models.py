@@ -106,3 +106,28 @@ class Timesheet(BaseModel):
         it needs the Engagement too — a model only sees its own fields.
         """
         return sum(entry.days for entry in self.entries)
+
+
+class TimesheetCreate(BaseModel):
+    """What a contractor *sends* to create a timesheet.
+
+    This is a separate, smaller model from `Timesheet` on purpose, and
+    it's an important habit: the request model contains only the fields
+    a caller is allowed to set. Notice what's missing —
+
+      - `id`            the server generates it
+      - `status`        a new timesheet is always a draft; you can't
+                        create one that's already "approved"
+      - `client_id`     derived from the engagement, never trusted from
+                        the request
+      - `contractor_id` likewise derived
+
+    If we accepted those from the request body, someone could forge a
+    timesheet against another client, or mark their own work approved.
+    Keeping the input model narrow is the first line of that defence —
+    the server fills in the trusted fields itself in the endpoint.
+    """
+
+    engagement_id: str
+    period: str = Field(..., description="The month covered, e.g. '2026-07'.")
+    entries: list[TimesheetEntry] = Field(default_factory=list)
