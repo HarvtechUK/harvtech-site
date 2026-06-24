@@ -1,65 +1,33 @@
 """
-The data layer — every read and write of portal data goes through here.
+The data layer — the rest of the app imports `store` and calls these
+functions, never caring where the data physically lives.
 
-Today it's plain Python lists held in memory (seeded from sample_data).
-Later it becomes Azure Cosmos DB. The whole point of this module is that
-when that swap happens, we reimplement the functions *in this one file*
-and the rest of the app — the endpoints in main.py — keeps calling
-`store.get_timesheet(...)` exactly as before. That separation (the API
-asks the store for data, the store decides where data lives) is worth
-internalising early; it's how real apps stay changeable.
+At startup this module picks ONE backend and re-exports its functions:
 
-Caveat while in memory: state lives only as long as the process. Restart
-uvicorn and any timesheets you created are gone, and the seed data
-resets. Persistence arrives with Cosmos.
+  - COSMOS_ENDPOINT set   → store_cosmos  (real Azure Cosmos DB)
+  - COSMOS_ENDPOINT unset → store_memory  (in-memory, for local learning)
+
+Both backends define the exact same function names with the same shapes,
+so the choice is invisible to main.py. Selecting an implementation by
+configuration like this — same interface, swappable behind it — is a
+pattern you'll reach for constantly.
 """
 
-from . import sample_data
-from .models import Engagement, Timesheet
+import os
 
-# Copy the seed lists so mutating the store doesn't edit the sample_data
-# module's own lists. (`list(...)` makes a new list; the Engagement/
-# Timesheet objects inside are still shared, which is fine here.)
-_engagements: list[Engagement] = list(sample_data.ENGAGEMENTS)
-_timesheets: list[Timesheet] = list(sample_data.TIMESHEETS)
+from . import store_cosmos, store_memory
 
+# Pick the backend once, when the app starts.
+_backend = store_cosmos if os.environ.get("COSMOS_ENDPOINT") else store_memory
 
-# --- Engagements (read-only for now) ---
+# Re-export the chosen backend's functions under this module's namespace,
+# so callers write `store.get_timesheet(...)` regardless of which one ran.
+list_engagements = _backend.list_engagements
+get_engagement = _backend.get_engagement
+list_timesheets = _backend.list_timesheets
+get_timesheet = _backend.get_timesheet
+add_timesheet = _backend.add_timesheet
+save_timesheet = _backend.save_timesheet
 
-def list_engagements() -> list[Engagement]:
-    return _engagements
-
-
-def get_engagement(engagement_id: str) -> Engagement | None:
-    """Return the engagement with this id, or None if there isn't one.
-
-    Returning None rather than raising lets the *caller* decide what a
-    miss means (a 404 to the user, say). The store's job is data, not
-    HTTP."""
-    return next((e for e in _engagements if e.id == engagement_id), None)
-
-
-# --- Timesheets (read + write) ---
-
-def list_timesheets() -> list[Timesheet]:
-    return _timesheets
-
-
-def get_timesheet(timesheet_id: str) -> Timesheet | None:
-    return next((t for t in _timesheets if t.id == timesheet_id), None)
-
-
-def add_timesheet(timesheet: Timesheet) -> None:
-    """Store a newly created timesheet."""
-    _timesheets.append(timesheet)
-
-
-def save_timesheet(timesheet: Timesheet) -> None:
-    """Persist changes to an existing timesheet (e.g. a status change).
-
-    In memory this is essentially a no-op — we're holding the very same
-    object by reference, so mutating it has already 'saved' it. We still
-    route status changes through here so the call site reads correctly,
-    and so the Cosmos version has an obvious home for its `upsert`."""
-    # With Cosmos this becomes: container.upsert_item(timesheet.model_dump())
-    return None
+# Handy for a log line / health output: which backend are we on?
+BACKEND_NAME = _backend.__name__.rsplit(".", 1)[-1]

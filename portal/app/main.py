@@ -31,8 +31,12 @@ app = FastAPI(
 
 @app.get("/healthz")
 def health_check() -> dict[str, str]:
-    """A trivial 'is the app alive?' endpoint (Container Apps health probe)."""
-    return {"status": "ok"}
+    """A trivial 'is the app alive?' endpoint (Container Apps health probe).
+
+    Also reports which data backend is live — a quick way to confirm
+    whether you're on in-memory or real Cosmos right now.
+    """
+    return {"status": "ok", "backend": store.BACKEND_NAME}
 
 
 # ── Reads ────────────────────────────────────────────────────────────────────

@@ -34,21 +34,42 @@ Then open:
 
 `Ctrl+C` stops the server. `deactivate` leaves the venv.
 
-## What's here so far (step 1)
+## What's here so far
 
 | File | What it teaches |
 |---|---|
-| `app/models.py` | Pydantic models — typed, validated data shapes |
-| `app/sample_data.py` | In-memory stand-in data (Cosmos comes later) |
-| `app/main.py` | The FastAPI app and its read-only endpoints |
+| `app/models.py` | Pydantic models — typed, validated data shapes; input vs stored models |
+| `app/main.py` | The FastAPI app: read + write endpoints, status transitions, error codes |
+| `app/store.py` | The data layer — picks a backend by config and re-exports it |
+| `app/store_memory.py` | In-memory backend (default; no Azure needed) |
+| `app/store_cosmos.py` | Cosmos DB backend (keyless, via managed identity) |
+| `app/sample_data.py` | Seed data for the in-memory backend (first client: 40 days @ £650) |
 | `requirements.txt` | Declaring dependencies; venv workflow |
+
+## Choosing the data backend
+
+The app uses Cosmos DB when `COSMOS_ENDPOINT` is set, and the in-memory
+store otherwise. `GET /healthz` tells you which is live.
+
+```bash
+# In-memory (default) — nothing to set, just run.
+uvicorn app.main:app --reload
+
+# Real Cosmos DB — sign in first (keyless auth uses your az login),
+# then point at the account:
+az login
+export COSMOS_ENDPOINT="https://cosno-harvtech-portal-prd-uks-01.documents.azure.com:443/"
+export COSMOS_DATABASE="portal"   # optional; this is the default
+uvicorn app.main:app --reload
+```
+
+(The Cosmos account and your data-plane role assignment come from the
+`portal-platform/` Terraform stack — so the Cosmos path works end-to-end
+once that's deployed.)
 
 ## What's coming (later steps)
 
-1. **Write operations** — create/submit a timesheet, approve/reject it.
-2. **A data layer** — swap `sample_data.py` for Azure Cosmos DB, reached
-   with the app's managed identity (no keys).
-3. **Authentication** — sign-in via Microsoft Entra External ID, with
+1. **Authentication** — sign-in via Microsoft Entra External ID, with
    per-client scoping so an approver only sees their own data.
-4. **A UI** — server-rendered pages (Jinja templates) over these endpoints.
-5. **Docker + Container Apps** — containerise and deploy.
+2. **A UI** — server-rendered pages (Jinja templates) over these endpoints.
+3. **Docker + Container Apps** — containerise and deploy.
