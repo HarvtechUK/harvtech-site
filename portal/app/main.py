@@ -15,18 +15,30 @@ approve timesheets straight from that page: "Try it out" → edit the JSON
 → "Execute".
 """
 
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 
-from . import store
+from . import services, store, web
 from .models import Engagement, Timesheet, TimesheetCreate, TimesheetStatus
 
 app = FastAPI(
     title="HarvTech Client Portal",
     summary="Timesheet and engagement approval for HarvTech clients.",
-    version="0.2.0",
+    version="0.3.0",
 )
+
+# The browser-facing HTML pages live in web.py as a separate router; we
+# attach them here. Splitting routes into routers keeps each file focused
+# (JSON API here, HTML pages there) — they still share store + services.
+app.include_router(web.router)
+
+# Serve the CSS (and any future images) from app/static at /static.
+# Path(__file__).parent is the app/ directory, found relative to THIS
+# file so it works no matter where the app is launched from.
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 
 @app.get("/healthz")
@@ -119,58 +131,36 @@ def create_timesheet(new: TimesheetCreate) -> Timesheet:
     return timesheet
 
 
-# Which statuses each action is allowed to move *from*. Encoding the rules
-# as data keeps the three endpoints below short and makes the state
-# machine obvious at a glance.
-_ALLOWED_FROM: dict[str, set[TimesheetStatus]] = {
-    "submit": {TimesheetStatus.DRAFT, TimesheetStatus.REJECTED},
-    "approve": {TimesheetStatus.SUBMITTED},
-    "reject": {TimesheetStatus.SUBMITTED},
-}
+def _api_transition(timesheet_id: str, action: str) -> Timesheet:
+    """Shared logic for the submit/approve/reject API endpoints.
 
-
-def _change_status(
-    timesheet_id: str, action: str, new_status: TimesheetStatus
-) -> Timesheet:
-    """Shared logic for the submit/approve/reject endpoints.
-
-    Looks the timesheet up, checks the move is legal from its current
-    status, applies it, and persists. An illegal move (e.g. approving a
-    draft that was never submitted) returns 409 Conflict — the right code
-    for "the request is valid but not allowed in the current state".
+    Find the timesheet (404 if missing), then defer the *rule* to the
+    services layer. An illegal move raises InvalidTransition, which we
+    translate to 409 Conflict — the right code for 'valid request, not
+    allowed in the current state' (distinct from 404 and from 422).
     """
     timesheet = store.get_timesheet(timesheet_id)
     if timesheet is None:
         raise HTTPException(status_code=404, detail="Timesheet not found")
-
-    if timesheet.status not in _ALLOWED_FROM[action]:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Cannot {action} a timesheet that is '{timesheet.status.value}'.",
-        )
-
-    timesheet.status = new_status
-    store.save_timesheet(timesheet)
-    return timesheet
+    try:
+        return services.change_timesheet_status(timesheet, action)
+    except services.InvalidTransition as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.post("/api/timesheets/{timesheet_id}/submit", response_model=Timesheet)
 def submit_timesheet(timesheet_id: str) -> Timesheet:
     """Contractor action: send a draft (or rejected) timesheet for approval."""
-    return _change_status(timesheet_id, "submit", TimesheetStatus.SUBMITTED)
+    return _api_transition(timesheet_id, "submit")
 
 
 @app.post("/api/timesheets/{timesheet_id}/approve", response_model=Timesheet)
 def approve_timesheet(timesheet_id: str) -> Timesheet:
-    """Client action: approve a submitted timesheet. This is what backs an invoice.
-
-    (Later, auth will ensure only the client's own approver can call this,
-    and only for their own client's timesheets.)
-    """
-    return _change_status(timesheet_id, "approve", TimesheetStatus.APPROVED)
+    """Client action: approve a submitted timesheet. This is what backs an invoice."""
+    return _api_transition(timesheet_id, "approve")
 
 
 @app.post("/api/timesheets/{timesheet_id}/reject", response_model=Timesheet)
 def reject_timesheet(timesheet_id: str) -> Timesheet:
     """Client action: send a submitted timesheet back. It can be resubmitted."""
-    return _change_status(timesheet_id, "reject", TimesheetStatus.REJECTED)
+    return _api_transition(timesheet_id, "reject")

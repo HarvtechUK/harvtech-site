@@ -1,0 +1,31 @@
+{# base.html — the shared page shell.
+
+   Every page "extends" this file and fills in the {% block %} areas
+   below. That's Jinja template inheritance: the header, footer and
+   <head> are written once here, and each page only supplies its own
+   title and content. Change the chrome in one place, every page updates.
+#}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}HarvTech Client Portal{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">HarvTech <span>Portal</span></a>
+      <span class="muted">Client timesheet portal</span>
+    </header>
+
+    <main class="container">
+      {# Each page's content drops in here. #}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="foot muted">
+      HARVTECH LTD &mdash; delivered consultancy days, approved for invoicing.
+    </footer>
+  </body>
+</html>
