@@ -75,6 +75,10 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # The containerapp commands live in a CLI extension that isn't
+      # pre-installed on the runner — add it explicitly (non-interactive).
+      - name: Ensure Container Apps CLI extension
+        run: az extension add --name containerapp --upgrade --only-show-errors
       # az acr build runs the Docker build inside ACR Tasks (server-side),
       # so we don't need to push from the runner or handle registry creds —
       # the OIDC login already authenticates us.
