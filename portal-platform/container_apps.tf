@@ -48,8 +48,13 @@ resource "azurerm_container_app" "portal" {
 
   ingress {
     external_enabled = true
-    target_port      = 8000 # uvicorn listens here inside the container
-    transport        = "auto"
+    # 80 matches the bootstrap placeholder (containerapps-helloworld listens
+    # on 80). target_port MUST match the running container's port or the
+    # revision never goes healthy and provisioning times out. The deploy
+    # workflow flips this to 8000 (where our uvicorn listens) when it ships
+    # the real image; ignore_changes below stops Terraform reverting it.
+    target_port = 80
+    transport   = "auto"
 
     traffic_weight {
       latest_revision = true
@@ -87,10 +92,13 @@ resource "azurerm_container_app" "portal" {
   }
 
   lifecycle {
-    # CI owns the running image tag; Terraform owns everything else about
-    # the app. Without this, every plan after a deploy would try to reset
-    # the image back to the placeholder.
-    ignore_changes = [template[0].container[0].image]
+    # CI owns the running image tag AND the ingress port (it flips 80→8000
+    # when shipping the real image); Terraform owns everything else. Without
+    # this, every plan after a deploy would try to reset them.
+    ignore_changes = [
+      template[0].container[0].image,
+      ingress[0].target_port,
+    ]
   }
 
   tags = module.tags.tags
