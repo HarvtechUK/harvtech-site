@@ -9,6 +9,7 @@
 
 fastapi>=0.115,<1.0           # the web framework
 uvicorn[standard]>=0.30,<1.0  # the ASGI server that actually runs the app
+jinja2>=3.1,<4                # HTML templating for the server-rendered UI
 azure-cosmos>=4.7,<5          # Cosmos DB SDK (the data layer's real backend)
 azure-identity>=1.17,<2       # DefaultAzureCredential — keyless auth to Azure
 # (pydantic comes bundled with fastapi — no need to list it separately yet)
