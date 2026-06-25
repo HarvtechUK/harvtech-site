@@ -47,6 +47,26 @@ output "key_vault" {
   value       = "kv${local.compact}"
 }
 
+output "container_registry" {
+  description = "Container Registry name (cr… compact — ACR names are alphanumeric only, 5–50 chars)."
+  value       = "cr${local.compact}"
+}
+
+output "container_app_environment" {
+  description = "Container Apps Environment name (cae-…)."
+  value       = "cae-${local.hyphenated}"
+}
+
+output "container_app" {
+  description = "Container App name (ca-…)."
+  value       = "ca-${local.hyphenated}"
+}
+
+output "application_insights" {
+  description = "Application Insights name (appi-…)."
+  value       = "appi-${local.hyphenated}"
+}
+
 output "log_analytics_workspace" {
   description = "Log Analytics workspace name (log-…)."
   value       = "log-${local.hyphenated}"

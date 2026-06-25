@@ -7,6 +7,7 @@ directory:
   - dns
   - identity
   - data-platform
+  - portal-platform
 
 # Soft fail keeps the workflow green even when checks fail — we'll ratchet
 # this to fail-on-high after we've worked through the deferred items
@@ -98,3 +99,28 @@ skip-check:
   # Blob service read logging. Same as CKV_AZURE_33 — deferred to the
   # planned Diagnostic Settings + Log Analytics workspace.
   - CKV2_AZURE_21
+
+  # --- portal-platform/ suppressions ---
+  # The portal's Container Registry is Basic SKU (~£4/mo). Every finding
+  # below is a Premium-tier-only (~£40/mo) or Defender-for-Cloud feature
+  # that Basic simply doesn't expose. For a low-traffic, single-client
+  # portal pulling its own first-party image, Basic is the right trade —
+  # the same call already made for Front Door Standard and Databricks
+  # Standard. Images are pulled keylessly via the app's managed identity.
+
+  # ACR public network access / private endpoints — Premium only.
+  - CKV_AZURE_139
+  # Image vulnerability scanning (Defender for container registries).
+  - CKV_AZURE_163
+  # Quarantine + scan + verify images on push — Premium/Defender.
+  - CKV_AZURE_164
+  # Geo-replicated registry — Premium; single-region by design here.
+  - CKV_AZURE_165
+  # Content trust / signed images — Premium only.
+  - CKV_AZURE_166
+  # Retention policy for untagged manifests — Premium only.
+  - CKV_AZURE_167
+  # Zone-redundant registry — Premium + zones.
+  - CKV_AZURE_233
+  # Dedicated data endpoints — Premium only.
+  - CKV_AZURE_237
