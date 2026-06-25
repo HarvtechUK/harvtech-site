@@ -84,9 +84,22 @@ jobs:
       # the OIDC login already authenticates us.
       - name: Build & push image in ACR
         run: az acr build --registry "$ACR" --image "$IMAGE:${{ github.sha }}" ./portal
+      # Point the app at our registry, authenticating with its managed
+      # identity (the AcrPull role was granted in portal-platform). Safe to
+      # run on every deploy — idempotent.
+      - name: Configure registry (managed-identity pull)
+        run: |
+          az containerapp registry set \
+            --name "$APP" --resource-group "$RG" \
+            --server "$ACR.azurecr.io" --identity system
+      # Ship the real image and move ingress to 8000 (our uvicorn port).
+      # Infra bootstraps ingress on 80 to match the placeholder; this is
+      # where it becomes 8000 for the real app. Idempotent on re-deploys.
       - name: Roll the Container App to the new image
         run: |
           az containerapp update \
             --name "$APP" \
             --resource-group "$RG" \
             --image "$ACR.azurecr.io/$IMAGE:${{ github.sha }}"
+          az containerapp ingress update \
+            --name "$APP" --resource-group "$RG" --target-port 8000
