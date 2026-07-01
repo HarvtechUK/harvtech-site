@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — HarvTech Portal{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+{# Loop over each engagement and its computed summary. `item.summary` is
+   the dict that services.engagement_summary() returned. #}
+{% for item in engagements %}
+  {% set e = item.engagement %}
+  {% set s = item.summary %}
+  <section class="card">
+    <h2>{{ e.title }}</h2>
+    <p class="muted">{{ e.client_id }} &middot; {{ e.currency }} {{ "%.0f"|format(e.day_rate) }}/day</p>
+
+    <div class="stats">
+      <div><span class="num">{{ s.days_approved }}</span><span class="lbl">days approved</span></div>
+      <div><span class="num">{{ s.days_remaining }}</span><span class="lbl">days remaining</span></div>
+      <div><span class="num">{{ e.total_days }}</span><span class="lbl">days total</span></div>
+      <div><span class="num">{{ e.currency }} {{ "{:,.0f}".format(s.value_approved) }}</span><span class="lbl">approved value</span></div>
+    </div>
+
+    {# Simple progress bar: width is the % of contracted days approved. #}
+    <div class="bar"><div class="bar-fill" style="width: {{ s.percent_used }}%"></div></div>
+    <p class="muted small">{{ s.percent_used }}% of contracted days approved</p>
+  </section>
+{% endfor %}
+
+<h2>Timesheets</h2>
+<table class="grid">
+  <thead>
+    <tr><th>Period</th><th>Days</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for ts in timesheets %}
+      <tr>
+        <td>{{ ts.period }}</td>
+        <td>{{ ts.total_days }}</td>
+        <td><span class="badge badge-{{ ts.status.value }}">{{ ts.status.value }}</span></td>
+        <td><a href="/timesheets/{{ ts.id }}">View &rarr;</a></td>
+      </tr>
+    {% else %}
+      {# Jinja's for/else: this runs when the list is empty. #}
+      <tr><td colspan="4" class="muted">No timesheets yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
