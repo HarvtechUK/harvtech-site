@@ -40,11 +40,15 @@ resource "azurerm_container_app" "portal" {
     type = "SystemAssigned"
   }
 
-  # Authenticate to our registry using that managed identity.
-  registry {
-    server   = azurerm_container_registry.portal.login_server
-    identity = "System"
-  }
+  # NOTE: no `registry` block here on purpose. If the app is created with
+  # a registry configured to pull via this managed identity, Container
+  # Apps validates that access during provisioning — but the AcrPull role
+  # (rbac.tf) can only be granted AFTER the identity exists, so the create
+  # deadlocks and times out. Instead the bootstrap runs the public
+  # placeholder image (no registry needed), and the deploy workflow runs
+  # `az containerapp registry set --identity system` once AcrPull is in
+  # place. `registry` is in ignore_changes below so Terraform leaves that
+  # deploy-managed config alone.
 
   ingress {
     external_enabled = true
@@ -98,6 +102,7 @@ resource "azurerm_container_app" "portal" {
     ignore_changes = [
       template[0].container[0].image,
       ingress[0].target_port,
+      registry,
     ]
   }
 
