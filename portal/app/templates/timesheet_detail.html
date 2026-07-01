@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ ts.period }} — Timesheet{% endblock %}
+
+{% block content %}
+<a class="back" href="/">&larr; Dashboard</a>
+
+<h1>Timesheet &middot; {{ ts.period }}</h1>
+<p class="muted">
+  {{ engagement.title if engagement else "" }}
+  &middot; <span class="badge badge-{{ ts.status.value }}">{{ ts.status.value }}</span>
+</p>
+
+{# Only shown when a transition was rejected (passed via ?error=...). #}
+{% if error %}<div class="alert">{{ error }}</div>{% endif %}
+
+<table class="grid">
+  <thead>
+    <tr><th>Date</th><th>Days</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    {% for entry in ts.entries %}
+      <tr><td>{{ entry.work_date }}</td><td>{{ entry.days }}</td><td>{{ entry.notes }}</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th>{{ ts.total_days }}</th>
+      <th>{{ engagement.currency if engagement else "" }} {{ "{:,.0f}".format(value) }}</th>
+    </tr>
+  </tfoot>
+</table>
+
+{# Which buttons appear depends on the status — the same state machine as
+   the API, expressed in the template. (Auth will later decide WHO sees
+   which: the contractor submits, the client approves/rejects.) #}
+<div class="actions">
+  {% if ts.status.value in ["draft", "rejected"] %}
+    <form method="post" action="/timesheets/{{ ts.id }}/submit">
+      <button class="btn">Submit for approval</button>
+    </form>
+  {% elif ts.status.value == "submitted" %}
+    <form method="post" action="/timesheets/{{ ts.id }}/approve">
+      <button class="btn btn-approve">Approve</button>
+    </form>
+    <form method="post" action="/timesheets/{{ ts.id }}/reject">
+      <button class="btn btn-reject">Reject</button>
+    </form>
+  {% else %}
+    <p class="muted">This timesheet is {{ ts.status.value }}.</p>
+  {% endif %}
+</div>
+{% endblock %}

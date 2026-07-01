@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "harvtech-site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
+      "cwd": "site",
+      "port": 4321
+    },
+    {
+      "name": "portal",
+      "runtimeExecutable": "./.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8100"],
+      "cwd": "portal",
+      "port": 8100
+    }
+  ]
+}
