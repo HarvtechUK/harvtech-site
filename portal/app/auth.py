@@ -28,8 +28,12 @@ from .config import settings
 
 router = APIRouter(tags=["auth"])
 
-# We only need to know who the user is, so basic OpenID scopes are enough.
-_SCOPES: list[str] = ["User.Read"]
+# Empty on purpose. We never call Microsoft Graph — we only read the
+# validated id_token claims (oid, tid, name, email) — so we don't ask for
+# User.Read. MSAL always adds the reserved OIDC scopes (openid, profile,
+# offline_access) itself. Fewer scopes = a smaller, less alarming consent
+# prompt for client approvers: just "sign you in and read your profile".
+_SCOPES: list[str] = []
 
 
 def _msal_app() -> msal.ConfidentialClientApplication:
