@@ -22,7 +22,7 @@ from functools import lru_cache
 from azure.cosmos import ContainerProxy, CosmosClient
 from azure.identity import DefaultAzureCredential
 
-from .models import Engagement, Timesheet
+from .models import Engagement, Timesheet, User
 
 _DATABASE_NAME = os.environ.get("COSMOS_DATABASE", "portal")
 
@@ -98,3 +98,25 @@ def save_timesheet(timesheet: Timesheet) -> None:
     # same id — the right call for a status change on a timesheet we
     # already created.
     _container("timesheets").upsert_item(body=timesheet.model_dump(mode="json"))
+
+
+# --- Users (authorisation) ---
+
+def get_user(oid: str, tid: str) -> User | None:
+    """Find a registered portal user by Entra object id + tenant id.
+
+    Matching on BOTH oid and tid means a user is only recognised from
+    their own home tenant — someone with the same object id in a
+    different directory (shouldn't happen, but defence in depth) wouldn't
+    match.
+    """
+    rows = list(
+        _container("users").query_items(
+            query="SELECT * FROM c WHERE c.oid = @oid AND c.tid = @tid",
+            parameters=[
+                {"name": "@oid", "value": oid},
+                {"name": "@tid", "value": tid},
+            ],
+        )
+    )
+    return User(**rows[0]) if rows else None

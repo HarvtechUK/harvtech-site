@@ -108,6 +108,28 @@ class Timesheet(BaseModel):
         return sum(entry.days for entry in self.entries)
 
 
+class User(BaseModel):
+    """A person allowed into the portal, and what they can do.
+
+    Authentication proves *who* someone is (their Microsoft account);
+    this record proves they're *allowed in*, and with what role. Anyone
+    can authenticate with a work account — only people with a matching
+    User record get access. The identity is bound to the stable Entra
+    `oid` + `tid` (tenant), never email: emails can be reassigned or
+    spoofed, oid+tid can't.
+    """
+
+    id: str  # equals the oid — one record per person; partition key
+    oid: str = Field(..., description="Entra object ID — the stable user identifier.")
+    tid: str = Field(..., description="Entra tenant ID — the user's home Microsoft 365 org.")
+    email: str = ""
+    name: str = ""
+    role: str = Field(..., description="admin | contractor | client_approver")
+    client_id: str | None = Field(
+        None, description="For client_approver: which client they may approve for."
+    )
+
+
 class TimesheetCreate(BaseModel):
     """What a contractor *sends* to create a timesheet.
 
