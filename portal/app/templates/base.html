@@ -16,7 +16,12 @@
   <body>
     <header class="topbar">
       <a class="brand" href="/">HarvTech <span>Portal</span></a>
-      <span class="muted">Client timesheet portal</span>
+      {# When signed in, show who — and a way out. #}
+      {% if user %}
+        <span class="muted">{{ user.name or user.email }} &middot; <a class="back" href="/auth/logout">Sign out</a></span>
+      {% else %}
+        <span class="muted">Client timesheet portal</span>
+      {% endif %}
     </header>
 
     <main class="container">

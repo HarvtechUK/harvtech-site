@@ -42,7 +42,11 @@ def dashboard(request: Request):
     return templates.TemplateResponse(
         request,
         "dashboard.html",
-        {"engagements": engagements, "timesheets": store.list_timesheets()},
+        {
+            "engagements": engagements,
+            "timesheets": store.list_timesheets(),
+            "user": request.session.get("user"),
+        },
     )
 
 
@@ -64,6 +68,7 @@ def timesheet_detail(request: Request, timesheet_id: str):
             "value": value,
             # If a previous action bounced back with an error, show it.
             "error": request.query_params.get("error"),
+            "user": request.session.get("user"),
         },
     )
 

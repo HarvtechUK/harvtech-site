@@ -18,22 +18,38 @@ approve timesheets straight from that page: "Try it out" → edit the JSON
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
-from . import services, store, web
+from . import auth, services, store, web
+from .auth import require_user
+from .config import settings
 from .models import Engagement, Timesheet, TimesheetCreate, TimesheetStatus
 
 app = FastAPI(
     title="HarvTech Client Portal",
     summary="Timesheet and engagement approval for HarvTech clients.",
-    version="0.3.0",
+    version="0.4.0",
 )
 
-# The browser-facing HTML pages live in web.py as a separate router; we
-# attach them here. Splitting routes into routers keeps each file focused
-# (JSON API here, HTML pages there) — they still share store + services.
-app.include_router(web.router)
+# Signed session cookie — holds the logged-in user and the in-flight
+# sign-in state. https_only when auth is on (i.e. deployed behind TLS).
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.session_secret,
+    same_site="lax",       # allows the cookie on the top-level redirect back from Microsoft
+    https_only=settings.auth_enabled,
+)
+
+# The sign-in routes (/auth/*) are public — they ARE the way in, so they
+# can't require a login themselves.
+app.include_router(auth.router)
+
+# The browser-facing HTML pages (web.py) require a signed-in, registered
+# user. require_user redirects to /auth/login if not — or lets everything
+# through when auth is disabled (local dev).
+app.include_router(web.router, dependencies=[Depends(require_user)])
 
 # Serve the CSS (and any future images) from app/static at /static.
 # Path(__file__).parent is the app/ directory, found relative to THIS
@@ -55,13 +71,13 @@ def health_check() -> dict[str, str]:
 # These now ask the `store` module for data rather than touching the data
 # directly — see store.py for why that seam matters.
 
-@app.get("/api/engagements", response_model=list[Engagement])
+@app.get("/api/engagements", response_model=list[Engagement], dependencies=[Depends(require_user)])
 def list_engagements() -> list[Engagement]:
     """List every engagement. (Later: scoped to the signed-in user's client.)"""
     return store.list_engagements()
 
 
-@app.get("/api/engagements/{engagement_id}", response_model=Engagement)
+@app.get("/api/engagements/{engagement_id}", response_model=Engagement, dependencies=[Depends(require_user)])
 def get_engagement(engagement_id: str) -> Engagement:
     """Fetch one engagement by id, or 404 if there's no match."""
     engagement = store.get_engagement(engagement_id)
@@ -70,13 +86,13 @@ def get_engagement(engagement_id: str) -> Engagement:
     return engagement
 
 
-@app.get("/api/timesheets", response_model=list[Timesheet])
+@app.get("/api/timesheets", response_model=list[Timesheet], dependencies=[Depends(require_user)])
 def list_timesheets() -> list[Timesheet]:
     """List every timesheet, each with its computed total_days."""
     return store.list_timesheets()
 
 
-@app.get("/api/timesheets/{timesheet_id}/value")
+@app.get("/api/timesheets/{timesheet_id}/value", dependencies=[Depends(require_user)])
 def get_timesheet_value(timesheet_id: str) -> dict[str, float | str]:
     """Money value of a timesheet: days × the engagement's day rate.
 
@@ -105,7 +121,7 @@ def get_timesheet_value(timesheet_id: str) -> dict[str, float | str]:
 # against that model, and hands you a ready-made object — or returns a
 # 422 with a precise error if the body is wrong. You never parse JSON by
 # hand. `status_code=201` is the HTTP "Created" code for a successful POST.
-@app.post("/api/timesheets", response_model=Timesheet, status_code=201)
+@app.post("/api/timesheets", response_model=Timesheet, status_code=201, dependencies=[Depends(require_user)])
 def create_timesheet(new: TimesheetCreate) -> Timesheet:
     """Create a new draft timesheet against an engagement.
 
@@ -148,19 +164,19 @@ def _api_transition(timesheet_id: str, action: str) -> Timesheet:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@app.post("/api/timesheets/{timesheet_id}/submit", response_model=Timesheet)
+@app.post("/api/timesheets/{timesheet_id}/submit", response_model=Timesheet, dependencies=[Depends(require_user)])
 def submit_timesheet(timesheet_id: str) -> Timesheet:
     """Contractor action: send a draft (or rejected) timesheet for approval."""
     return _api_transition(timesheet_id, "submit")
 
 
-@app.post("/api/timesheets/{timesheet_id}/approve", response_model=Timesheet)
+@app.post("/api/timesheets/{timesheet_id}/approve", response_model=Timesheet, dependencies=[Depends(require_user)])
 def approve_timesheet(timesheet_id: str) -> Timesheet:
     """Client action: approve a submitted timesheet. This is what backs an invoice."""
     return _api_transition(timesheet_id, "approve")
 
 
-@app.post("/api/timesheets/{timesheet_id}/reject", response_model=Timesheet)
+@app.post("/api/timesheets/{timesheet_id}/reject", response_model=Timesheet, dependencies=[Depends(require_user)])
 def reject_timesheet(timesheet_id: str) -> Timesheet:
     """Client action: send a submitted timesheet back. It can be resubmitted."""
     return _api_transition(timesheet_id, "reject")

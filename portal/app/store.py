@@ -28,6 +28,7 @@ list_timesheets = _backend.list_timesheets
 get_timesheet = _backend.get_timesheet
 add_timesheet = _backend.add_timesheet
 save_timesheet = _backend.save_timesheet
+get_user = _backend.get_user
 
 # Handy for a log line / health output: which backend are we on?
 BACKEND_NAME = _backend.__name__.rsplit(".", 1)[-1]
