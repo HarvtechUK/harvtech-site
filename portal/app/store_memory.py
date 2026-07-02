@@ -11,13 +11,14 @@ store_cosmos.py is the one that persists.
 """
 
 from . import sample_data
-from .models import Engagement, Timesheet
+from .models import Engagement, Timesheet, User
 
 # Copy the seed lists so mutating the store doesn't edit sample_data's
 # own lists. (`list(...)` makes a new list; the objects inside are still
 # shared, which is fine here.)
 _engagements: list[Engagement] = list(sample_data.ENGAGEMENTS)
 _timesheets: list[Timesheet] = list(sample_data.TIMESHEETS)
+_users: list[User] = []  # empty locally; real portal users live in Cosmos
 
 
 def list_engagements() -> list[Engagement]:
@@ -45,3 +46,8 @@ def save_timesheet(timesheet: Timesheet) -> None:
     # already 'saved' it — nothing to do. The Cosmos backend does the
     # real persistence here.
     return None
+
+
+def get_user(oid: str, tid: str) -> User | None:
+    """Find a registered portal user by Entra object id + tenant id."""
+    return next((u for u in _users if u.oid == oid and u.tid == tid), None)

@@ -92,6 +92,25 @@ jobs:
           az containerapp registry set \
             --name "$APP" --resource-group "$RG" \
             --server "$ACR.azurecr.io" --identity system
+      # Auth config. The two secrets come from GitHub Actions secrets and
+      # are stored as Container App secrets (encrypted at rest); the app
+      # env references them by name (secretref) so the values never appear
+      # in the env listing. ENTRA_CLIENT_ID is a public identifier, not a
+      # secret. Setting ENTRA_CLIENT_ID is what turns auth ON.
+      - name: Configure auth secrets + env
+        run: |
+          FQDN=$(az containerapp show --name "$APP" --resource-group "$RG" \
+                   --query "properties.configuration.ingress.fqdn" -o tsv)
+          az containerapp secret set --name "$APP" --resource-group "$RG" --secrets \
+            entra-client-secret="${{ secrets.ENTRA_CLIENT_SECRET }}" \
+            session-secret="${{ secrets.SESSION_SECRET }}"
+          az containerapp update --name "$APP" --resource-group "$RG" \
+            --set-env-vars \
+              ENTRA_CLIENT_ID="${{ vars.PORTAL_ENTRA_CLIENT_ID }}" \
+              ENTRA_AUTHORITY="https://login.microsoftonline.com/organizations" \
+              ENTRA_REDIRECT_URI="https://$FQDN/auth/callback" \
+              ENTRA_CLIENT_SECRET="secretref:entra-client-secret" \
+              SESSION_SECRET="secretref:session-secret"
       # Ship the real image and move ingress to 8000 (our uvicorn port).
       # Infra bootstraps ingress on 80 to match the placeholder; this is
       # where it becomes 8000 for the real app. Idempotent on re-deploys.
