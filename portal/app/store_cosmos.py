@@ -19,7 +19,7 @@ which we can switch to later; the function signatures wouldn't change.
 import os
 from functools import lru_cache
 
-from azure.cosmos import ContainerProxy, CosmosClient
+from azure.cosmos import ContainerProxy, CosmosClient, exceptions
 from azure.identity import DefaultAzureCredential
 
 from .models import Engagement, Timesheet, User
@@ -58,13 +58,18 @@ def list_engagements() -> list[Engagement]:
 
 def get_engagement(engagement_id: str) -> Engagement | None:
     # Engagements are partitioned by /clientId, and here we only know the
-    # id, so this is a cross-partition query (automatic in the 4.x SDK).
+    # id — so Cosmos must fan the query out across every partition, and
+    # the SDK makes you say so EXPLICITLY (enable_cross_partition_query).
+    # Without the flag the service refuses with "Cross partition query is
+    # required but disabled" — which we learned the hard way; a previous
+    # comment here wrongly claimed the SDK handles it automatically.
     # Parameterised (@id) rather than string-formatted — the same habit
     # as avoiding SQL injection in any database.
     rows = list(
         _container("engagements").query_items(
             query="SELECT * FROM c WHERE c.id = @id",
             parameters=[{"name": "@id", "value": engagement_id}],
+            enable_cross_partition_query=True,
         )
     )
     return Engagement(**rows[0]) if rows else None
@@ -77,10 +82,12 @@ def list_timesheets() -> list[Timesheet]:
 
 
 def get_timesheet(timesheet_id: str) -> Timesheet | None:
+    # Same cross-partition situation as get_engagement above.
     rows = list(
         _container("timesheets").query_items(
             query="SELECT * FROM c WHERE c.id = @id",
             parameters=[{"name": "@id", "value": timesheet_id}],
+            enable_cross_partition_query=True,
         )
     )
     return Timesheet(**rows[0]) if rows else None
@@ -105,18 +112,21 @@ def save_timesheet(timesheet: Timesheet) -> None:
 def get_user(oid: str, tid: str) -> User | None:
     """Find a registered portal user by Entra object id + tenant id.
 
-    Matching on BOTH oid and tid means a user is only recognised from
-    their own home tenant — someone with the same object id in a
-    different directory (shouldn't happen, but defence in depth) wouldn't
-    match.
+    The users container is partitioned by /id, and a user's id IS their
+    oid — which means we can do a *point read*: fetch by id + partition
+    key directly, no query at all. Point reads are the cheapest, fastest
+    operation Cosmos has (single-digit ms, ~1 RU); use them whenever you
+    know both the id and the partition key.
+
+    The tid check still matters: a user is only recognised from their own
+    home tenant (defence in depth — oids shouldn't collide across
+    tenants, but we verify rather than assume).
     """
-    rows = list(
-        _container("users").query_items(
-            query="SELECT * FROM c WHERE c.oid = @oid AND c.tid = @tid",
-            parameters=[
-                {"name": "@oid", "value": oid},
-                {"name": "@tid", "value": tid},
-            ],
-        )
-    )
-    return User(**rows[0]) if rows else None
+    try:
+        row = _container("users").read_item(item=oid, partition_key=oid)
+    except exceptions.CosmosResourceNotFoundError:
+        # No record with that id — an authenticated but unregistered
+        # account. The caller treats None as "not allowed in".
+        return None
+    user = User(**row)
+    return user if user.tid == tid else None
