@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Access not set up — HarvTech Portal{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="card login-card">
+    <h1 class="login-title">Almost there</h1>
+    <p class="muted">
+      You signed in successfully as
+      <span class="denied-who">{{ email or "your Microsoft account" }}</span>,
+      but this account isn&rsquo;t registered for the HarvTech portal yet.
+    </p>
+    <p class="muted small">
+      If you&rsquo;re expecting access, ask your HarvTech contact to add
+      this account &mdash; or email
+      <a href="mailto:alex@harvtech.co.uk">alex@harvtech.co.uk</a>.
+    </p>
+    <p class="muted small login-legal">
+      <a href="/auth/logout">Sign out</a> &middot;
+      <a href="https://harvtech.co.uk">harvtech.co.uk</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

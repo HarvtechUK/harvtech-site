@@ -146,3 +146,12 @@ jobs:
               --destination '$web' \
               --overwrite \
               --auth-mode login
+            # upload-batch silently skips hidden directories, which loses
+            # .well-known/ (the Entra publisher-domain verification file).
+            # Upload it explicitly so the pipeline owns it.
+            az storage blob upload-batch \
+              --account-name "${{ steps.sa.outputs.name }}" \
+              --source ./dist/.well-known \
+              --destination '$web/.well-known' \
+              --overwrite \
+              --auth-mode login
