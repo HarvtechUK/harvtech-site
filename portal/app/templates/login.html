@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Sign in — HarvTech Portal{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="card login-card">
+    <h1 class="login-title">HarvTech <span>Portal</span></h1>
+    <p class="muted">
+      Timesheets and engagement approval for HarvTech clients.
+    </p>
+
+    {# The button links to /auth/login, which starts the Microsoft
+       sign-in (OIDC) flow. Styled per Microsoft's branding guidance:
+       their four-square logo + "Sign in with Microsoft". #}
+    <a class="btn-ms" href="/auth/login">
+      <svg width="20" height="20" viewBox="0 0 21 21" aria-hidden="true">
+        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Sign in with Microsoft
+    </a>
+
+    <p class="muted small">
+      Use your organisation's Microsoft&nbsp;365 work account &mdash;
+      no separate password for this portal. Access is limited to
+      registered HarvTech clients.
+    </p>
+
+    <p class="muted small login-legal">
+      <a href="https://harvtech.co.uk/privacy">Privacy</a> &middot;
+      <a href="https://harvtech.co.uk/terms">Terms</a> &middot;
+      <a href="https://harvtech.co.uk">harvtech.co.uk</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

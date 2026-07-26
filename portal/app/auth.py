@@ -19,14 +19,22 @@ security-critical bits for us — PKCE, the state/nonce, token validation —
 so we don't hand-roll any of that.
 """
 
+from pathlib import Path
+
 import msal
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 from . import store
 from .config import settings
 
 router = APIRouter(tags=["auth"])
+
+# The sign-in and access-denied pages are rendered here (not in web.py)
+# because they must stay PUBLIC — they're the way in, so they can't sit
+# behind the login gate that covers the web router.
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 # Empty on purpose. We never call Microsoft Graph — we only read the
 # validated id_token claims (oid, tid, name, email) — so we don't ask for
@@ -45,6 +53,19 @@ def _msal_app() -> msal.ConfidentialClientApplication:
         authority=settings.entra_authority,
         client_credential=settings.entra_client_secret,
     )
+
+
+@router.get("/login")
+def login_page(request: Request):
+    """The branded sign-in page — a HarvTech page with a 'Sign in with
+    Microsoft' button, rather than bouncing visitors straight onto
+    Microsoft's login with no context.
+
+    Already signed in (or auth disabled)? Straight to the dashboard.
+    """
+    if not settings.auth_enabled or request.session.get("user"):
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse(request, "login.html", {})
 
 
 @router.get("/auth/login")
@@ -83,13 +104,14 @@ def callback(request: Request):
     if user is None:
         # Authenticated with a real Microsoft account, but not registered
         # as a portal user. Deny — this is the line that keeps the portal
-        # private even though anyone can *authenticate*.
-        raise HTTPException(
+        # private even though anyone can *authenticate*. Rendered as a
+        # branded page (not raw JSON): the person seeing it is likely a
+        # client whose record hasn't been set up yet.
+        return templates.TemplateResponse(
+            request,
+            "denied.html",
+            {"email": email},
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"{email or 'This account'} is signed in but not registered for the "
-                "HarvTech portal. Ask your HarvTech contact to add you."
-            ),
         )
 
     # Minimal session — enough to authorise later requests without another
@@ -116,9 +138,10 @@ def require_user(request: Request) -> dict | None:
     """Dependency that gates protected routes.
 
     - Auth disabled (local/dev, no client id): allow through.
-    - No session user: redirect the browser to /auth/login. (Raising an
-      HTTPException with a 307 + Location is how a dependency triggers a
-      redirect.)
+    - No session user: redirect the browser to the branded /login page
+      (NOT straight to Microsoft — context first, redirect on click).
+      Raising an HTTPException with a 307 + Location is how a dependency
+      triggers a redirect.
     - Otherwise: return the session user so routes can read role/client.
     """
     if not settings.auth_enabled:
@@ -127,7 +150,7 @@ def require_user(request: Request) -> dict | None:
     if not user:
         raise HTTPException(
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-            headers={"Location": "/auth/login"},
+            headers={"Location": "/login"},
             detail="Login required.",
         )
     return user

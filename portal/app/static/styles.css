@@ -101,3 +101,47 @@ h2 { font-size: 1.15rem; letter-spacing: -0.01em; margin: 32px 0 12px; }
 @media (max-width: 600px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── Sign-in / access pages ─────────────────────────────────────── */
+
+.login-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 9vh 0 4vh;
+}
+.login-card {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  padding: 40px 36px;
+}
+.login-title {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.login-title span { color: var(--teal); }
+
+/* "Sign in with Microsoft" — per Microsoft's branding guidance: their
+   four-square logo, the exact wording, on a dark neutral button. */
+.btn-ms {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 20px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: #2f2f2f;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.btn-ms:hover { background: #3a3a3a; }
+
+.login-legal { margin-top: 20px; }
+.login-legal a { color: var(--muted); }
+.login-legal a:hover { color: var(--text); }
+
+.denied-who { color: var(--text); font-weight: 600; }
