@@ -146,12 +146,15 @@ jobs:
               --destination '$web' \
               --overwrite \
               --auth-mode login
-            # upload-batch silently skips hidden directories, which loses
-            # .well-known/ (the Entra publisher-domain verification file).
-            # Upload it explicitly so the pipeline owns it.
+            # Hidden directories get dropped between the Astro build and
+            # upload-batch, which loses .well-known/ (the Entra
+            # publisher-domain verification file). public/ files are
+            # copied verbatim anyway, so upload straight from the source
+            # tree — independent of any build-tool dotfile behaviour.
             az storage blob upload-batch \
               --account-name "${{ steps.sa.outputs.name }}" \
-              --source ./dist/.well-known \
-              --destination '$web/.well-known' \
+              --source site/public/.well-known \
+              --destination '$web' \
+              --destination-path '.well-known' \
               --overwrite \
               --auth-mode login
