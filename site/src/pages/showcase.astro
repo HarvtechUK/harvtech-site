@@ -1,6 +1,44 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
+/**
+ * Client case studies. Each stays `draft: true` — and therefore OFF the
+ * rendered site — until its wording has been confirmed against the
+ * engagement terms with the client. Flipping one live is a deliberate,
+ * single-line decision, never a side effect.
+ */
+const caseStudies = [
+  {
+    draft: true,
+    client: 'Brit Insurance',
+    sector: "Lloyd's of London market insurer",
+    title: 'Identity security engagement',
+    problem:
+      '[Placeholder — one paragraph on the problem: privileged access sprawl / audit driver. Confirm wording against engagement terms before publishing.]',
+    whatWeDid:
+      'Key Vault access migrated to RBAC, Privileged Identity Management rolled out for standing-access elimination, and Entra privileged access groups introduced for role governance. [Placeholder — confirm scope wording against engagement terms.]',
+    outcome:
+      '[Placeholder — outcome with any agreed metrics, e.g. standing privileged assignments reduced, access reviews evidenced. Confirm before publishing.]',
+    technologies: ['Entra ID', 'PIM', 'Key Vault', 'Azure RBAC', 'Conditional Access'],
+  },
+  {
+    draft: true,
+    client: 'Tokio Marine Kiln',
+    sector: "Lloyd's of London market insurer",
+    title: 'SFTPPlus managed file transfer — proof of concept',
+    problem:
+      '[Placeholder — one paragraph on the problem: legacy file transfer estate / partner integration need. Confirm wording against engagement terms before publishing.]',
+    whatWeDid:
+      'Proof of concept for SFTPPlus managed file transfer on Azure — architecture, security controls, and integration evaluation. [Placeholder — confirm scope wording against engagement terms.]',
+    outcome:
+      '[Placeholder — outcome: PoC findings and recommendation. Confirm before publishing.]',
+    technologies: ['SFTPPlus', 'Azure', 'Managed File Transfer', 'Networking'],
+  },
+];
+
+// Only confirmed (non-draft) case studies ever reach the rendered page.
+const publishedCaseStudies = caseStudies.filter((cs) => !cs.draft);
+
 const projects = [
   {
     status: 'Live',
@@ -56,6 +94,43 @@ const projects = [
       decisions, and the honest record of what worked first time and what
       didn&rsquo;t.
     </p>
+
+    {
+      publishedCaseStudies.length > 0 && (
+        <div class="mb-16">
+          <p class="eyebrow mb-4">Client work</p>
+          <div class="space-y-6">
+            {publishedCaseStudies.map((cs) => (
+              <div class="card border-primary/20 border p-8 md:p-10">
+                <p class="eyebrow mb-2 text-xs">{cs.sector}</p>
+                <h2 class="title-card mb-1 text-xl">
+                  {cs.client} &mdash; {cs.title}
+                </h2>
+                <div class="mt-5 grid gap-6 md:grid-cols-3">
+                  {[
+                    ['The problem', cs.problem],
+                    ['What HarvTech did', cs.whatWeDid],
+                    ['The outcome', cs.outcome],
+                  ].map(([heading, body]) => (
+                    <div>
+                      <p class="text-text-primary mb-1 text-sm font-semibold">{heading}</p>
+                      <p class="body-muted text-sm leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+                <div class="mt-6 flex flex-wrap gap-2">
+                  {cs.technologies.map((tag) => (
+                    <span class="bg-bg-3 text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
 
     <div class="space-y-6">
       {

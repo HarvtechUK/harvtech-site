@@ -3,13 +3,27 @@ export interface ServiceOffering {
   description: string;
 }
 
+/**
+ * A packaged engagement stage (assessment → delivery → retainer).
+ * Services structured as a productised journey (Security Hardening)
+ * use `stages`; the broader capability lines use `offerings`.
+ */
+export interface ServiceStage {
+  number: string;
+  name: string;
+  format: string; // e.g. "Fixed scope · 2–3 weeks" — engagement shape, never pricing
+  description: string;
+  outputs: string[];
+}
+
 export interface Service {
   slug: string;
   title: string;
   eyebrow: string;
   tagline: string;
   summary: string;
-  offerings: ServiceOffering[];
+  offerings?: ServiceOffering[];
+  stages?: ServiceStage[];
   deliverables: string[];
 }
 
@@ -18,38 +32,55 @@ export const services: Service[] = [
     slug: 'security-hardening',
     title: 'Security Hardening',
     eyebrow: 'Security & compliance',
-    tagline: 'Find the gaps. Fix them. Prove it.',
+    tagline: 'Failed an audit — or facing one? Findings fixed in code, with evidence.',
     summary:
-      'A systematic review of your Azure security posture — backed up with a written report, a prioritised remediation backlog, and hands-on fixing delivered in Terraform.',
-    offerings: [
+      'Audit-driven Azure security and compliance remediation for regulated environments. The usual trigger is a failed or upcoming audit: we turn the findings into a risk-scored plan, fix them in Terraform and pipelines with a full evidence trail, and keep you compliant between audits.',
+    stages: [
       {
-        title: 'Audit',
+        number: '01',
+        name: 'Security Controls Assessment',
+        format: 'Fixed scope · 2–3 weeks',
         description:
-          'A structured review of your Azure environment against CIS Foundations Benchmark, Microsoft Secure Score, and Defender for Cloud recommendations. Covers identity, networking, storage, compute, logging, and monitoring.',
+          'A gap analysis of your Azure estate against the thing that actually triggered the work — your audit findings, or SOX ITGC, ISO 27001 Annex A, and DORA control sets. Identity, privileged access, Conditional Access, Key Vault, Defender, logging, and the pipelines that change them.',
+        outputs: [
+          'Risk-scored remediation plan, ordered by exposure and audit impact',
+          'Effort estimate per finding, so remediation can be budgeted honestly',
+          'Evidence requirements per control — what an auditor will ask for, captured up front',
+        ],
       },
       {
-        title: 'Reports',
+        number: '02',
+        name: 'Remediation Sprints',
+        format: 'Delivery · 10-day blocks',
         description:
-          'A written findings report with every issue risk-scored, mapped to its regulatory implication, and paired with a specific remediation action. Not a checklist — a prioritised action plan your team can execute against.',
+          'The plan delivered in Terraform and CI/CD pipelines — Entra ID, PIM, Conditional Access, Key Vault, Defender for Cloud. Every change reviewed, merged through your branching process, and traceable: what changed, when, why, and which control it satisfies.',
+        outputs: [
+          'Findings remediated as reviewed, merged infrastructure-as-code',
+          'Azure Policy guardrails that keep fixed things fixed',
+          'An auditor-ready evidence pack closing out each block',
+        ],
       },
       {
-        title: 'Remediation',
+        number: '03',
+        name: 'Continuous Compliance',
+        format: 'Retainer',
         description:
-          'Hands-on fixing in Terraform. Security gaps become IaC changes — reviewed in CI, merged through your branching process, so there\'s a full audit trail of what changed, when, and why.',
-      },
-      {
-        title: 'Compliance',
-        description:
-          'Controls mapped to FCA, DORA, PCI DSS, ISO 27001, and CIS Benchmark. Azure Policy guardrails deployed and enforced continuously — not just at point-in-time audit.',
+          'Compliance decays between audits — access accumulates, policies drift, scores slip. A standing cadence keeps the posture you paid for: reviewed, evidenced, and ready before the auditor asks.',
+        outputs: [
+          'Quarterly access reviews with documented outcomes',
+          'PIM and Conditional Access drift checks against the agreed baseline',
+          'Defender for Cloud secure score reporting with trend and commentary',
+          'Pre-audit readiness checks ahead of each cycle',
+        ],
       },
     ],
     deliverables: [
-      'Security posture assessment with risk-scored findings',
-      'Remediation backlog mapped to regulatory frameworks',
+      'Risk-scored assessment mapped to DORA, SOX ITGC, ISO 27001 Annex A, FCA, and PCI DSS',
+      'Remediation delivered as reviewed Terraform with a full change history',
+      'Auditor-ready evidence pack per remediation block',
       'Terraform-managed Azure Policy guardrails',
-      'Defender for Cloud workload protection configured',
-      'Entra ID Conditional Access hardened with phishing-resistant MFA',
-      'Written report suitable for audit and governance review',
+      'Entra ID, PIM, and Conditional Access hardened with phishing-resistant MFA',
+      'Defender for Cloud workload protection configured and reporting',
     ],
   },
   {
