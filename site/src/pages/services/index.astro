@@ -40,11 +40,12 @@ import { services } from '../../data/services';
                     {s.summary}
                   </p>
 
-                  <!-- Sub-offering chips -->
+                  <!-- Sub-offering chips: stage names for packaged
+                       services, offering titles for capability lines -->
                   <div class="flex flex-wrap gap-2">
-                    {s.offerings.map((o) => (
+                    {(s.stages?.map((st) => st.name) ?? s.offerings?.map((o) => o.title) ?? []).map((chip) => (
                       <span class="bg-bg-3 text-text-muted rounded px-2.5 py-1 text-xs font-medium">
-                        {o.title}
+                        {chip}
                       </span>
                     ))}
                   </div>

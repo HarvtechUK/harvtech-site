@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CodeWindow from '../components/CodeWindow.astro';
 
 const phases = [
   {
@@ -58,7 +59,7 @@ const standards = [
   },
   {
     name: 'Regulatory frameworks',
-    detail: 'FCA, DORA, PCI DSS, ISO 27001, and Lloyd\'s of London market requirements mapped to Azure controls.',
+    detail: 'DORA, SOX ITGC, FCA, ISO 27001, PCI DSS, and Lloyd\'s of London market requirements mapped to Azure controls.',
   },
 ];
 ---
@@ -113,6 +114,30 @@ const standards = [
             </div>
           ))
         }
+      </div>
+    </div>
+  </section>
+
+  <!-- Everything in code (relocated from the homepage hero) -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
+        <div>
+          <p class="eyebrow mb-4">In practice</p>
+          <h2 class="title-section mb-4">
+            If it isn&rsquo;t in code, it didn&rsquo;t happen.
+          </h2>
+          <p class="body-muted max-w-xl">
+            Every control we remediate and every platform we build ships as
+            reviewed, versioned infrastructure-as-code &mdash; which is what
+            makes the evidence trail automatic. The change history <em>is</em>
+            the audit trail: what changed, when, why, and which control it
+            satisfies.
+          </p>
+        </div>
+        <div class="min-w-0">
+          <CodeWindow />
+        </div>
       </div>
     </div>
   </section>

@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Drafts never render — publishing is a one-line frontmatter flip in
+// src/content/writing/<slug>.md.
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.updated.valueOf() - a.data.updated.valueOf());
+
+// Shown as a teaser while drafts are still in progress.
+const inThePipeline = (await getCollection('writing'))
+  .filter((p) => p.data.draft)
+  .map((p) => p.data.title);
+---
+
+<BaseLayout
+  title="Writing — HarvTech"
+  description="Practitioner writing on Azure security and compliance for regulated financial services — DORA, PRA operational resilience, Lloyd's standards, and SOX ITGCs, from the platform side."
+>
+  <section class="container-page py-20">
+    <p class="eyebrow mb-4">Writing</p>
+    <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
+      Notes from the field.
+    </h1>
+    <p class="body-muted max-w-2xl text-lg">
+      Practitioner pieces on Azure security and compliance in regulated
+      financial services &mdash; the regulations as an engineer meets
+      them, and the platform work that turns them into evidence.
+    </p>
+
+    {
+      posts.length > 0 && (
+        <div class="mt-12 space-y-5">
+          {posts.map((post) => (
+            <a href={`/writing/${post.id}`} class="card group block p-7 transition hover:border-primary/30">
+              <p class="text-text-subtle mb-2 text-xs font-semibold uppercase tracking-wider">
+                {post.data.updated.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+              <p class="title-card group-hover:text-primary mb-2 transition-colors">{post.data.title}</p>
+              <p class="body-muted text-sm">{post.data.description}</p>
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      posts.length === 0 && inThePipeline.length > 0 && (
+        <div class="card mt-12 p-8">
+          <p class="title-card mb-4">In the pipeline</p>
+          <ul class="space-y-3">
+            {inThePipeline.map((title) => (
+              <li class="flex gap-3 text-sm">
+                <span
+                  aria-hidden="true"
+                  class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current"
+                />
+                <span class="body-muted">{title}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>
