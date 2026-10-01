@@ -27,4 +27,21 @@ const docs = defineCollection({
   }),
 });
 
-export const collections = { docs };
+/**
+ * The `writing` collection — posts at /writing/<slug>.
+ *
+ * draft: true keeps a post out of the listing AND prevents its page from
+ * being generated, so stubs and in-progress pieces can live in the repo
+ * without ever rendering. Publishing is a one-line frontmatter flip.
+ */
+const writing = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/writing' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    updated: z.coerce.date(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { docs, writing };
