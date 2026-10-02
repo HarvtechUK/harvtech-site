@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" width="180" height="40" role="img" aria-label="HarvTech">
   <!--
     HarvTech standalone vector lockup.
-    Icon and wordmark are both Petronas teal (#00A19B) — readable on white,
+    Icon and wordmark are both Petronas teal (#00A19B), readable on white,
     light-grey, and dark backgrounds.
     For the site header (dark bg, white wordmark) use Logo.astro instead.
 

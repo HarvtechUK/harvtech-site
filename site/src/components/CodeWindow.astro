@@ -1,15 +1,15 @@
 ---
 /**
- * CodeWindow — VS Code-style editor window used as the hero visual.
+ * CodeWindow, VS Code-style editor window used as the hero visual.
  *
  * Static markup, no syntax-highlighting dependency: the HCL snippet is
  * hand-spanned with theme colours so the palette stays inside the brand
  * system (teal keywords, silver strings, dark-grey comments). The one
- * red element is the tab's unsaved-changes dot — the W13 "red detail"
+ * red element is the tab's unsaved-changes dot, the W13 "red detail"
  * token used the way the theme docs intend: once, and small.
  *
- * The snippets live in frontmatter strings rendered via set:html —
- * literal HCL/shell braces in the template would trip Astro's
+ * The snippets live in frontmatter strings rendered via set:html,
+ * because literal HCL/shell braces in the template would trip Astro's
  * expression parser.
  */
 

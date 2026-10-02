@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 /**
- * The `docs` collection — the internal-style wiki at /docs/*.
+ * The `docs` collection, the internal-style wiki at /docs/*.
  *
  * Each .md file under src/content/docs/<category>/<slug>.md gets routed to
  * /docs/<category>/<slug> by src/pages/docs/[...slug].astro. The category
@@ -12,7 +12,7 @@ import { glob } from 'astro/loaders';
  * status: drafts, deprecated, and superseded docs are still indexable by
  *   URL but the /docs landing page filters them out so the index stays
  *   clean. "superseded" is the standard ADR vocabulary for "this decision
- *   has been re-made elsewhere" — semantically distinct from "deprecated"
+ *   has been re-made elsewhere", semantically distinct from "deprecated"
  *   (rotting / will be removed) even though both hide from the index.
  */
 const docs = defineCollection({
@@ -28,7 +28,7 @@ const docs = defineCollection({
 });
 
 /**
- * The `writing` collection — posts at /writing/<slug>.
+ * The `writing` collection, posts at /writing/<slug>.
  *
  * draft: true keeps a post out of the listing AND prevents its page from
  * being generated, so stubs and in-progress pieces can live in the repo

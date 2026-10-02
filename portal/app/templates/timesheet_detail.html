@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ ts.period }} — Timesheet{% endblock %}
+{% block title %}{{ ts.period }} - Timesheet{% endblock %}
 
 {% block content %}
 <a class="back" href="/">&larr; Dashboard</a>
@@ -31,7 +31,7 @@
   </tfoot>
 </table>
 
-{# Which buttons appear depends on the status — the same state machine as
+{# Which buttons appear depends on the status, the same state machine as
    the API, expressed in the template. (Auth will later decide WHO sees
    which: the contractor submits, the client approves/rejects.) #}
 <div class="actions">

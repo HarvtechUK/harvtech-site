@@ -9,7 +9,7 @@ status: living
 
 ## Why bother
 
-If the admin login is a one-password compromise away from full takeover, every other security control on the platform is theatre. This applies whether you're a solo developer with one Owner account on a personal subscription, or an SRE with Global Admin in a client tenant — the playbook is the same, just the policies tighten over time.
+If the admin login is a one-password compromise away from full takeover, every other security control on the platform is theatre. This applies whether you're a solo developer with one Owner account on a personal subscription, or an SRE with Global Admin in a client tenant, the playbook is the same, just the policies tighten over time.
 
 The work below is what was actually run through on this account on 2026-05-31, starting from password-only and ending with phishing-resistant MFA enforced tenant-wide.
 
@@ -51,13 +51,13 @@ gh api repos/HarvtechUK/harvtech-site --jq '.security_and_analysis'
 
 Findings:
 
-- **Azure identity**: Owner on the subscription via `alex@alexander-harvey.com`. Tenant has Microsoft 365 Business Premium, which includes **Entra ID P1** — Conditional Access available.
+- **Azure identity**: Owner on the subscription via `alex@alexander-harvey.com`. Tenant has Microsoft 365 Business Premium, which includes **Entra ID P1** - Conditional Access available.
 - **No Conditional Access policies** existed.
-- **Microsoft Authenticator was registered** (Alex had set it up previously and forgotten — common pattern).
+- **Microsoft Authenticator was registered** (Alex had set it up previously and forgotten, common pattern).
 - **Security Defaults state** couldn't be queried via CLI without elevated permissions; required a portal check.
-- **GitHub 2FA was OFF**, even though a passkey was registered as a sign-in method. Critical distinction — see below.
+- **GitHub 2FA was OFF** - even though a passkey was registered as a sign-in method. Critical distinction, see below.
 
-## Step 1 — Confirm Entra MFA registration
+## Step 1, Confirm Entra MFA registration
 
 If `mysignins.microsoft.com/security-info` already lists Microsoft Authenticator (or any strong factor), this step is done.
 
@@ -69,9 +69,9 @@ If not:
 4. **+ Add sign-in method** → **Authenticator app** → scan the QR code in the phone app
 5. Approve the test notification
 6. Set as the default sign-in method
-7. Don't add SMS as a fallback — it's phishable via SIM-swap
+7. Don't add SMS as a fallback, it's phishable via SIM-swap
 
-## Step 2 — Check Security Defaults state
+## Step 2, Check Security Defaults state
 
 Security Defaults is the tenant-wide "everyone gets MFA, legacy auth blocked" toggle. It's the free baseline that catches the basics.
 
@@ -82,9 +82,9 @@ Security Defaults is the tenant-wide "everyone gets MFA, legacy auth blocked" to
 
 If **Disabled**: enable it now. This forces MFA registration for all users within 14 days and immediately blocks legacy auth.
 
-If **Enabled**: you're already covered for the immediate threat. Plan the upgrade to Conditional Access (see [TODO](#whats-still-todo)) as a follow-up — CA is more granular and is Terraform-manageable. **Note**: Security Defaults and Conditional Access cannot coexist. The CA migration will disable SD first.
+If **Enabled**: you're already covered for the immediate threat. Plan the upgrade to Conditional Access (see [TODO](#whats-still-todo)) as a follow-up, CA is more granular and is Terraform-manageable. **Note**: Security Defaults and Conditional Access cannot coexist. The CA migration will disable SD first.
 
-## Step 3 — Enable GitHub 2FA properly
+## Step 3, Enable GitHub 2FA properly
 
 This is the one that catches people. **Having a passkey as a "sign-in method" on GitHub is NOT the same as having 2FA enabled.**
 
@@ -97,19 +97,19 @@ To enable:
 
 1. `https://github.com/settings/security`
 2. **Two-factor authentication** section → **Enable two-factor authentication**
-3. Pick **Set up using an app** (TOTP / Authenticator). Reuse the same Microsoft Authenticator app — it supports multiple accounts.
+3. Pick **Set up using an app** (TOTP / Authenticator). Reuse the same Microsoft Authenticator app, it supports multiple accounts.
 4. Scan the QR, enter the code
-5. **Save recovery codes** — copy them and put them in your password manager. Single-use; if your phone is lost AND your passkey isn't accessible, these are the only way back in.
-6. After 2FA is on, the passkey continues to work for passwordless sign-in too — best of both: one-tap auth, but every path is gated.
+5. **Save recovery codes** - copy them and put them in your password manager. Single-use; if your phone is lost AND your passkey isn't accessible, these are the only way back in.
+6. After 2FA is on, the passkey continues to work for passwordless sign-in too, best of both: one-tap auth, but every path is gated.
 7. Do **not** enable SMS as a fallback.
 
-Verifying via API doesn't reliably work for OAuth tokens — the `two_factor_authentication` field on `gh api user` returns `null` for OAuth scopes that don't include `read:user`. The UI is the authoritative answer.
+Verifying via API doesn't reliably work for OAuth tokens, the `two_factor_authentication` field on `gh api user` returns `null` for OAuth scopes that don't include `read:user`. The UI is the authoritative answer.
 
-## Step 4 — Add phishing-resistant MFA (passkey)
+## Step 4, Add phishing-resistant MFA (passkey)
 
 Authenticator TOTP is good but it's **phishable** by real-time relay phishing kits (Evilginx, Modlishka, off-the-shelf and cheap). The attacker mirrors the Microsoft login page on a lookalike domain, captures both your password and the 6-digit code, replays them to Microsoft within seconds, captures the resulting session cookie. Your MFA didn't help.
 
-**Passkey or FIDO2 security key** is cryptographically bound to the actual domain. A relay phishing kit can't satisfy the challenge because the credential won't sign for `microsoft-signin.fake.com` — only for the real `login.microsoftonline.com`.
+**Passkey or FIDO2 security key** is cryptographically bound to the actual domain. A relay phishing kit can't satisfy the challenge because the credential won't sign for `microsoft-signin.fake.com`, only for the real `login.microsoftonline.com`.
 
 iCloud Keychain on macOS gives this for free, no hardware key purchase needed.
 
@@ -143,14 +143,14 @@ Things deferred to a future session, captured for the next pass:
   - Block legacy auth (Security Defaults already does this; CA replicates it explicitly)
   - Sign-in frequency: re-authenticate every N hours for privileged sign-ins
 - **Break-glass account**: a second Global Admin, cloud-only, with its own FIDO2 key, excluded from CA policies that could lock everyone out, never used for day-to-day. Stored in safe + password manager.
-- **Tighten the CI SP RBAC**: `sp-github-harvtech-site` is currently Contributor at subscription scope. Should be RG-scoped (per stack), with Storage Blob Data Contributor on specific storage accounts. Requires the SP to also have User Access Administrator on the site RG so Terraform can manage its own role assignments — chicken-and-egg, handled in the bootstrap script.
+- **Tighten the CI SP RBAC**: `sp-github-harvtech-site` is currently Contributor at subscription scope. Should be RG-scoped (per stack), with Storage Blob Data Contributor on specific storage accounts. Requires the SP to also have User Access Administrator on the site RG so Terraform can manage its own role assignments, chicken-and-egg, handled in the bootstrap script.
 - **Review sign-in logs periodically**: `entra.microsoft.com → Monitoring → Sign-in logs`. Set up an alert rule for anomalous sign-ins (new country, impossible travel) if/when on P2.
 
 ## What goes wrong
 
 A few traps worth flagging:
 
-- **Locking yourself out**: never tighten enforcement (especially CA policies) without a tested break-glass account. CA policies have a "What if" tool in the portal — use it before you flip Enabled.
+- **Locking yourself out**: never tighten enforcement (especially CA policies) without a tested break-glass account. CA policies have a "What if" tool in the portal, use it before you flip Enabled.
 - **CLI token caching**: enabling MFA enforcement doesn't immediately invalidate existing `az login` or `gh auth` tokens. They'll continue working until expiry. Useful (so you don't lock yourself out of the terminal that's making these changes), but means a stolen token is still usable for ~24 hours.
-- **Authenticator backup**: if you switch phones without exporting Authenticator first, you lose all the TOTP entries. Authenticator supports cloud backup — turn it on inside the app (Settings → Backup) before you ever switch devices.
+- **Authenticator backup**: if you switch phones without exporting Authenticator first, you lose all the TOTP entries. Authenticator supports cloud backup, turn it on inside the app (Settings → Backup) before you ever switch devices.
 - **GitHub passkey-without-2FA**: as covered in Step 3, the two concepts are independent on GitHub. Always confirm 2FA is the toggle, not just "I have a passkey registered".

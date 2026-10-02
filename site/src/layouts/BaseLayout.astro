@@ -1,11 +1,11 @@
 ---
-// Latin subsets only — we don't need Cyrillic/Greek/Vietnamese on this site
+// Latin subsets only, we don't need Cyrillic/Greek/Vietnamese on this site
 // and shipping them across every page load wastes ~600 KB of bandwidth.
 import '@fontsource/inter/latin-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
 import '@fontsource/inter/latin-700.css';
-// Display face used for the brand wordmark only (one weight — 600 — so we
+// Display face used for the brand wordmark only (one weight, 600, so we
 // pay for ~6 KB of woff2 rather than the full Space Grotesk family).
 import '@fontsource/space-grotesk/latin-600.css';
 import '../styles/theme.css';
@@ -19,7 +19,7 @@ interface Props {
 
 const {
   title,
-  description = 'HarvTech — Azure security and compliance remediation for London-market insurers and regulated financial services. Audit findings fixed in Terraform with auditor-ready evidence. CAF and Well-Architected aligned.',
+  description = 'HarvTech - Azure security and compliance remediation for London-market insurers and regulated financial services. Audit findings fixed in Terraform with auditor-ready evidence. CAF and Well-Architected aligned.',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();

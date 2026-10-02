@@ -1,4 +1,4 @@
-{# base.html — the shared page shell.
+{# base.html, the shared page shell.
 
    Every page "extends" this file and fills in the {% block %} areas
    below. That's Jinja template inheritance: the header, footer and
@@ -16,7 +16,7 @@
   <body>
     <header class="topbar">
       <a class="brand" href="/">HarvTech <span>Portal</span></a>
-      {# When signed in, show who — and a way out. #}
+      {# When signed in, show who, and a way out. #}
       {% if user %}
         <span class="muted">{{ user.name or user.email }} &middot; <a class="back" href="/auth/logout">Sign out</a></span>
       {% else %}
@@ -30,7 +30,7 @@
     </main>
 
     <footer class="foot muted">
-      HARVTECH LTD &mdash; delivered consultancy days, approved for invoicing.
+      HARVTECH LTD - delivered consultancy days, approved for invoicing.
     </footer>
   </body>
 </html>

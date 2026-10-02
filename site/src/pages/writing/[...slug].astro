@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 
-// Only non-draft posts get a page at all — a draft's URL simply doesn't
+// Only non-draft posts get a page at all, a draft's URL simply doesn't
 // exist until the frontmatter flips, so there's nothing to leak.
 export async function getStaticPaths() {
   const posts = (await getCollection('writing')).filter((p) => !p.data.draft);
@@ -16,7 +16,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} — HarvTech`} description={post.data.description}>
+<BaseLayout title={`${post.data.title} - HarvTech`} description={post.data.description}>
   <section class="container-page py-20">
     <a
       href="/writing"

@@ -8,7 +8,7 @@
  *
  * Utility-class shapes (container, eyebrow, card, badges, hero gradient)
  * still derive from Tailcast (https://github.com/matt765/Tailcast, MIT)
- * — only the colour tokens have changed. Original Tailcast credit stands.
+ *, only the colour tokens have changed. Original Tailcast credit stands.
  */
 
 @theme {
@@ -17,7 +17,7 @@
   --color-primary-hover: rgb(0, 181, 173);          /* slightly brighter */
   --color-secondary: rgb(200, 204, 206);            /* Mercedes silver #C8CCCE */
 
-  /* Detail accent — used SPARINGLY for small high-signal moments.
+  /* Detail accent, used SPARINGLY for small high-signal moments.
      The W13's red inscription is a single thin line; treat this token
      the same way. If you find yourself reaching for it on more than a
      couple of UI surfaces at once, you're probably overusing it. */
@@ -29,7 +29,7 @@
   --color-text-muted: rgb(174, 178, 183);
   --color-text-subtle: rgb(86, 95, 100);            /* Mercedes dark grey #565F64 */
 
-  /* Backgrounds — pure black surface, graded for layered depth */
+  /* Backgrounds, pure black surface, graded for layered depth */
   --color-bg-1: rgb(0, 0, 0);                       /* Mercedes carbon black */
   --color-bg-2: rgb(20, 20, 20);
   --color-bg-3: rgb(31, 32, 36);                    /* slightly lifted card background */
@@ -44,7 +44,7 @@
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-  /* Display face for the brand wordmark only — Inter handles all body / UI
+  /* Display face for the brand wordmark only, Inter handles all body / UI
      copy. Loaded as a single weight (600) in BaseLayout to keep the extra
      bandwidth to one woff2. */
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
@@ -80,7 +80,7 @@
   @apply text-text-muted text-base leading-relaxed;
 }
 
-/* Hero title — white-to-silver vertical gradient (W13 paintwork) */
+/* Hero title, white-to-silver vertical gradient (W13 paintwork) */
 .hero-gradient {
   background: -webkit-linear-gradient(white, rgb(200, 204, 206));
   -webkit-background-clip: text;
@@ -114,7 +114,7 @@
   @apply bg-bg-3 text-text-muted rounded-full px-3 py-1 text-xs font-medium;
 }
 .badge-accent {
-  /* Reserved for THE high-signal pill on a page — e.g. the "Live"
+  /* Reserved for THE high-signal pill on a page, e.g. the "Live"
      marker on the showcase. Don't sprinkle these around. */
   @apply rounded-full px-3 py-1 text-xs font-semibold;
   background: rgb(128 20 43 / 0.18);

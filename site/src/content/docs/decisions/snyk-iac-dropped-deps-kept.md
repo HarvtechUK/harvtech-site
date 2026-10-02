@@ -11,8 +11,8 @@ status: living
 
 The pipeline already had three IaC scanners: Checkov, Trivy, and tflint. Snyk was added on top of that with two scopes:
 
-- **Snyk Open Source** — npm dependency CVE scanning on `site/package-lock.json`. New capability nothing else in the pipeline covered.
-- **Snyk IaC** — Terraform misconfig scanning. Heavy overlap with Checkov and Trivy by design — three scanners with overlapping rules surfaces genuine findings as the ones they disagree on.
+- **Snyk Open Source** - npm dependency CVE scanning on `site/package-lock.json`. New capability nothing else in the pipeline covered.
+- **Snyk IaC** - Terraform misconfig scanning. Heavy overlap with Checkov and Trivy by design, three scanners with overlapping rules surfaces genuine findings as the ones they disagree on.
 
 First run found exactly what the others did: one Medium severity finding, `SNYK-CC-AZURE-649` (Storage Account geo-replication disabled). Same rule, same conclusion as Checkov `CKV_AZURE_206` and Trivy `AZU-0058`.
 
@@ -24,15 +24,15 @@ The other three scanners all support in-git suppression with a documented reason
 - Trivy reads `.trivyignore`
 - tflint reads `.tflint.hcl` for rule disables
 
-Snyk Open Source supports the same pattern via `.snyk` — works perfectly.
+Snyk Open Source supports the same pattern via `.snyk`, works perfectly.
 
 **Snyk IaC's current CLI scanner (v2, default since 2023) does not honour `.snyk` ignores.** Ignores have to be configured in the Snyk Web UI after running with `--report`, which then syncs them back to subsequent scans.
 
 This was tried with multiple combinations:
 
-- `.snyk` at repo root with `'*'` as the path key — ignored
-- `.snyk` at repo root with the exact resource-path string Snyk itself prints — ignored
-- Explicit `--policy-path=.snyk` flag in the workflow — same result
+- `.snyk` at repo root with `'*'` as the path key, ignored
+- `.snyk` at repo root with the exact resource-path string Snyk itself prints, ignored
+- Explicit `--policy-path=.snyk` flag in the workflow, same result
 
 Snyk's docs on this aren't crisp (the relevant pages 404), but the behaviour is consistent and documented in community threads: v2 IaC has moved ignore management out of the policy file and into the Snyk Cloud UI.
 
@@ -66,4 +66,4 @@ Snyk Open Source stays for a different reason: it covers a dimension nothing els
 
 ## Postscript on tool selection
 
-For a portfolio repo this whole sequence — added a tool, hit a real limitation, made a principled call to scope it down rather than ignore the problem — is more valuable than blindly stacking scanners. Hiring managers care more about engineering judgement than tool count. Future scanner additions should pass the same test: does it add a dimension nothing else covers, AND can its config live in git alongside everything else?
+For a portfolio repo this whole sequence, added a tool, hit a real limitation, made a principled call to scope it down rather than ignore the problem, is more valuable than blindly stacking scanners. Hiring managers care more about engineering judgement than tool count. Future scanner additions should pass the same test: does it add a dimension nothing else covers, AND can its config live in git alongside everything else?

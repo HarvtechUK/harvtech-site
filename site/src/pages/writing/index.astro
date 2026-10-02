@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-// Drafts never render — publishing is a one-line frontmatter flip in
+// Drafts never render, publishing is a one-line frontmatter flip in
 // src/content/writing/<slug>.md.
 const posts = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
@@ -15,8 +15,8 @@ const inThePipeline = (await getCollection('writing'))
 ---
 
 <BaseLayout
-  title="Writing — HarvTech"
-  description="Practitioner writing on Azure security and compliance for regulated financial services — DORA, PRA operational resilience, Lloyd's standards, and SOX ITGCs, from the platform side."
+  title="Writing - HarvTech"
+  description="Practitioner writing on Azure security and compliance for regulated financial services, DORA, PRA operational resilience, Lloyd's standards, and SOX ITGCs, from the platform side."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Writing</p>
@@ -25,7 +25,7 @@ const inThePipeline = (await getCollection('writing'))
     </h1>
     <p class="body-muted max-w-2xl text-lg">
       Practitioner pieces on Azure security and compliance in regulated
-      financial services &mdash; the regulations as an engineer meets
+      financial services, the regulations as an engineer meets
       them, and the platform work that turns them into evidence.
     </p>
 

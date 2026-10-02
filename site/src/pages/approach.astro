@@ -6,8 +6,8 @@ const phases = [
   {
     number: '01',
     title: 'Discovery',
-    duration: 'Day 1–3',
-    body: 'We start by understanding your environment — what you have, where you want to be, and what\'s blocking you. For new builds that means translating business and regulatory requirements into architecture decisions. For existing platforms it means an honest assessment of what works, what doesn\'t, and what carries risk.',
+    duration: 'Day 1-3',
+    body: 'We start by understanding your environment - what you have, where you want to be, and what\'s blocking you. For new builds that means translating business and regulatory requirements into architecture decisions. For existing platforms it means an honest assessment of what works, what doesn\'t, and what carries risk.',
     outputs: [
       'Current-state architecture review',
       'Regulatory and compliance requirements captured',
@@ -17,11 +17,11 @@ const phases = [
   {
     number: '02',
     title: 'Design & build',
-    duration: 'Weeks 1–N',
-    body: 'Everything is Infrastructure as Code from day one. Architecture Decision Records capture the trade-offs and the reasoning — so you can understand and challenge every call we make. CI/CD pipelines are secured before code lands in any environment. Security and compliance controls are baked into the design, not retrofitted at the end.',
+    duration: 'Weeks 1-N',
+    body: 'Everything is Infrastructure as Code from day one. Architecture Decision Records capture the trade-offs and the reasoning, so you can understand and challenge every call we make. CI/CD pipelines are secured before code lands in any environment. Security and compliance controls are baked into the design, not retrofitted at the end.',
     outputs: [
       'Terraform modules, reviewed and tested in CI',
-      'OIDC-federated CI/CD pipelines — no long-lived secrets',
+      'OIDC-federated CI/CD pipelines, no long-lived secrets',
       'ADRs for every significant design decision',
       'Security scanning integrated into every pull request',
     ],
@@ -30,7 +30,7 @@ const phases = [
     number: '03',
     title: 'Handover & knowledge transfer',
     duration: 'Final sprint',
-    body: 'No black boxes. Every engagement ends with documentation, runbooks, and architecture guides delivered alongside the code. Your team inherits something they can understand, maintain, and extend — with the reasoning intact so future decisions are made in context.',
+    body: 'No black boxes. Every engagement ends with documentation, runbooks, and architecture guides delivered alongside the code. Your team inherits something they can understand, maintain, and extend, with the reasoning intact so future decisions are made in context.',
     outputs: [
       'HLD and architecture documentation',
       'Operational runbooks',
@@ -43,7 +43,7 @@ const phases = [
 const standards = [
   {
     name: 'Microsoft Cloud Adoption Framework (CAF)',
-    detail: 'Landing zone design, subscription structure, and migration methodology — assess, replicate, migrate, optimise.',
+    detail: 'Landing zone design, subscription structure, and migration methodology - assess, replicate, migrate, optimise.',
   },
   {
     name: 'Azure Well-Architected Framework (WAF)',
@@ -55,7 +55,7 @@ const standards = [
   },
   {
     name: 'Microsoft Zero Trust security model',
-    detail: 'Verify explicitly, least-privilege access, assume breach — applied to identity, network, and workload layers.',
+    detail: 'Verify explicitly, least-privilege access, assume breach - applied to identity, network, and workload layers.',
   },
   {
     name: 'Regulatory frameworks',
@@ -65,8 +65,8 @@ const standards = [
 ---
 
 <BaseLayout
-  title="Approach — HarvTech"
-  description="How HarvTech delivers Azure platform engagements — discovery, design and build, handover. CAF, WAF, and regulatory frameworks applied throughout."
+  title="Approach - HarvTech"
+  description="How HarvTech delivers Azure platform engagements, discovery, design and build, handover. CAF, WAF, and regulatory frameworks applied throughout."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Approach</p>
@@ -74,7 +74,7 @@ const standards = [
       Structured delivery.<br />Honest trade-offs.
     </h1>
     <p class="body-muted max-w-2xl text-lg">
-      Every engagement follows the same three-phase structure &mdash;
+      Every engagement follows the same three-phase structure -
       Discovery, Design &amp; Build, Handover. The phases scale to the
       size of the work, but the principles don&rsquo;t change: everything
       in code, every decision documented, nothing handed over that
@@ -129,7 +129,7 @@ const standards = [
           </h2>
           <p class="body-muted max-w-xl">
             Every control we remediate and every platform we build ships as
-            reviewed, versioned infrastructure-as-code &mdash; which is what
+            reviewed, versioned infrastructure-as-code, which is what
             makes the evidence trail automatic. The change history <em>is</em>
             the audit trail: what changed, when, why, and which control it
             satisfies.
@@ -173,7 +173,7 @@ const standards = [
           <div class="space-y-5">
             {[
               ['Everything in code', 'No undocumented manual steps. If it\'s not in Terraform and a CI/CD pipeline, it doesn\'t exist.'],
-              ['Decisions are visible', 'Every significant architectural choice has an ADR — context, options considered, reasoning, consequences.'],
+              ['Decisions are visible', 'Every significant architectural choice has an ADR, context, options considered, reasoning, consequences.'],
               ['Security by default', 'Security controls are designed in, not added later. Findings are documented with reasoning, not silently accepted.'],
               ['You own it afterwards', 'Handover is a first-class deliverable, not an afterthought. Your team can operate and extend everything we build.'],
             ].map(([heading, detail]) => (
