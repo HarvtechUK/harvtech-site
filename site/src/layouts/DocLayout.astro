@@ -15,7 +15,7 @@ const siblings = allDocs
     (d) =>
       d.data.category === doc.data.category &&
       // Hide other drafts from the sidebar, but always keep the current doc
-      // visible — when you're viewing a draft directly, you still want it
+      // visible, when you're viewing a draft directly, you still want it
       // to appear in its own sidebar so navigation makes sense.
       (d.data.status !== 'draft' || d.id === doc.id),
   )
@@ -44,7 +44,7 @@ const statusBadge: Record<string, { label: string; cls: string }> = {
 const sb = statusBadge[doc.data.status];
 ---
 
-<BaseLayout title={`${doc.data.title} — HarvTech`} description={doc.data.description}>
+<BaseLayout title={`${doc.data.title} - HarvTech`} description={doc.data.description}>
   <div class="container-page py-12 lg:py-16">
     <!-- Breadcrumb -->
     <p class="text-text-muted mb-6 text-sm">

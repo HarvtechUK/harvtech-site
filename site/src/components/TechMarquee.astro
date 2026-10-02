@@ -1,6 +1,6 @@
 ---
 /**
- * TechMarquee — full-width scrolling strip of technology logos.
+ * TechMarquee, full-width scrolling strip of technology logos.
  *
  * All logos use single-path clean SVGs (simple-icons 24×24), so the
  * CSS brightness/invert filter produces clean white silhouettes with
@@ -44,7 +44,7 @@ const logos: Logo[] = [
   { name: 'Microsoft Azure',    body: icons['azure-icon'].body,  viewBox: '0 0 256 256', tooltip: 'Primary cloud platform across all engagements' },
   { name: 'Terraform',          body: si(siTerraform),           viewBox: '0 0 24 24',   tooltip: 'All infrastructure defined as code via azurerm 4.x' },
   { name: 'GitHub',             body: si(siGithub),              viewBox: '0 0 24 24',   tooltip: 'Source control, PR workflows, and collaboration' },
-  { name: 'GitHub Actions',     body: si(siGithubactions),       viewBox: '0 0 24 24',   tooltip: 'OIDC-federated CI/CD — validate, plan, and apply' },
+  { name: 'GitHub Actions',     body: si(siGithubactions),       viewBox: '0 0 24 24',   tooltip: 'OIDC-federated CI/CD - validate, plan, and apply' },
   { name: 'Snyk',               body: si(siSnyk),                viewBox: '0 0 24 24',   tooltip: 'Open-source and IaC vulnerability scanning on every PR' },
   { name: 'Trivy',              body: si(siTrivy),               viewBox: '0 0 24 24',   tooltip: 'Container and IaC vulnerability scanning in CI' },
   { name: 'Databricks',         body: si(siDatabricks),          viewBox: '0 0 24 24',   tooltip: 'Unified analytics and data platform on Azure' },
@@ -77,7 +77,7 @@ const logos: Logo[] = [
       aria-hidden="true"
     ></div>
 
-    <!-- Two identical sets — track animates to -50% for seamless loop -->
+    <!-- Two identical sets, track animates to -50% for seamless loop -->
     <div class="marquee-track flex items-center" aria-hidden="true">
       {[0, 1].map(() => (
         <div class="flex items-center">
@@ -123,7 +123,7 @@ const logos: Logo[] = [
     animation-play-state: paused;
   }
 
-  /* White silhouettes — brightness(0) collapses all colour to black,
+  /* White silhouettes, brightness(0) collapses all colour to black,
      invert(1) flips to white. opacity softens the result. */
   .logo-icon {
     filter: brightness(0) invert(1);

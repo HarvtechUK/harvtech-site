@@ -1,11 +1,11 @@
 ---
 title: "SOX ITGCs in Azure DevOps and Entra: access, change, and evidence"
-description: "Access to programs and data, program changes, and IT operations — implementing and evidencing SOX IT general controls in Entra ID and modern pipelines."
+description: "Access to programs and data, program changes, and IT operations - implementing and evidencing SOX IT general controls in Entra ID and modern pipelines."
 updated: 2026-09-30
 draft: true
 ---
 
-<!-- STUB — outline only; write before flipping draft: false -->
+<!-- STUB, outline only; write before flipping draft: false -->
 
 Outline:
 

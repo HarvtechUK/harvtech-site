@@ -2,8 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 /**
- * Client case studies. Each stays `draft: true` — and therefore OFF the
- * rendered site — until its wording has been confirmed against the
+ * Client case studies. Each stays `draft: true`, and therefore OFF the
+ * rendered site, until its wording has been confirmed against the
  * engagement terms with the client. Flipping one live is a deliberate,
  * single-line decision, never a side effect.
  */
@@ -14,24 +14,24 @@ const caseStudies = [
     sector: "Lloyd's of London market insurer",
     title: 'Identity security engagement',
     problem:
-      '[Placeholder — one paragraph on the problem: privileged access sprawl / audit driver. Confirm wording against engagement terms before publishing.]',
+      '[Placeholder: one paragraph on the problem - privileged access sprawl / audit driver. Confirm wording against engagement terms before publishing.]',
     whatWeDid:
-      'Key Vault access migrated to RBAC, Privileged Identity Management rolled out for standing-access elimination, and Entra privileged access groups introduced for role governance. [Placeholder — confirm scope wording against engagement terms.]',
+      'Key Vault access migrated to RBAC, Privileged Identity Management rolled out for standing-access elimination, and Entra privileged access groups introduced for role governance. [Placeholder: confirm scope wording against engagement terms.]',
     outcome:
-      '[Placeholder — outcome with any agreed metrics, e.g. standing privileged assignments reduced, access reviews evidenced. Confirm before publishing.]',
+      '[Placeholder: outcome with any agreed metrics, e.g. standing privileged assignments reduced, access reviews evidenced. Confirm before publishing.]',
     technologies: ['Entra ID', 'PIM', 'Key Vault', 'Azure RBAC', 'Conditional Access'],
   },
   {
     draft: true,
     client: 'Tokio Marine Kiln',
     sector: "Lloyd's of London market insurer",
-    title: 'SFTPPlus managed file transfer — proof of concept',
+    title: 'SFTPPlus managed file transfer - proof of concept',
     problem:
-      '[Placeholder — one paragraph on the problem: legacy file transfer estate / partner integration need. Confirm wording against engagement terms before publishing.]',
+      '[Placeholder: one paragraph on the problem - legacy file transfer estate / partner integration need. Confirm wording against engagement terms before publishing.]',
     whatWeDid:
-      'Proof of concept for SFTPPlus managed file transfer on Azure — architecture, security controls, and integration evaluation. [Placeholder — confirm scope wording against engagement terms.]',
+      'Proof of concept for SFTPPlus managed file transfer on Azure, architecture, security controls, and integration evaluation. [Placeholder: confirm scope wording against engagement terms.]',
     outcome:
-      '[Placeholder — outcome: PoC findings and recommendation. Confirm before publishing.]',
+      '[Placeholder: outcome - PoC findings and recommendation. Confirm before publishing.]',
     technologies: ['SFTPPlus', 'Azure', 'Managed File Transfer', 'Networking'],
   },
 ];
@@ -42,10 +42,10 @@ const publishedCaseStudies = caseStudies.filter((cs) => !cs.draft);
 const projects = [
   {
     status: 'Live',
-    title: 'harvtech.co.uk — site & infrastructure',
+    title: 'harvtech.co.uk - site & infrastructure',
     summary: 'This site, built and operated in the open.',
     description:
-      'The full stack behind harvtech.co.uk — Astro + Tailwind static site served from Azure Storage $web, behind Front Door Standard with WAF custom rules and managed rule sets. Two Terraform stacks (site and DNS) with shared state in a dedicated platform resource group. GitHub Actions CI/CD federated to Azure via OIDC — no long-lived secrets anywhere in the pipeline. Security scanning on every PR: Checkov, Trivy, tflint, and Snyk Open Source, all emitting SARIF to GitHub Code Scanning.',
+      'The full stack behind harvtech.co.uk - Astro + Tailwind static site served from Azure Storage $web, behind Front Door Standard with WAF custom rules and managed rule sets. Two Terraform stacks (site and DNS) with shared state in a dedicated platform resource group. GitHub Actions CI/CD federated to Azure via OIDC - no long-lived secrets anywhere in the pipeline. Security scanning on every PR: Checkov, Trivy, tflint, and Snyk Open Source, all emitting SARIF to GitHub Code Scanning.',
     tags: ['Azure', 'Terraform', 'Astro', 'Front Door + WAF', 'GitHub Actions', 'OIDC', 'Checkov', 'Trivy'],
     links: [
       { label: 'View repository', href: 'https://github.com/HarvtechUK/harvtech-site', external: true },
@@ -58,7 +58,7 @@ const projects = [
     title: 'Azure data platform',
     summary: 'Medallion lakehouse on ADLS Gen2, Cosmos DB, Databricks, and Data Factory.',
     description:
-      'Reference IaC for an Azure data platform — ADLS Gen2 with a medallion architecture (raw, cleansed, curated layers), Cosmos DB on the free tier for operational data, Data Factory as orchestrator, and a Databricks Premium workspace. All storage hardened: local auth disabled, infrastructure encryption enabled, OAuth-only access, network rules. The platform stays under £1/month by deploying the resources without running active workloads — the Terraform patterns are the showcase, drawn from real-world data engineering delivery.',
+      'Reference IaC for an Azure data platform - ADLS Gen2 with a medallion architecture (raw, cleansed, curated layers), Cosmos DB on the free tier for operational data, Data Factory as orchestrator, and a Databricks Premium workspace. All storage hardened: local auth disabled, infrastructure encryption enabled, OAuth-only access, network rules. The platform stays under £1/month by deploying the resources without running active workloads - the Terraform patterns are the showcase, drawn from real-world data engineering delivery.',
     tags: ['Azure', 'Terraform', 'ADLS Gen2', 'Databricks', 'Cosmos DB', 'Data Factory', 'Entra ID'],
     links: [
       { label: 'Read the HLD', href: '/docs/architecture/data-platform-hld', external: false },
@@ -71,7 +71,7 @@ const projects = [
     title: 'Reference Azure landing zone',
     summary: 'A production-grade landing zone in Terraform, with AI as a demonstrated workload.',
     description:
-      'A well-architected Azure landing zone in Terraform — hub-spoke networking, private endpoints throughout, Entra ID Conditional Access policies, Defender for Cloud with DINE policies, image scanning in CI, and WAF at the edge. AI (Azure OpenAI / Foundry) and data workloads drop in on top as demonstrated platform tenants. The goal is a reference architecture you can clone and adapt, not a contrived demo. Coming as a separate public repo with this site as its case-study home.',
+      'A well-architected Azure landing zone in Terraform - hub-spoke networking, private endpoints throughout, Entra ID Conditional Access policies, Defender for Cloud with DINE policies, image scanning in CI, and WAF at the edge. AI (Azure OpenAI / Foundry) and data workloads drop in on top as demonstrated platform tenants. The goal is a reference architecture you can clone and adapt, not a contrived demo. Coming as a separate public repo with this site as its case-study home.',
     tags: ['Azure', 'Terraform', 'Hub-spoke', 'Entra ID', 'Defender for Cloud', 'Azure OpenAI', 'WAF'],
     links: [],
     highlight: false,
@@ -80,8 +80,8 @@ const projects = [
 ---
 
 <BaseLayout
-  title="Showcase — HarvTech"
-  description="HarvTech working portfolio — Azure platform engineering, data platform, and landing zone reference architecture. Source on GitHub, trade-offs written up in plain English."
+  title="Showcase - HarvTech"
+  description="HarvTech working portfolio - Azure platform engineering, data platform, and landing zone reference architecture. Source on GitHub, trade-offs written up in plain English."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Showcase</p>
@@ -90,7 +90,7 @@ const projects = [
     </h1>
     <p class="body-muted mb-16 max-w-2xl text-lg">
       Real infrastructure, in public repos. Every project here is live or
-      in active development &mdash; the source code, the architecture
+      in active development, the source code, the architecture
       decisions, and the honest record of what worked first time and what
       didn&rsquo;t.
     </p>
@@ -104,7 +104,7 @@ const projects = [
               <div class="card border-primary/20 border p-8 md:p-10">
                 <p class="eyebrow mb-2 text-xs">{cs.sector}</p>
                 <h2 class="title-card mb-1 text-xl">
-                  {cs.client} &mdash; {cs.title}
+                  {cs.client} - {cs.title}
                 </h2>
                 <div class="mt-5 grid gap-6 md:grid-cols-3">
                   {[
