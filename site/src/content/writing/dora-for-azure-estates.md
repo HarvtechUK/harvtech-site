@@ -1,11 +1,11 @@
 ---
 title: "DORA for Azure estates: what the regulation actually asks of your platform"
-description: "Mapping DORA's ICT risk, resilience testing, and third-party requirements to concrete Azure controls — and what auditors ask to see."
+description: "Mapping DORA's ICT risk, resilience testing, and third-party requirements to concrete Azure controls, and what auditors ask to see."
 updated: 2026-09-30
 draft: true
 ---
 
-<!-- STUB — outline only; write before flipping draft: false -->
+<!-- STUB, outline only; write before flipping draft: false -->
 
 Outline:
 

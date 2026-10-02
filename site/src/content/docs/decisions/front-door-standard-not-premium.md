@@ -19,8 +19,8 @@ Standard.
 
 What we lose by being on Standard:
 
-- **No managed WAF rulesets** — Microsoft DRS and Bot Manager are Premium-only. We compensate with custom WAF rules that block the actual attack patterns we see (WordPress probes, PHP scans, dotfile/VCS probes, admin-panel discovery) plus a 100 req/min per-IP rate limit. Detail in `infra/waf.tf`.
-- **No Private Link to origin** — Premium can use real Private Link from FD to the storage backend; Standard can't. Without that, locking the storage account to only-FD-can-reach isn't possible (the resource-instance-rule feature explicitly doesn't list `Microsoft.Cdn/profiles` as a supported source). Trivy AZU-0012 (default network action should be deny) is therefore suppressed-with-reasoning rather than fixed in code. The bypass path — direct access to `*.web.core.windows.net` — exists in theory; in practice it serves the same static HTML as the FD path, just without WAF interposition.
+- **No managed WAF rulesets** - Microsoft DRS and Bot Manager are Premium-only. We compensate with custom WAF rules that block the actual attack patterns we see (WordPress probes, PHP scans, dotfile/VCS probes, admin-panel discovery) plus a 100 req/min per-IP rate limit. Detail in `infra/waf.tf`.
+- **No Private Link to origin** - Premium can use real Private Link from FD to the storage backend; Standard can't. Without that, locking the storage account to only-FD-can-reach isn't possible (the resource-instance-rule feature explicitly doesn't list `Microsoft.Cdn/profiles` as a supported source). Trivy AZU-0012 (default network action should be deny) is therefore suppressed-with-reasoning rather than fixed in code. The bypass path, direct access to `*.web.core.windows.net`, exists in theory; in practice it serves the same static HTML as the FD path, just without WAF interposition.
 
 What Standard does give us:
 
@@ -32,8 +32,8 @@ What Standard does give us:
 
 ## Alternatives considered
 
-- **Premium FD** — ~£200/month uplift. Buys us the items above. Not justified for a personal portfolio; would be the right call for a client engagement where the WAF managed ruleset alone moves the risk needle.
-- **A different origin altogether** — App Service, Static Web Apps, AKS. Each would be in the supported list for storage resource-instance rules or have its own equivalent. But we'd lose the static-HTML simplicity of Storage `$web` and pick up other compute costs.
+- **Premium FD** - ~£200/month uplift. Buys us the items above. Not justified for a personal portfolio; would be the right call for a client engagement where the WAF managed ruleset alone moves the risk needle.
+- **A different origin altogether** - App Service, Static Web Apps, AKS. Each would be in the supported list for storage resource-instance rules or have its own equivalent. But we'd lose the static-HTML simplicity of Storage `$web` and pick up other compute costs.
 
 ## Trigger for reconsideration
 
