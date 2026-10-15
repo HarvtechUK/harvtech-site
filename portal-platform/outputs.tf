@@ -1,6 +1,6 @@
 output "resource_group_name" {
   description = "Resource group holding the portal platform."
-  value       = azurerm_resource_group.portal.name
+  value       = module.resource_group.name
 }
 
 output "container_registry_login_server" {

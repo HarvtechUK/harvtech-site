@@ -1,4 +1,7 @@
-resource "azurerm_resource_group" "site" {
+# Resource group for the site stack: UK-region, tag and RBAC guardrails
+# come from modules/resource-group.
+module "resource_group" {
+  source   = "../modules/resource-group"
   name     = local.rg_name
   location = var.location
   tags     = module.tags.tags
@@ -6,8 +9,8 @@ resource "azurerm_resource_group" "site" {
 
 resource "azurerm_storage_account" "site" {
   name                            = local.storage_name
-  resource_group_name             = azurerm_resource_group.site.name
-  location                        = azurerm_resource_group.site.location
+  resource_group_name             = module.resource_group.name
+  location                        = module.resource_group.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"

@@ -6,7 +6,7 @@
 module "frontdoor" {
   source = "../modules/frontdoor"
 
-  resource_group_name = azurerm_resource_group.site.name
+  resource_group_name = module.resource_group.name
 
   profile_name      = local.fd_profile_name
   endpoint_name     = local.fd_endpoint_name

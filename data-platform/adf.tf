@@ -9,8 +9,8 @@
 # OIDC-flavoured discipline applied elsewhere in this repo.
 resource "azurerm_data_factory" "this" {
   name                = local.adf_name
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
 
   managed_virtual_network_enabled = false # public IR for cheap-demo simplicity
   public_network_enabled          = true

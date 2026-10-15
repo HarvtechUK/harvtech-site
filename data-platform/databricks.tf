@@ -15,8 +15,8 @@
 # doesn't get an auto-generated GUID suffix on every recreate.
 resource "azurerm_databricks_workspace" "this" {
   name                = local.databricks_ws
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
   sku                 = var.databricks_sku
 
   managed_resource_group_name = local.databricks_rg
