@@ -12,10 +12,5 @@ resource "azurerm_cosmosdb_sql_role_assignment" "api_data_contributor" {
   scope               = azurerm_cosmosdb_account.portal.id
 }
 
-# Pull images from our own registry with the same managed identity, so
-# the Container App needs no registry username/password.
-resource "azurerm_role_assignment" "portal_acr_pull" {
-  scope                = azurerm_container_registry.portal.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_container_app.portal.identity[0].principal_id
-}
+# AcrPull for the same identity is granted through the registry module
+# (container_apps.tf, role_assignments.portal_pull).

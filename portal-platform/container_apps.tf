@@ -5,32 +5,46 @@
 # zero when idle, and reaches Cosmos with its managed identity — no keys
 # anywhere, matching the rest of this repo.
 
-resource "azurerm_container_registry" "portal" {
+# Images are pulled by the app's managed identity (AcrPull below) and
+# pushed by CI (AcrPush, granted at bootstrap). No admin user, no
+# anonymous pulls: both are fixed in modules/container-registry.
+module "container_registry" {
+  source              = "../modules/container-registry"
   name                = module.naming.container_registry
   resource_group_name = module.resource_group.name
   location            = module.resource_group.location
-  sku                 = "Basic"
+  tags                = module.tags.tags
 
-  # No admin user: the Container App pulls images with its managed
-  # identity (AcrPull role in rbac.tf), so there are no registry
-  # username/password credentials to leak.
-  admin_enabled = false
+  # Basic (~£4/mo) and therefore public: one first-party image, pulled by
+  # one identity. The Premium-only features (private access, retention,
+  # content trust) are suppressed with that reasoning in .checkov.yaml.
+  sku                           = "Basic"
+  public_network_access_enabled = true
 
-  tags = module.tags.tags
+  role_assignments = {
+    portal_pull = {
+      role_definition_id_or_name = "AcrPull"
+      principal_id               = azurerm_container_app.portal.identity[0].principal_id
+      principal_type             = "ServicePrincipal"
+    }
+  }
 }
 
-resource "azurerm_container_app_environment" "portal" {
+# Not VNet-integrated, so the portal reaches Cosmos and Key Vault over
+# their public (Entra RBAC-protected) endpoints. That is the deferred
+# private-networking trade-off recorded across this stack.
+module "container_app_environment" {
+  source                     = "../modules/container-app-environment"
   name                       = module.naming.container_app_environment
   resource_group_name        = module.resource_group.name
   location                   = module.resource_group.location
+  tags                       = module.tags.tags
   log_analytics_workspace_id = azurerm_log_analytics_workspace.portal.id
-
-  tags = module.tags.tags
 }
 
 resource "azurerm_container_app" "portal" {
   name                         = module.naming.container_app
-  container_app_environment_id = azurerm_container_app_environment.portal.id
+  container_app_environment_id = module.container_app_environment.id
   resource_group_name          = module.resource_group.name
   revision_mode                = "Single"
 
