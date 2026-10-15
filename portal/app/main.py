@@ -24,8 +24,13 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from . import auth, services, store, web
 from .auth import require_user
-from .config import settings
+from .config import check_safe_to_start, settings
 from .models import Engagement, Timesheet, TimesheetCreate, TimesheetStatus
+
+# Before anything else: refuse to start in a configuration that would
+# expose real data (see config.py). Deliberately not inside a startup
+# hook, so the failure happens at import, before a server socket exists.
+check_safe_to_start(settings)
 
 app = FastAPI(
     title="HarvTech Client Portal",
