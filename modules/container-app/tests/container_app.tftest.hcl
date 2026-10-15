@@ -179,6 +179,11 @@ run "public_app_with_registry_and_health_probes" {
     )
     error_message = "HTTP probes should hit the health path on the target port."
   }
+
+  assert {
+    condition     = azurerm_container_app.workload.template[0].container[0].readiness_probe[0].success_count_threshold == 1
+    error_message = "Readiness should need one success, so scale-from-zero isn't delayed ~30s."
+  }
 }
 
 run "adds_user_assigned_identities_alongside_the_system_one" {

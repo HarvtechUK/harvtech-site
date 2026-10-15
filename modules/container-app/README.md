@@ -118,6 +118,14 @@ The portal used the second route when it was created.
 | `latest_revision_name` | For deployment checks. |
 | `outbound_ip_addresses` | For allow-listing downstream. |
 
+## Why the tests matter more here
+
+Checkov (3.3.x) has no checks for `azurerm_container_app` at all, so no
+scanner in this repo's pipeline looks at an app's ingress, identity or
+secrets. The module's test suite is the guard: it fails if plain HTTP is
+allowed, if a secret **value** appears instead of a reference, or if the
+system identity is dropped.
+
 ## Testing
 
 ```bash

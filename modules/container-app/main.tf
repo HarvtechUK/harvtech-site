@@ -103,6 +103,13 @@ resource "azurerm_container_app" "workload" {
           transport = "HTTP"
           port      = var.target_port
           path      = readiness_probe.value
+
+          # The platform default (3 successes, 10s apart) adds ~30s to
+          # every cold start, which a scale-to-zero app pays on its first
+          # request. One success, checked every 5s, is enough to prove
+          # the app answers.
+          success_count_threshold = 1
+          interval_seconds        = 5
         }
       }
     }
