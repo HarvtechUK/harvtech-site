@@ -5,12 +5,12 @@ output "resource_group_name" {
 
 output "container_registry_login_server" {
   description = "ACR login server (e.g. crharvtechportalprduks01.azurecr.io) — the deploy workflow pushes the image here."
-  value       = azurerm_container_registry.portal.login_server
+  value       = module.container_registry.login_server
 }
 
 output "container_registry_name" {
   description = "Container Registry name."
-  value       = azurerm_container_registry.portal.name
+  value       = module.container_registry.name
 }
 
 output "container_app_name" {
@@ -31,4 +31,9 @@ output "cosmos_account_name" {
 output "cosmos_endpoint" {
   description = "Portal Cosmos endpoint (not a secret — access is via Entra RBAC, no keys)."
   value       = azurerm_cosmosdb_account.portal.endpoint
+}
+
+output "key_vault_name" {
+  description = "Portal Key Vault name. Operators set secret values here when rotating (az keyvault secret set --vault-name …)."
+  value       = module.key_vault.name
 }

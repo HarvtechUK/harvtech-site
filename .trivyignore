@@ -29,3 +29,10 @@ AZU-0012
 # documented in /docs/architecture/data-platform-hld.
 AZU-0035
 
+# Key Vault network ACL default action Deny. Mirror of Checkov
+# CKV_AZURE_109: the portal vault must stay reachable from a Container
+# Apps environment without VNet integration (Container Apps is not a Key
+# Vault trusted service). Access is Entra RBAC only; modules/key-vault
+# defaults to private for any new vault.
+AZU-0013
+

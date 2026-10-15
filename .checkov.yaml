@@ -124,3 +124,17 @@ skip-check:
   - CKV_AZURE_233
   # Dedicated data endpoints — Premium only.
   - CKV_AZURE_237
+
+  # --- portal-platform/ Key Vault ---
+  # The portal vault is public (Entra RBAC-protected) because the Container
+  # Apps environment is not VNet-integrated and Container Apps is not a Key
+  # Vault trusted service, so a firewalled or private vault would lock the
+  # portal out of its own secrets. Same deferred productionisation path as
+  # the rest of this stack: VNet-integrated environment + private endpoint.
+  # modules/key-vault defaults to private, so new vaults pass these.
+  # Firewall default action Deny:
+  - CKV_AZURE_109
+  # Public network access disabled:
+  - CKV_AZURE_189
+  # Private endpoint on the vault:
+  - CKV2_AZURE_32
