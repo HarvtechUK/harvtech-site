@@ -32,3 +32,8 @@ output "cosmos_endpoint" {
   description = "Portal Cosmos endpoint (not a secret — access is via Entra RBAC, no keys)."
   value       = azurerm_cosmosdb_account.portal.endpoint
 }
+
+output "key_vault_name" {
+  description = "Portal Key Vault name. Operators set secret values here when rotating (az keyvault secret set --vault-name …)."
+  value       = module.key_vault.name
+}
