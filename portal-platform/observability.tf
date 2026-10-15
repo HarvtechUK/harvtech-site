@@ -5,8 +5,8 @@
 
 resource "azurerm_log_analytics_workspace" "portal" {
   name                = module.naming.log_analytics_workspace
-  resource_group_name = azurerm_resource_group.portal.name
-  location            = azurerm_resource_group.portal.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
   sku                 = "PerGB2018"
   retention_in_days   = 30
 
@@ -15,8 +15,8 @@ resource "azurerm_log_analytics_workspace" "portal" {
 
 resource "azurerm_application_insights" "api" {
   name                = module.naming.application_insights
-  resource_group_name = azurerm_resource_group.portal.name
-  location            = azurerm_resource_group.portal.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
   application_type    = "web"
   workspace_id        = azurerm_log_analytics_workspace.portal.id
 

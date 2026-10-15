@@ -4,8 +4,8 @@
 # account per subscription, ever; flip the flag if it's already in use.
 resource "azurerm_cosmosdb_account" "this" {
   name                = local.cosmos_name
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
 
   offer_type = "Standard"
   kind       = "GlobalDocumentDB" # Core (SQL) API
@@ -20,7 +20,7 @@ resource "azurerm_cosmosdb_account" "this" {
   }
 
   geo_location {
-    location          = azurerm_resource_group.this.location
+    location          = module.resource_group.location
     failover_priority = 0
   }
 
@@ -44,7 +44,7 @@ resource "azurerm_cosmosdb_sql_database" "this" {
   for_each = var.cosmos_databases
 
   name                = each.key
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = module.resource_group.name
   account_name        = azurerm_cosmosdb_account.this.name
 }
 
@@ -68,7 +68,7 @@ resource "azurerm_cosmosdb_sql_container" "this" {
   for_each = local.cosmos_containers
 
   name                = each.value.container_name
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = module.resource_group.name
   account_name        = azurerm_cosmosdb_account.this.name
   database_name       = azurerm_cosmosdb_sql_database.this[each.value.database_name].name
   partition_key_paths = [each.value.partition_key_path]

@@ -9,7 +9,7 @@ output "primary_web_endpoint" {
 }
 
 output "resource_group_name" {
-  value = azurerm_resource_group.site.name
+  value = module.resource_group.name
 }
 
 # --- Front Door outputs (consumed by dns/ via terraform_remote_state) ---

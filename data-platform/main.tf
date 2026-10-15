@@ -1,4 +1,7 @@
-resource "azurerm_resource_group" "this" {
+# Resource group for the data-platform stack: UK-region, tag and RBAC
+# guardrails come from modules/resource-group.
+module "resource_group" {
+  source   = "../modules/resource-group"
   name     = local.rg_name
   location = var.location
   tags     = module.tags.tags
@@ -15,8 +18,8 @@ resource "azurerm_resource_group" "this" {
 # replacement-and-RBAC-redo dance.
 resource "azurerm_storage_account" "datalake" {
   name                = local.datalake_name
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
 
   account_tier             = "Standard"
   account_replication_type = "LRS"
