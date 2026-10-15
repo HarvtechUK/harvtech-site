@@ -99,10 +99,23 @@ resource "azurerm_container_app" "portal" {
     # CI owns the running image tag AND the ingress port (it flips 80→8000
     # when shipping the real image); Terraform owns everything else. Without
     # this, every plan after a deploy would try to reset them.
+    #
+    # CI also owns the env list and secrets after the first apply. The
+    # deploy workflow adds the ENTRA_* sign-in settings and SESSION_SECRET
+    # (values from GitHub secrets, so they never enter Terraform state).
+    # Before env and secret were listed here, any apply of this stack
+    # would have deleted them. Terraform still seeds the COSMOS_* and
+    # App Insights variables above when the app is created, but later
+    # edits to them need a deploy (or a one-off az containerapp update),
+    # because env is a single list and cannot be part-ignored. The app
+    # also refuses to start with Cosmos configured and no sign-in
+    # (portal/app/config.py), so a lost variable fails closed.
     ignore_changes = [
       template[0].container[0].image,
+      template[0].container[0].env,
       ingress[0].target_port,
       registry,
+      secret,
     ]
   }
 
