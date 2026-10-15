@@ -27,3 +27,10 @@ moved {
   from = azurerm_container_app_environment.portal
   to   = module.container_app_environment.azurerm_container_app_environment.workload
 }
+
+# --- Root → modules/container-app ---
+
+moved {
+  from = azurerm_container_app.portal
+  to   = module.container_app.azurerm_container_app.workload
+}

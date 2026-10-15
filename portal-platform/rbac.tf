@@ -8,7 +8,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "api_data_contributor" {
   resource_group_name = module.resource_group.name
   account_name        = azurerm_cosmosdb_account.portal.name
   role_definition_id  = "${azurerm_cosmosdb_account.portal.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id        = azurerm_container_app.portal.identity[0].principal_id
+  principal_id        = module.container_app.principal_id
   scope               = azurerm_cosmosdb_account.portal.id
 }
 
