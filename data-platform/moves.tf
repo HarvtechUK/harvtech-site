@@ -11,3 +11,17 @@ moved {
   from = azurerm_resource_group.this
   to   = module.resource_group.azurerm_resource_group.workload
 }
+
+# --- Root → modules/storage-account ---
+
+moved {
+  from = azurerm_storage_account.datalake
+  to   = module.datalake.azurerm_storage_account.workload
+}
+
+# Moving the whole for_each collection moves every container (raw,
+# cleansed, curated). The keys are the container names in both places.
+moved {
+  from = azurerm_storage_container.lakehouse
+  to   = module.datalake.azurerm_storage_container.workload
+}

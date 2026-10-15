@@ -31,12 +31,15 @@ resource "azurerm_data_factory" "this" {
 #
 # The right fix is to grant the SP User Access Administrator scoped to
 # rg-harvtech-data-prd-uks-01 (so it can manage roles within its own
-# blast radius but nowhere else), then re-introduce this resource:
+# blast radius but nowhere else), then add this to module.datalake in
+# main.tf:
 #
-#   resource "azurerm_role_assignment" "adf_datalake_reader" {
-#     scope                = azurerm_storage_account.datalake.id
-#     role_definition_name = "Storage Blob Data Reader"
-#     principal_id         = azurerm_data_factory.this.identity[0].principal_id
+#   role_assignments = {
+#     adf_read = {
+#       role_definition_id_or_name = "Storage Blob Data Reader"
+#       principal_id               = azurerm_data_factory.this.identity[0].principal_id
+#       principal_type             = "ServicePrincipal"
+#     }
 #   }
 #
 # Tracked as a follow-up — same RBAC tape-fix backlog item as the
