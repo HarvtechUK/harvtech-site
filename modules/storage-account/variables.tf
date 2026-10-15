@@ -67,13 +67,12 @@ variable "public_network_access_enabled" {
 variable "network_rules" {
   description = <<-EOT
     Optional firewall for public traffic. When set, the default action is
-    Deny and only the listed IP ranges and subnets get in. bypass keeps
-    trusted Azure services (backup, monitoring) working.
+    Deny and only the listed IP ranges and subnets get in. Trusted Azure
+    services (backup, monitoring, Defender) always bypass it.
   EOT
   type = object({
     ip_rules                   = optional(list(string), [])
     virtual_network_subnet_ids = optional(list(string), [])
-    bypass                     = optional(list(string), ["AzureServices"])
   })
   default = null
 

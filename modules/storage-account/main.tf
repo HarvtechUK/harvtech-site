@@ -77,17 +77,23 @@ resource "azurerm_storage_account" "workload" {
       days = var.container_soft_delete_retention_days
     }
   }
+}
 
-  dynamic "network_rules" {
-    for_each = var.network_rules == null ? [] : [var.network_rules]
+# The firewall is its own resource, created only when network_rules is
+# set. As a dynamic block on the account, scanners such as Checkov
+# render it even when it is not created, and report a deny-by-default
+# firewall on accounts that do not have one.
+resource "azurerm_storage_account_network_rules" "workload" {
+  count = var.network_rules == null ? 0 : 1
 
-    content {
-      default_action             = "Deny"
-      ip_rules                   = network_rules.value.ip_rules
-      virtual_network_subnet_ids = network_rules.value.virtual_network_subnet_ids
-      bypass                     = network_rules.value.bypass
-    }
-  }
+  storage_account_id         = azurerm_storage_account.workload.id
+  default_action             = "Deny"
+  ip_rules                   = var.network_rules.ip_rules
+  virtual_network_subnet_ids = var.network_rules.virtual_network_subnet_ids
+
+  # Trusted Azure services (backup, monitoring, Defender) always get
+  # through. Not an input: removing it breaks those services silently.
+  bypass = ["AzureServices"]
 }
 
 # The standalone resource rather than the static_website block on the

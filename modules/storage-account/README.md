@@ -83,7 +83,7 @@ Terraform to read blob service properties.
 |---|---|---|
 | `replication_type` | `ZRS` | `LRS` when the data is rebuildable from source; `GZRS` for regional failover. |
 | `public_network_access_enabled` | `false` | The consumer cannot reach the account privately (for example Front Door Standard). Pair with `network_rules` where you can. |
-| `network_rules` | none | Public access must be on. Sets default action **Deny**, with `ip_rules` and subnets as the exceptions and Azure services bypassing. |
+| `network_rules` | none | Public access must be on. Sets default action **Deny**, with `ip_rules` and subnets as the exceptions. Trusted Azure services always bypass (not configurable: removing it silently breaks backup, monitoring and Defender). |
 | `blob_soft_delete_retention_days` / `container_soft_delete_retention_days` | `7` | Regulated data with longer recovery requirements (1-365). |
 
 Plus the house guardrails shared with `modules/resource-group`: CAF
@@ -103,7 +103,7 @@ Role Based Access Control Administrator grants in `role_assignments`.
 | `required_tag_keys` | `list(string)` | ownership and cost keys | Tag keys the account must carry. |
 | `replication_type` | `string` | `ZRS` | `LRS`, `ZRS`, `GRS`, `GZRS`, `RAGRS` or `RAGZRS`. |
 | `public_network_access_enabled` | `bool` | `false` | See trade-offs. |
-| `network_rules` | `object` | `null` | `{ ip_rules?, virtual_network_subnet_ids?, bypass? }`. |
+| `network_rules` | `object` | `null` | `{ ip_rules?, virtual_network_subnet_ids? }`. |
 | `hierarchical_namespace_enabled` | `bool` | `false` | ADLS Gen2. Creation-time only. |
 | `blob_soft_delete_retention_days` | `number` | `7` | 1-365. |
 | `container_soft_delete_retention_days` | `number` | `7` | 1-365. |
@@ -131,6 +131,21 @@ The static website uses the standalone
 removed in 5.0. `infra/moves.tf` shows how the live site was switched
 over with an `import` block, adopting the existing website config
 rather than recreating it.
+
+## Why the firewall and website are separate resources
+
+Both could be blocks on the account. They are standalone resources
+(`azurerm_storage_account_network_rules`,
+`azurerm_storage_account_static_website`) created only when configured:
+
+- The inline `static_website` block is deprecated in azurerm 4.x and
+  removed in 5.0.
+- Checkov renders a dynamic `network_rules` block even when it is not
+  created, so an account with **no** firewall was reported as passing
+  "default network access rule is Deny" (CKV_AZURE_35). As its own
+  resource, the account is scanned for what it really is. Checkov still
+  lists the uncreated firewall resource itself (as `workload[0]`), which
+  is noise rather than a false claim about the account.
 
 ## Testing
 

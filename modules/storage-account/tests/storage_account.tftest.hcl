@@ -90,8 +90,8 @@ run "defaults_to_resilient_and_private" {
   }
 
   assert {
-    condition     = length(azurerm_storage_account.workload.network_rules) == 0
-    error_message = "No firewall block unless network_rules is set."
+    condition     = length(azurerm_storage_account_network_rules.workload) == 0
+    error_message = "No firewall unless network_rules is set."
   }
 
   assert {
@@ -251,13 +251,18 @@ run "adds_a_firewall_that_denies_by_default" {
   }
 
   assert {
-    condition     = azurerm_storage_account.workload.network_rules[0].default_action == "Deny"
+    condition     = azurerm_storage_account_network_rules.workload[0].default_action == "Deny"
     error_message = "Network rules must deny by default."
   }
 
   assert {
-    condition     = contains(azurerm_storage_account.workload.network_rules[0].bypass, "AzureServices")
-    error_message = "Trusted Azure services should bypass the firewall by default."
+    condition     = azurerm_storage_account_network_rules.workload[0].bypass == toset(["AzureServices"])
+    error_message = "Trusted Azure services must always bypass the firewall."
+  }
+
+  assert {
+    condition     = azurerm_storage_account_network_rules.workload[0].ip_rules == toset(["203.0.113.10"])
+    error_message = "IP rules should pass through."
   }
 }
 
