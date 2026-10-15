@@ -7,6 +7,11 @@ name: Portal
 # main   push          build → push to ACR → update the Container App
 # workflow_dispatch    same as a main push (from main only)
 #
+# This workflow only ships images. Everything else about the app
+# (registry, ingress port, env vars, and Key Vault-referenced secrets)
+# is owned by the portal-platform Terraform stack. Secret values live
+# only in Key Vault and never pass through this pipeline.
+#
 # Deploy prerequisites (the Container App + registry come from the
 # portal-platform Terraform stack; the CI service principal needs, on
 # the portal resource group / registry):
@@ -84,41 +89,12 @@ jobs:
       # the OIDC login already authenticates us.
       - name: Build & push image in ACR
         run: az acr build --registry "$ACR" --image "$IMAGE:${{ github.sha }}" ./portal
-      # Point the app at our registry, authenticating with its managed
-      # identity (the AcrPull role was granted in portal-platform). Safe to
-      # run on every deploy — idempotent.
-      - name: Configure registry (managed-identity pull)
-        run: |
-          az containerapp registry set \
-            --name "$APP" --resource-group "$RG" \
-            --server "$ACR.azurecr.io" --identity system
-      # Auth config. The two secrets come from GitHub Actions secrets and
-      # are stored as Container App secrets (encrypted at rest); the app
-      # env references them by name (secretref) so the values never appear
-      # in the env listing. ENTRA_CLIENT_ID is a public identifier, not a
-      # secret. Setting ENTRA_CLIENT_ID is what turns auth ON.
-      - name: Configure auth secrets + env
-        run: |
-          FQDN=$(az containerapp show --name "$APP" --resource-group "$RG" \
-                   --query "properties.configuration.ingress.fqdn" -o tsv)
-          az containerapp secret set --name "$APP" --resource-group "$RG" --secrets \
-            entra-client-secret="${{ secrets.ENTRA_CLIENT_SECRET }}" \
-            session-secret="${{ secrets.SESSION_SECRET }}"
-          az containerapp update --name "$APP" --resource-group "$RG" \
-            --set-env-vars \
-              ENTRA_CLIENT_ID="${{ vars.PORTAL_ENTRA_CLIENT_ID }}" \
-              ENTRA_AUTHORITY="https://login.microsoftonline.com/organizations" \
-              ENTRA_REDIRECT_URI="https://$FQDN/auth/callback" \
-              ENTRA_CLIENT_SECRET="secretref:entra-client-secret" \
-              SESSION_SECRET="secretref:session-secret"
-      # Ship the real image and move ingress to 8000 (our uvicorn port).
-      # Infra bootstraps ingress on 80 to match the placeholder; this is
-      # where it becomes 8000 for the real app. Idempotent on re-deploys.
+      # Ship the new image. A new revision starts with the config
+      # Terraform manages; with Single revision mode it only takes traffic
+      # once healthy, so a broken image or config never replaces a good one.
       - name: Roll the Container App to the new image
         run: |
           az containerapp update \
             --name "$APP" \
             --resource-group "$RG" \
             --image "$ACR.azurecr.io/$IMAGE:${{ github.sha }}"
-          az containerapp ingress update \
-            --name "$APP" --resource-group "$RG" --target-port 8000
