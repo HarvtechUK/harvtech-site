@@ -9,8 +9,8 @@
 # data-platform account anyway.)
 resource "azurerm_cosmosdb_account" "portal" {
   name                = module.naming.cosmosdb_account
-  resource_group_name = azurerm_resource_group.portal.name
-  location            = azurerm_resource_group.portal.location
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
 
   offer_type = "Standard"
   kind       = "GlobalDocumentDB" # Core (SQL) API
@@ -24,7 +24,7 @@ resource "azurerm_cosmosdb_account" "portal" {
   }
 
   geo_location {
-    location          = azurerm_resource_group.portal.location
+    location          = module.resource_group.location
     failover_priority = 0
   }
 
@@ -42,7 +42,7 @@ resource "azurerm_cosmosdb_account" "portal" {
 
 resource "azurerm_cosmosdb_sql_database" "portal" {
   name                = "portal"
-  resource_group_name = azurerm_resource_group.portal.name
+  resource_group_name = module.resource_group.name
   account_name        = azurerm_cosmosdb_account.portal.name
 }
 
@@ -52,7 +52,7 @@ resource "azurerm_cosmosdb_sql_container" "portal" {
   for_each = var.portal_containers
 
   name                = each.key
-  resource_group_name = azurerm_resource_group.portal.name
+  resource_group_name = module.resource_group.name
   account_name        = azurerm_cosmosdb_account.portal.name
   database_name       = azurerm_cosmosdb_sql_database.portal.name
   partition_key_paths = [each.value.partition_key_path]

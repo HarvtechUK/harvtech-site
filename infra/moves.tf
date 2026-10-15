@@ -89,3 +89,12 @@ moved {
   from = azurerm_cdn_frontdoor_security_policy.this
   to   = module.frontdoor.azurerm_cdn_frontdoor_security_policy.waf
 }
+
+# --- Root → modules/resource-group ---
+# Same resource group, new address. Without this, Terraform would plan
+# to destroy the group (and everything in it) and create a new one.
+
+moved {
+  from = azurerm_resource_group.site
+  to   = module.resource_group.azurerm_resource_group.workload
+}
