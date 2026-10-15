@@ -4,12 +4,12 @@ output "resource_group_name" {
 }
 
 output "datalake_name" {
-  value       = azurerm_storage_account.datalake.name
+  value       = module.datalake.name
   description = "ADLS Gen2 storage account name."
 }
 
 output "datalake_dfs_endpoint" {
-  value       = azurerm_storage_account.datalake.primary_dfs_endpoint
+  value       = module.datalake.primary_dfs_endpoint
   description = "ADLS Gen2 DFS endpoint (the abfss://-style hostname). What Spark / Databricks would use to read."
 }
 

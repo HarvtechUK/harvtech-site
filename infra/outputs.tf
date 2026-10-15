@@ -1,10 +1,10 @@
 output "storage_account_name" {
-  value       = azurerm_storage_account.site.name
+  value       = module.site_storage.name
   description = "Storage account hosting the static site"
 }
 
 output "primary_web_endpoint" {
-  value       = azurerm_storage_account.site.primary_web_endpoint
+  value       = module.site_storage.primary_web_endpoint
   description = "Public URL of the static site (before custom domain)"
 }
 

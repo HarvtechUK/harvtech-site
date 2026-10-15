@@ -8,65 +8,28 @@ module "resource_group" {
 }
 
 # --- ADLS Gen2 storage account ---
-# is_hns_enabled = true is what makes this a Data Lake Storage Gen2
-# account rather than a normal Blob Storage account: hierarchical
-# namespace, POSIX-style ACLs, and the dfs.core.windows.net endpoint
-# for Spark/Databricks-style filesystem access.
+# hierarchical_namespace_enabled is what makes this a Data Lake Storage
+# Gen2 account rather than plain blob storage: hierarchical namespace,
+# POSIX-style ACLs, and the dfs.core.windows.net endpoint for
+# Spark/Databricks-style filesystem access. The security baseline
+# (Entra-only access, TLS 1.2, infrastructure encryption, soft delete,
+# no local users) comes from modules/storage-account.
 #
-# Created fresh, so unlike the site SA we CAN set
-# infrastructure_encryption_enabled = true at create time without a
-# replacement-and-RBAC-redo dance.
-resource "azurerm_storage_account" "datalake" {
+# Medallion layers are the containers: raw (bronze), cleansed (silver),
+# curated (gold). Adding a layer = one entry in var.lakehouse_layers.
+module "datalake" {
+  source              = "../modules/storage-account"
   name                = local.datalake_name
   resource_group_name = module.resource_group.name
   location            = module.resource_group.location
+  tags                = module.tags.tags
 
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind             = "StorageV2"
+  hierarchical_namespace_enabled = true
+  containers                     = toset(var.lakehouse_layers)
 
-  is_hns_enabled                  = true # ADLS Gen2 = HNS on
-  min_tls_version                 = "TLS1_2"
-  https_traffic_only_enabled      = true
-  allow_nested_items_to_be_public = false
-  shared_access_key_enabled       = false
-  public_network_access_enabled   = true
-  # Default-to-Entra-auth for any client SDK that doesn't specify an
-  # auth flow. Belt-and-braces alongside shared_access_key_enabled=false.
-  default_to_oauth_authentication = true
-
-  # Storage-account "local users" (SFTP-style user-and-password identities
-  # scoped to a single SA). Default is false; setting it explicitly so
-  # Checkov CKV_AZURE_244 confirms intent rather than relying on the
-  # provider default.
-  local_user_enabled = false
-
-  # Double-encrypt at rest. Free flag, no operational cost.
-  infrastructure_encryption_enabled = true
-
-  blob_properties {
-    delete_retention_policy {
-      days = 7
-    }
-    container_delete_retention_policy {
-      days = 7
-    }
-  }
-
-  sas_policy {
-    expiration_period = "00.01:00:00"
-    expiration_action = "Log"
-  }
-
-  tags = module.tags.tags
-}
-
-# Medallion layers — raw (bronze), cleansed (silver), curated (gold).
-# Adding a new layer = one entry in var.lakehouse_layers.
-resource "azurerm_storage_container" "lakehouse" {
-  for_each = toset(var.lakehouse_layers)
-
-  name                  = each.value
-  storage_account_id    = azurerm_storage_account.datalake.id
-  container_access_type = "private"
+  # LRS and public access: demo data, no private networking in this
+  # stack (Checkov/Trivy suppressions and the productionisation path
+  # are in /docs/architecture/data-platform-hld).
+  replication_type              = "LRS"
+  public_network_access_enabled = true
 }
