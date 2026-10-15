@@ -12,7 +12,7 @@ module "frontdoor" {
   endpoint_name     = local.fd_endpoint_name
   origin_group_name = local.fd_origin_group_name
   origin_name       = local.fd_origin_name
-  origin_host_name  = azurerm_storage_account.site.primary_web_host
+  origin_host_name  = module.site_storage.primary_web_host
   route_name        = local.fd_route_name
 
   custom_domains = var.custom_domains

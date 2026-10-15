@@ -3,7 +3,7 @@ title: Site infrastructure HLD
 description: How harvtech.co.uk fits together end to end - platform layer, application stacks, edge, identity, CI/CD.
 category: architecture
 order: 10
-updated: 2026-05-31
+updated: 2026-10-15
 status: living
 ---
 
@@ -40,9 +40,9 @@ Two Terraform stacks in the repo, each with its own state blob.
 
 ### `infra/` - state key `site.tfstate`
 
-- `rg-harvtech-site-prod-uks`
-- Storage account `stharvtechsiteproduks01` with `static_website` hosting and TLS 1.2 minimum
-- Front Door Standard profile with one endpoint, one origin group, one origin pointing at the storage `$web` endpoint
+- `rg-harvtech-site-prd-uks-01`, built by `modules/resource-group` (UK regions only, mandatory tags)
+- Storage account `stharvtechsiteprduks01`, built by `modules/storage-account`: static website hosting, Entra ID-only access (shared keys off), TLS 1.2 minimum, infrastructure encryption, soft delete. LRS and public network access are explicit, documented trade-offs at the call site
+- Front Door Standard profile, built by `modules/frontdoor`, with one endpoint, one origin group, one origin pointing at the storage `$web` endpoint
 - Two custom domains: apex `harvtech.co.uk` and `www.harvtech.co.uk`, both Front Door managed certs
 - Rules engine that 301-redirects `www` to apex
 - WAF policy with custom rules covering WordPress probes, dotfile probes, admin-panel probes, and a 100 req/min rate limit per IP. No managed ruleset, Standard SKU doesn't support it, documented inline.
@@ -123,4 +123,3 @@ For the bigger decisions, see the `decisions/` category, each ADR captures the c
 - Diagrams, this doc is text-only for v1. Adding Mermaid via remark plugin is a follow-up.
 - Reference Azure landing zone lab, planned as a separate repo, with this site hosting its case study and writeup. AI (Azure OpenAI / Foundry) drops in as one demonstrated workload on top, alongside data and app-tier examples.
 - Diagnostic Settings to a Log Analytics workspace, closes two Checkov/Trivy suppressions (storage logging and queue logging) when it lands.
-- `infrastructure_encryption_enabled = true` on the storage account, requires SA replacement, currently bundled with the SP RBAC modernisation work for safe coordination.

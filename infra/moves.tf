@@ -98,3 +98,21 @@ moved {
   from = azurerm_resource_group.site
   to   = module.resource_group.azurerm_resource_group.workload
 }
+
+# --- Root → modules/storage-account ---
+
+moved {
+  from = azurerm_storage_account.site
+  to   = module.site_storage.azurerm_storage_account.workload
+}
+
+# The static website moves from the deprecated inline block on the
+# account to the standalone azurerm_storage_account_static_website
+# resource. The website config already exists in Azure, so it is
+# imported (adopted as-is) rather than created. Import blocks must live
+# in the root module; once applied this is a no-op. Its ID is the
+# account's own ID, already in state, so nothing is hardcoded.
+import {
+  to = module.site_storage.azurerm_storage_account_static_website.workload[0]
+  id = module.site_storage.id
+}

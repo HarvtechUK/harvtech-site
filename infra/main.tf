@@ -7,73 +7,34 @@ module "resource_group" {
   tags     = module.tags.tags
 }
 
-resource "azurerm_storage_account" "site" {
-  name                            = local.storage_name
-  resource_group_name             = module.resource_group.name
-  location                        = module.resource_group.location
-  account_tier                    = "Standard"
-  account_replication_type        = "LRS"
-  account_kind                    = "StorageV2"
-  min_tls_version                 = "TLS1_2"
-  allow_nested_items_to_be_public = false
-  https_traffic_only_enabled      = true
+# Static-site origin for Front Door. The security baseline (Entra-only
+# access, TLS 1.2, infrastructure encryption, soft delete, no anonymous
+# blob access) comes from modules/storage-account; only the trade-offs
+# below are chosen here.
+module "site_storage" {
+  source              = "../modules/storage-account"
+  name                = local.storage_name
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
+  tags                = module.tags.tags
 
-  # Double-encrypt at rest (closes Trivy AZU-0061). Settable only at
-  # create time — enabled here because the naming-convention rename is
-  # already replacing this SA, so the deferred "SA modernization" cost
-  # (RBAC re-grant for the deploy SP) is being paid in the same change.
-  infrastructure_encryption_enabled = true
+  # LRS: everything in this account is rebuilt from git on each deploy,
+  # so zone redundancy buys nothing (CKV_AZURE_206 / AZU-0058 suppressed
+  # with the same reasoning).
+  replication_type = "LRS"
 
-  # Disable legacy shared-access keys. The CI/CD deploy step authenticates
-  # via Entra (`az storage blob upload-batch --auth-mode login`) and the
-  # azurerm provider is configured with `storage_use_azuread = true`, so
-  # nothing in this stack needs the keys. Closes Checkov CKV2_AZURE_40.
-  shared_access_key_enabled = false
+  # Public on purpose. Front Door Standard cannot reach a storage origin
+  # privately: Microsoft.Cdn/profiles is not a supported source for
+  # storage resource instance rules
+  # (https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security-trusted-azure-services),
+  # so denying by default would lock Front Door out too. The fixes are
+  # Front Door Premium with Private Link to origin (~£200/mo uplift) or
+  # a non-storage origin. Neither is justified for a static portfolio
+  # site, so Trivy AZU-0012 is accepted and suppressed in .trivyignore.
+  public_network_access_enabled = true
 
-  static_website {
+  static_website = {
     index_document     = "index.html"
     error_404_document = "404.html"
   }
-
-  # Soft-delete: keep deleted blobs and containers for 7 days so an
-  # accidental rm or overwrite can be reverted. Cheap insurance; closes
-  # Checkov CKV2_AZURE_38.
-  blob_properties {
-    delete_retention_policy {
-      days = 7
-    }
-    container_delete_retention_policy {
-      days = 7
-    }
-  }
-
-  # SAS expiration policy — even though we don't currently issue SAS
-  # tokens, enforcing a max lifetime is defence-in-depth so if anything
-  # ever does mint a SAS it can't be long-lived. Closes Checkov
-  # CKV2_AZURE_41.
-  sas_policy {
-    expiration_period = "00.01:00:00" # 1 hour max
-    expiration_action = "Log"
-  }
-
-  # NOTE: there's no `network_rules { default_action = "Deny" }` block
-  # here, even though Trivy AZU-0012 wants one. Microsoft's resource
-  # instance rule mechanism (`private_link_access` in azurerm) does NOT
-  # include Microsoft.Cdn/profiles in its supported resource types —
-  # see https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security-trusted-azure-services
-  # for the list. So a Standard-SKU Front Door has no way to be
-  # explicitly allowed when the SA defaults to Deny; locking the
-  # storage down would also lock out FD.
-  #
-  # The supported alternatives are:
-  #   - Upgrade to FD Premium and use actual Private Link to origin
-  #     (~£200/mo uplift), or
-  #   - Replace the storage origin with a service that IS in the
-  #     supported list (App Service, AKS workload, etc.)
-  #
-  # For a portfolio site, neither is justified. AZU-0012 is
-  # consciously accepted and suppressed in .trivyignore with this
-  # reasoning recorded.
-
-  tags = module.tags.tags
 }
