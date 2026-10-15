@@ -30,7 +30,7 @@ module "key_vault" {
     # list keys, change secrets or manage the vault.
     portal_secrets_read = {
       role_definition_id_or_name = "Key Vault Secrets User"
-      principal_id               = azurerm_container_app.portal.identity[0].principal_id
+      principal_id               = module.container_app.principal_id
       principal_type             = "ServicePrincipal"
     }
   }

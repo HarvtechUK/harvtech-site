@@ -18,3 +18,6 @@ portal_containers = {
     partition_key_path = "/clientId"
   }
 }
+
+# Entra app for "Sign in with Microsoft". Public identifier, safe in git.
+portal_entra_client_id = "c4297773-7a12-4895-a9c3-422d2d7c34b3"
