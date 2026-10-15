@@ -28,3 +28,13 @@ variable "portal_containers" {
     partition_key_path = string
   }))
 }
+
+variable "portal_entra_client_id" {
+  description = "Application (client) ID of the multi-tenant \"HarvTech Client Portal\" Entra app. A public identifier, not a secret: it appears in every sign-in redirect."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.portal_entra_client_id))
+    error_message = "portal_entra_client_id must be a GUID."
+  }
+}
