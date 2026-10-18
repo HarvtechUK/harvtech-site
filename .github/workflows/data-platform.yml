@@ -58,7 +58,7 @@ jobs:
     name: Checkov (data-platform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: bridgecrewio/checkov-action@v12
         with:
           framework: terraform
@@ -77,7 +77,7 @@ jobs:
     name: Trivy (data-platform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
@@ -95,7 +95,7 @@ jobs:
     name: tflint (data-platform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: latest
@@ -115,7 +115,7 @@ jobs:
     name: Validate Terraform (data-platform)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.8
@@ -142,7 +142,7 @@ jobs:
     env:
       TFVARS: env/prd.tfvars
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.8

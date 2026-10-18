@@ -59,7 +59,7 @@ jobs:
     name: Checkov (identity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: bridgecrewio/checkov-action@v12
         with:
           framework: terraform
@@ -78,7 +78,7 @@ jobs:
     name: Trivy (identity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
@@ -96,7 +96,7 @@ jobs:
     name: tflint (identity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: latest
@@ -116,7 +116,7 @@ jobs:
     name: Validate Terraform (identity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.8
@@ -144,7 +144,7 @@ jobs:
       ARM_CLIENT_ID: ${{ vars.AZURE_IDENTITY_CLIENT_ID }}
       TFVARS: env/prd.tfvars
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.8
