@@ -31,21 +31,24 @@
   </tfoot>
 </table>
 
-{# Which buttons appear depends on the status, the same state machine as
-   the API, expressed in the template. (Auth will later decide WHO sees
-   which: the contractor submits, the client approves/rejects.) #}
+{# Which buttons appear depends on the status (the same state machine as
+   the API) AND on who is looking: HarvTech submits, the client approves
+   or rejects. The route re-checks on the POST; hiding a button here is
+   only a courtesy. #}
 <div class="actions">
-  {% if ts.status.value in ["draft", "rejected"] %}
+  {% if ts.status.value in ["draft", "rejected"] and can_submit %}
     <form method="post" action="/timesheets/{{ ts.id }}/submit">
       <button class="btn">Submit for approval</button>
     </form>
-  {% elif ts.status.value == "submitted" %}
+  {% elif ts.status.value == "submitted" and can_decide %}
     <form method="post" action="/timesheets/{{ ts.id }}/approve">
       <button class="btn btn-approve">Approve</button>
     </form>
     <form method="post" action="/timesheets/{{ ts.id }}/reject">
       <button class="btn btn-reject">Reject</button>
     </form>
+  {% elif ts.status.value == "submitted" %}
+    <p class="muted">Submitted, waiting for the client's decision.</p>
   {% else %}
     <p class="muted">This timesheet is {{ ts.status.value }}.</p>
   {% endif %}

@@ -17,6 +17,15 @@ portal_containers = {
   timesheets = {
     partition_key_path = "/clientId"
   }
+  # Client onboarding (portal/app/onboarding_*.py). Partitioned by the
+  # field's real name in the documents, so a client's records share one
+  # partition and a client-scoped query never leaves it.
+  onboarding = {
+    partition_key_path = "/client_id"
+  }
+  requests = {
+    partition_key_path = "/client_id"
+  }
 }
 
 # Entra app for "Sign in with Microsoft". Public identifier, safe in git.

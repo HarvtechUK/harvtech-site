@@ -22,7 +22,7 @@ from functools import lru_cache
 from azure.cosmos import ContainerProxy, CosmosClient, exceptions
 from azure.identity import DefaultAzureCredential
 
-from .models import Engagement, Timesheet, User
+from .models import Engagement, Onboarding, ServiceRequest, Timesheet, User
 
 _DATABASE_NAME = os.environ.get("COSMOS_DATABASE", "portal")
 
@@ -130,3 +130,71 @@ def get_user(oid: str, tid: str) -> User | None:
         return None
     user = User(**row)
     return user if user.tid == tid else None
+
+
+# --- Client onboarding ---
+# The `onboarding` and `requests` containers are partitioned by /client_id
+# (the field's real name in the document), so one client's records sit in
+# one partition and a query for a client never leaves it.
+#
+# Every read here treats "not found" as "nothing yet". That covers a
+# client with no onboarding, and also the short window in a release where
+# the new app version is live before Terraform has created the container.
+
+def get_onboarding(client_id: str) -> Onboarding | None:
+    # id == client_id == partition key, so this is a point read.
+    try:
+        row = _container("onboarding").read_item(item=client_id, partition_key=client_id)
+    except exceptions.CosmosResourceNotFoundError:
+        return None
+    return Onboarding(**row)
+
+
+def list_onboardings() -> list[Onboarding]:
+    try:
+        return [Onboarding(**item) for item in _container("onboarding").read_all_items()]
+    except exceptions.CosmosResourceNotFoundError:
+        return []
+
+
+def save_onboarding(onboarding: Onboarding) -> None:
+    _container("onboarding").upsert_item(body=onboarding.model_dump(mode="json"))
+
+
+# --- Data-handling requests ---
+
+def list_requests(client_id: str | None = None) -> list[ServiceRequest]:
+    try:
+        if client_id is None:
+            # Staff view: every client's requests, so every partition.
+            rows = _container("requests").read_all_items()
+        else:
+            # A client's view: pinned to their partition. Cosmos cannot
+            # return another client's request from this query even if the
+            # WHERE clause were wrong, because it never opens their partition.
+            rows = _container("requests").query_items(
+                query="SELECT * FROM c WHERE c.client_id = @client_id",
+                parameters=[{"name": "@client_id", "value": client_id}],
+                partition_key=client_id,
+            )
+        return [ServiceRequest(**row) for row in rows]
+    except exceptions.CosmosResourceNotFoundError:
+        return []
+
+
+def get_request(request_id: str) -> ServiceRequest | None:
+    try:
+        rows = list(
+            _container("requests").query_items(
+                query="SELECT * FROM c WHERE c.id = @id",
+                parameters=[{"name": "@id", "value": request_id}],
+                enable_cross_partition_query=True,
+            )
+        )
+    except exceptions.CosmosResourceNotFoundError:
+        return None
+    return ServiceRequest(**rows[0]) if rows else None
+
+
+def save_request(request: ServiceRequest) -> None:
+    _container("requests").upsert_item(body=request.model_dump(mode="json"))

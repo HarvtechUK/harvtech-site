@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Security and data handling - HarvTech Portal{% endblock %}
+
+{# The statement a client's security team reads. The wording is versioned
+   (onboarding_services.STATEMENT_VERSION): change the words, bump the
+   version, and each client is asked to accept the new one. #}
+
+{% block content %}
+<a class="back" href="/onboarding{{ suffix }}">&larr; Onboarding</a>
+<p class="eyebrow">Azure health check &middot; version {{ version }}</p>
+<h1 class="tight">Security and data handling</h1>
+{% include "_flash.html" %}
+
+<section class="prose">
+  <h2>In one paragraph</h2>
+  <p>The health check reads the configuration of your Azure estate with read-only roles you
+  grant, prices it against Microsoft's public price list, and produces findings. It never
+  creates, changes or deletes anything in your tenant. It reads no data planes: no blobs, files,
+  table rows, secrets or database contents. What we hold about you is configuration metadata,
+  metric summaries, directory metadata where you grant it, aggregated log query results where
+  you grant them, and the findings themselves. It is stored in HarvTech's own Azure tenant in
+  the UK, reachable only by HarvTech staff after sign-in, and deleted when the engagement ends
+  or when you ask.</p>
+
+  <h2>What is read, tier by tier</h2>
+  <table class="grid doc-table">
+    <thead><tr><th>Tier</th><th>What is read</th><th>What is never read</th></tr></thead>
+    <tbody>
+      <tr><td>A Reader</td><td>Resource configuration: names, types, sizes, settings, tags, role assignments, backup items. Thirty days of platform metrics, kept as a summary per resource.</td><td>Anything inside storage, databases or vaults. Secret, key and certificate values. Connection strings.</td></tr>
+      <tr><td>B Logs</td><td>The results of a fixed set of queries: ingestion per table, flow and firewall aggregates, virtual desktop connection counts, pipeline run summaries.</td><td>Log rows outside those queries. Message bodies. Query texts.</td></tr>
+      <tr><td>C Identity</td><td>Users (name, sign-in name, enabled, last sign-in date), groups, service principals and app registrations with credential expiry dates, directory roles, Conditional Access policies, licence counts.</td><td>Mailboxes, files, messages, passwords, authentication methods. Credential values.</td></tr>
+      <tr><td>D Commitments</td><td>Reservations and savings plans: what, how many, term, scope, expiry, utilisation.</td><td>Invoices and the bill.</td></tr>
+      <tr><td>E Extras</td><td>Databricks clusters, jobs and run outcomes, warehouses, token owners and expiry. From the scripts your staff run: file paths, sizes and dates, database names and editions, share permissions.</td><td>Notebook contents, table contents, file contents, data rows, the tokens themselves.</td></tr>
+    </tbody>
+  </table>
+  <p>Every collector is read-only by construction. The scan identity holds no write permission,
+  the scripts contain only listing and <code>SELECT</code> calls, and the engine has no code
+  path that writes to a client tenant. Nothing is installed in your tenant.</p>
+
+  <h2>Where it is held and who can see it</h2>
+  <p>A PostgreSQL database in HarvTech's Azure subscription in UK South, encrypted in transit
+  and at rest, with Entra authentication only. HarvTech staff reach it after signing in with a
+  HarvTech account. No client data goes to any third party. The engine is deterministic rules:
+  no AI model processes your data, and no telemetry leaves the environment. Microsoft Azure is
+  the only sub-processor.</p>
+
+  <h2>Retention and deletion</h2>
+  <p>Your data is kept for the engagement and 90 days after the final report, so questions on
+  the report can be answered, then deleted. You can ask for deletion at any time from the
+  <a href="/requests{{ suffix }}">Requests</a> page: every scan, snapshot and finding is removed
+  in one operation and we confirm in writing.</p>
+
+  <h2>The scan identity</h2>
+  <p>The identity you create holds Reader and the optional read-only roles in the
+  <a href="/documents/onboarding{{ suffix }}">onboarding guide</a>, and nothing else. HarvTech
+  keeps its credential in Azure Key Vault, rotates it at the end of the engagement, and asks you
+  to delete the identity when the engagement ends. If you prefer Azure Lighthouse, the delegation
+  is Reader-only and you revoke it yourself.</p>
+
+  <h2>What you can ask us to do</h2>
+  <p>Delete your data, send you your findings, tell you who can see your data, rotate or retire
+  the scan identity, pause scanning, or answer a question in writing. Each is a request on the
+  <a href="/requests{{ suffix }}">Requests</a> page, answered there, with a record of when.</p>
+</section>
+
+<section class="card accept">
+  {% if onboarding is none %}
+    <p class="muted">An onboarding has not been opened for your organisation yet.</p>
+  {% elif accepted %}
+    <p><span class="dot dot-verified"><svg viewBox="0 0 16 16" width="12" height="12"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Accepted for {{ onboarding.client_name }} by {{ onboarding.statement_acknowledged_by }}
+      on {{ onboarding.statement_acknowledged_at|when }} (version {{ onboarding.statement_version }}).</p>
+  {% else %}
+    <h2>Accept this statement for {{ onboarding.client_name }}</h2>
+    <p class="muted">Pressing the button records your name and the date against version {{ version }}.
+    It tells HarvTech your security team has read how the health check handles your data.</p>
+    <form method="post" action="/documents/security/acknowledge{{ suffix }}">
+      <button class="btn btn-approve">We have read and accept this statement</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ onboarding.client_name }} - onboarding admin{% endblock %}
+{% block container_class %}wide{% endblock %}
+
+{# One client's checklist, with HarvTech's controls. A client says "done";
+   this page is the only place "verified" can be set. #}
+
+{% block content %}
+<a class="back" href="/admin/onboarding">&larr; All clients</a>
+<p class="eyebrow">HarvTech admin &middot; {{ onboarding.client_id }}</p>
+<h1 class="tight">{{ onboarding.client_name }}</h1>
+{% include "_flash.html" %}
+
+<section class="card hero hero-slim">
+  <div class="hero-body">
+    <span class="chip chip-{{ 'ready' if ready.can_scan else ('attention' if ready.attention else 'waiting') }}">{{ ready.headline }}</span>
+    <div class="stats">
+      <div><span class="num teal">{{ ready.verified }}</span><span class="lbl">verified</span></div>
+      <div><span class="num amber">{{ ready.done }}</span><span class="lbl">to verify</span></div>
+      <div><span class="num rose">{{ ready.attention }}</span><span class="lbl">need attention</span></div>
+      <div><span class="num">{{ ready.rules_ready }}</span><span class="lbl">of {{ ready.rules_in_scope }} checks unlocked</span></div>
+    </div>
+    <p class="small muted">Statement:
+      {% if ready.statement_ok %}accepted by {{ onboarding.statement_acknowledged_by }} on {{ onboarding.statement_acknowledged_at|when }}
+      {% else %}not accepted yet{% endif %}
+      &middot; <a href="/onboarding?client={{ onboarding.client_id }}">View as the client sees it</a></p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Import a preflight result</h2>
+  <p class="muted small">Run <code>finops preflight --customer "{{ onboarding.client_name }}" --out preflight.json</code>
+  with the scan identity, then paste the file here. Verified probes mark their lines verified;
+  failed and partial ones mark them as needing attention with the probe's own words; lines the
+  probe could not check are left alone.</p>
+  <form method="post" action="/admin/onboarding/{{ onboarding.client_id }}/preflight" class="form">
+    <label class="field">preflight.json
+      <textarea name="payload" rows="4" class="mono" placeholder='{"kind": "finops-preflight", ...}' required></textarea>
+    </label>
+    <button class="btn btn-approve">Apply to checklist</button>
+  </form>
+</section>
+
+{% for t in ready.tiers %}
+  <section class="checklist">
+    <header><h2><span class="tier-key">{{ t.tier.key }}</span> {{ t.tier.name }}
+      <span class="muted small">{{ t.verified }}/{{ t.total }} verified</span></h2></header>
+    {% for row in t.rows %}
+      {% set item = row.item %}{% set st = row.state %}
+      <article class="item item-{{ st.status.value }}" id="item-{{ item.id }}">
+        <span class="dot dot-{{ st.status.value }}" aria-hidden="true">
+          {% if st.status == ItemStatus.VERIFIED %}<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {% elif st.status == ItemStatus.NEEDS_ATTENTION %}!{% endif %}
+        </span>
+        <div class="item-body">
+          <div class="item-head"><h3>{{ item.title }}</h3><span class="item-id">{{ item.id }}</span></div>
+          <p class="muted small">
+            {% if st.done_by %}Client: done by {{ st.done_by }}{% if st.done_at %} on {{ st.done_at|when }}{% endif %}.{% else %}Client has not marked this done.{% endif %}
+            {% if st.checked_by %} Checked by {{ st.checked_by }}{% if st.checked_at %} on {{ st.checked_at|when }}{% endif %}.{% endif %}
+          </p>
+          {% if st.detail %}<p class="state {{ 'teal' if st.status == ItemStatus.VERIFIED else 'rose' }}">{{ st.detail }}</p>{% endif %}
+          <form method="post" action="/admin/onboarding/{{ onboarding.client_id }}/items/{{ item.id }}" class="check-form">
+            <input name="detail" placeholder="What the check found (the client sees this)" value="" />
+            <button class="btn btn-approve" name="result" value="verified">Verified</button>
+            <button class="btn btn-reject" name="result" value="needs_attention">Needs attention</button>
+            {% if st.status != ItemStatus.TODO %}<button class="btn btn-quiet" name="result" value="reset">Reset</button>{% endif %}
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+{% endfor %}
+
+<div class="split split-even">
+  <section class="card side">
+    <h2>Requests</h2>
+    {% for r in requests %}
+      <p class="small"><span class="badge badge-{{ {'open': 'submitted', 'in_progress': 'submitted', 'done': 'approved', 'declined': 'rejected'}[r.status.value] }}">{{ r.status.value|replace("_", " ") }}</span>
+        {{ kinds[r.kind].label if r.kind in kinds else r.kind }}</p>
+    {% else %}
+      <p class="muted small">None.</p>
+    {% endfor %}
+    <a class="link" href="/admin/requests">All requests &rarr;</a>
+  </section>
+  <section class="card side">
+    <h2>Audit trail</h2>
+    <ol class="timeline">
+      {% for e in history %}
+        <li><span class="muted small">{{ e.at|when }} &middot; {{ e.who }}</span><span>{{ e.what }}</span></li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+{% endblock %}
