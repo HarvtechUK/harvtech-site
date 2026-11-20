@@ -11,7 +11,7 @@ store_cosmos.py is the one that persists.
 """
 
 from . import sample_data
-from .models import Engagement, Timesheet, User
+from .models import Engagement, Onboarding, ServiceRequest, Timesheet, User
 
 # Copy the seed lists so mutating the store doesn't edit sample_data's
 # own lists. (`list(...)` makes a new list; the objects inside are still
@@ -19,6 +19,10 @@ from .models import Engagement, Timesheet, User
 _engagements: list[Engagement] = list(sample_data.ENGAGEMENTS)
 _timesheets: list[Timesheet] = list(sample_data.TIMESHEETS)
 _users: list[User] = []  # empty locally; real portal users live in Cosmos
+# Keyed by client id / request id. Dicts, because we always look these up
+# by key, and a dict makes "save" the same one line whether new or changed.
+_onboardings: dict[str, Onboarding] = {o.client_id: o for o in sample_data.onboardings()}
+_requests: dict[str, ServiceRequest] = {r.id: r for r in sample_data.requests()}
 
 
 def list_engagements() -> list[Engagement]:
@@ -51,3 +55,44 @@ def save_timesheet(timesheet: Timesheet) -> None:
 def get_user(oid: str, tid: str) -> User | None:
     """Find a registered portal user by Entra object id + tenant id."""
     return next((u for u in _users if u.oid == oid and u.tid == tid), None)
+
+
+# --- Client onboarding ---
+
+def get_onboarding(client_id: str) -> Onboarding | None:
+    return _onboardings.get(client_id)
+
+
+def list_onboardings() -> list[Onboarding]:
+    return list(_onboardings.values())
+
+
+def save_onboarding(onboarding: Onboarding) -> None:
+    _onboardings[onboarding.client_id] = onboarding
+
+
+# --- Data-handling requests ---
+
+def list_requests(client_id: str | None = None) -> list[ServiceRequest]:
+    """One client's requests, or everyone's when client_id is None (staff only —
+    the route decides who may ask for that)."""
+    return [r for r in _requests.values() if client_id is None or r.client_id == client_id]
+
+
+def get_request(request_id: str) -> ServiceRequest | None:
+    return _requests.get(request_id)
+
+
+def save_request(request: ServiceRequest) -> None:
+    _requests[request.id] = request
+
+
+def reset() -> None:
+    """Put the store back to its seed. For tests, so one test's writes
+    never leak into the next."""
+    global _engagements, _timesheets, _users, _onboardings, _requests
+    _engagements = list(sample_data.ENGAGEMENTS)
+    _timesheets = [t.model_copy(deep=True) for t in sample_data.TIMESHEETS]
+    _users = []
+    _onboardings = {o.client_id: o for o in sample_data.onboardings()}
+    _requests = {r.id: r for r in sample_data.requests()}

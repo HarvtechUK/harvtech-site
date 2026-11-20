@@ -123,15 +123,59 @@ denormalised, so they can't drift.
 
 | Role | Can |
 |---|---|
-| `contractor` | Create/submit timesheets across all clients (this is Alex) |
-| `client_approver` | Read + approve/reject timesheets **for their own client only** |
+| `contractor` | Create/submit timesheets across all clients (this is Alex); verify onboarding |
+| `client_approver` | Read + approve/reject timesheets **for their own client only**; onboarding for their client |
+| `client_technical` | Onboarding **for their own client only**. Never timesheets or day rates, which are commercial |
 | `admin` | Manage clients & engagements (also Alex) |
+
+The rules live in one module, `portal/app/access.py`, and every page and
+API route goes through it: lists through `scoped(...)`, single records
+through `can_see_client(...)`. A record the caller may not see answers
+exactly like one that does not exist. `portal/tests/test_access.py`
+proves it with two clients.
 
 The API maps the token's subject to a `users` doc carrying `role` and
 `clientId`, and **enforces clientId scoping server-side on every call** —
 the client identity is never trusted from the request body. Defence in
 depth: a `client_approver` token can only ever touch its own client's
 partition.
+
+## 4a. Client onboarding (health-check clients)
+
+Clients of the Azure health check (the `harvtech-finops` product) grant
+read-only access in tiers. The portal carries that as a checklist per
+client, with one rule: **the client says "done"; only HarvTech says
+"verified"**, so a client can never mark their own work as checked.
+
+- **Catalogue** (`onboarding_catalogue.py`): tiers A to E plus two
+  context conversations, 17 items, with the words the client reads. The
+  item ids are shared with `finops preflight`, which probes each grant
+  read-only and writes a result file the admin page imports.
+- **State** (`onboarding` container, `/client_id`, one document per
+  client, id = client id so it is a point read): per-item status
+  (`todo`, `done`, `verified`, `needs_attention`), who and when on both
+  sides, the statement acceptance, and an audit trail.
+- **Requests** (`requests` container, `/client_id`): what the security
+  and data-handling statement promises, callable by the client (delete
+  our data, send our findings, who can see our data, rotate the scan
+  identity, pause scanning, a question), answered in writing by HarvTech.
+  A request cannot be closed without a written response.
+- **Readiness**: two percentages on purpose, verified and claimed; the
+  gap is HarvTech's to-do list. "Checks unlocked" counts a tier once
+  every item in it is verified.
+- **Telling HarvTech**: every client action is logged, shows on the admin
+  pages, and is posted to `NOTIFY_WEBHOOK_URL` when one is set. The
+  webhook is best effort and can never fail a client's button.
+
+A client user's client id always comes from their session, never from
+the URL or a form, so there is nothing to tamper with. Staff may add
+`?client=<id>` to see a page as that client sees it.
+
+Known gap, not changed here: the `engagements` and `timesheets`
+containers are partitioned by `/clientId`, but the documents carry
+`client_id`, so every document lands in one logical partition. Isolation
+is enforced in the application (above), not by the partition. Fixing it
+means recreating both containers with `/client_id` and copying the data.
 
 ## 5. IR35 framing
 

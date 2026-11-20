@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Onboarding - {{ onboarding.client_name }}{% endblock %}
+{% block container_class %}wide{% endblock %}
+
+{# The client's readiness dashboard.
+
+   Everything on this page is drawn from `ready`, the dict
+   onboarding_services.readiness() worked out — the template only lays it
+   out. The ring is two SVG arcs on one circle: the solid one is what
+   HarvTech has verified, the faint one behind it adds what the client
+   says is done. `ring` carries the arc lengths, computed in the route. #}
+
+{% macro state_icon(status) %}
+  <span class="dot dot-{{ status.value }}" aria-hidden="true">
+    {% if status == ItemStatus.VERIFIED %}
+      <svg viewBox="0 0 16 16" width="12" height="12"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    {% elif status == ItemStatus.NEEDS_ATTENTION %}!
+    {% endif %}
+  </span>
+{% endmacro %}
+
+{% block content %}
+{% if is_staff %}
+  <p class="preview">You are viewing this page as {{ onboarding.client_name }} sees it.
+    <a href="/admin/onboarding/{{ onboarding.client_id }}">Back to the admin view</a></p>
+{% endif %}
+
+<p class="eyebrow">Azure health check &middot; onboarding</p>
+<h1 class="tight">{{ onboarding.client_name }}</h1>
+{% include "_flash.html" %}
+
+{# ── Hero: the ring, the counts, the checks unlocked ─────────────────── #}
+<section class="card hero">
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 128 128" role="img"
+         aria-label="{{ ready.verified_pct }} percent verified, {{ ready.claimed_pct }} percent marked done">
+      <circle class="ring-track" cx="64" cy="64" r="{{ ring.radius }}"/>
+      <circle class="ring-claimed" cx="64" cy="64" r="{{ ring.radius }}"
+              stroke-dasharray="{{ ring.claimed }} {{ ring.length }}"/>
+      <circle class="ring-verified" cx="64" cy="64" r="{{ ring.radius }}"
+              stroke-dasharray="{{ ring.verified }} {{ ring.length }}"/>
+    </svg>
+    <div class="ring-label">
+      <span class="ring-num">{{ ready.verified_pct }}<small>%</small></span>
+      <span class="lbl">verified</span>
+    </div>
+  </div>
+
+  <div class="hero-body">
+    <span class="chip chip-{{ 'ready' if ready.can_scan else ('attention' if ready.attention else 'waiting') }}">{{ ready.headline }}</span>
+    <div class="stats">
+      <div><span class="num teal">{{ ready.verified }}</span><span class="lbl">verified</span></div>
+      <div><span class="num amber">{{ ready.done }}</span><span class="lbl">waiting for HarvTech</span></div>
+      <div><span class="num rose">{{ ready.attention }}</span><span class="lbl">need attention</span></div>
+      <div><span class="num">{{ ready.todo }}</span><span class="lbl">to do</span></div>
+    </div>
+    <div class="unlock">
+      <div class="unlock-head">
+        <span><strong>{{ ready.rules_ready }}</strong> of {{ ready.rules_in_scope }} checks unlocked</span>
+        <span class="muted small">{{ ready.rules_total }} in the full health check</span>
+      </div>
+      <div class="bar"><div class="bar-fill" style="width: {{ (ready.rules_ready / ready.rules_in_scope * 100)|round|int if ready.rules_in_scope else 0 }}%"></div></div>
+      <p class="muted small">Each tier you grant switches on more of the health check. A tier counts once HarvTech has verified it works.</p>
+    </div>
+  </div>
+</section>
+
+{% if not ready.statement_ok %}
+  <a class="banner" href="/documents/security{{ suffix }}">
+    <span><strong>Before the first scan:</strong> read and accept the security and data-handling statement.</span>
+    <span class="banner-go">Open &rarr;</span>
+  </a>
+{% endif %}
+
+{# ── The tiers at a glance ───────────────────────────────────────────── #}
+<div class="tiers">
+  {% for t in ready.tiers %}
+    <a class="tier tier-{{ t.state }}" href="#tier-{{ t.tier.key }}">
+      <div class="tier-top">
+        <span class="tier-key">{{ t.tier.key }}</span>
+        <span class="tier-name">{{ t.tier.name }}</span>
+      </div>
+      {# Two bars stacked: marked done behind, verified in front. #}
+      <div class="bar bar-thin">
+        <div class="bar-claimed" style="width: {{ t.claimed_pct }}%"></div>
+        <div class="bar-fill" style="width: {{ t.verified_pct }}%"></div>
+      </div>
+      <div class="tier-foot">
+        <span>{{ t.verified }}/{{ t.total }}</span>
+        <span class="muted">{{ t.label }}</span>
+      </div>
+      {% if t.rules %}<span class="tier-rules">{{ t.rules }} checks</span>{% endif %}
+    </a>
+  {% endfor %}
+</div>
+
+<div class="split">
+  {# ── The checklist ─────────────────────────────────────────────────── #}
+  <div>
+    {% for t in ready.tiers %}
+      <section class="checklist" id="tier-{{ t.tier.key }}">
+        <header>
+          <h2><span class="tier-key">{{ t.tier.key }}</span> {{ t.tier.name }}
+            {% if t.tier.optional %}<span class="muted small">optional</span>{% endif %}</h2>
+          <p class="muted">{{ t.tier.unlocks }}</p>
+        </header>
+        {% for row in t.rows %}
+          {% set item = row.item %}{% set st = row.state %}
+          <article class="item item-{{ st.status.value }}" id="item-{{ item.id }}">
+            {{ state_icon(st.status) }}
+            <div class="item-body">
+              <div class="item-head">
+                <h3>{{ item.title }}</h3>
+                <span class="item-id">{{ item.id }}</span>
+              </div>
+              <p class="muted small">{{ item.who }}</p>
+
+              {% if st.status == ItemStatus.VERIFIED %}
+                <p class="state teal">Verified by HarvTech{% if st.checked_at %} on {{ st.checked_at|when }}{% endif %}{% if st.detail %}: {{ st.detail }}{% endif %}</p>
+              {% elif st.status == ItemStatus.NEEDS_ATTENTION %}
+                <p class="state rose">HarvTech checked{% if st.checked_at %} on {{ st.checked_at|when }}{% endif %} and it is not working yet{% if st.detail %}: {{ st.detail }}{% endif %}</p>
+              {% elif st.status == ItemStatus.DONE %}
+                <p class="state amber">Marked done by {{ st.done_by }}{% if st.done_at %} on {{ st.done_at|when }}{% endif %}. Waiting for HarvTech to verify.</p>
+              {% endif %}
+
+              {% if st.status != ItemStatus.VERIFIED %}
+                <details {% if st.status == ItemStatus.NEEDS_ATTENTION %}open{% endif %}>
+                  <summary>How to do this</summary>
+                  <ol>{% for step in item.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+                  {% if item.command %}<pre><code>{{ item.command }}</code></pre>{% endif %}
+                  {% for note in item.notes %}<p class="muted small">{{ note }}</p>{% endfor %}
+                  <p class="muted small">
+                    {% if item.verified_by == "preflight" %}HarvTech verifies this with a read-only probe.
+                    {% else %}HarvTech confirms this with you.{% endif %}
+                  </p>
+                </details>
+              {% endif %}
+            </div>
+            <div class="item-action">
+              {% if st.status in (ItemStatus.TODO, ItemStatus.NEEDS_ATTENTION) %}
+                <form method="post" action="/onboarding/items/{{ item.id }}/done{{ suffix }}">
+                  <button class="btn btn-approve">{{ "Fixed, check again" if st.status == ItemStatus.NEEDS_ATTENTION else "Mark as done" }}</button>
+                </form>
+              {% elif st.status == ItemStatus.DONE %}
+                <form method="post" action="/onboarding/items/{{ item.id }}/undo{{ suffix }}">
+                  <button class="btn btn-quiet">Reopen</button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </div>
+
+  {# ── The side column: documents, requests, activity ────────────────── #}
+  <aside>
+    <section class="card side">
+      <h2>Documents</h2>
+      <a class="doc" href="/documents/onboarding{{ suffix }}"><strong>Onboarding guide</strong><span class="muted small">What each tier grants and unlocks</span></a>
+      <a class="doc" href="/documents/security{{ suffix }}"><strong>Security and data handling</strong>
+        <span class="small {{ 'teal' if ready.statement_ok else 'amber' }}">{{ "Accepted" if ready.statement_ok else "Waiting for your acceptance" }}</span></a>
+    </section>
+
+    <section class="card side">
+      <h2>Requests</h2>
+      {% for r in open_requests %}
+        <p class="small"><span class="badge badge-submitted">{{ r.status.value|replace("_", " ") }}</span> {{ r.kind|replace("_", " ") }}</p>
+      {% else %}
+        <p class="muted small">Nothing open.</p>
+      {% endfor %}
+      <a class="link" href="/requests{{ suffix }}">Raise or review a request &rarr;</a>
+    </section>
+
+    <section class="card side">
+      <h2>Recent activity</h2>
+      <ol class="timeline">
+        {% for e in history %}
+          <li><span class="muted small">{{ e.at|when }} &middot; {{ e.who }}</span><span>{{ e.what }}</span></li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% endblock %}

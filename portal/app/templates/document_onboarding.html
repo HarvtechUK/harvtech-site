@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Onboarding guide - HarvTech Portal{% endblock %}
+
+{# Generated from onboarding_catalogue.py, the same data the checklist
+   uses, so the guide and the checklist can never disagree. #}
+
+{% block content %}
+<a class="back" href="/onboarding{{ suffix }}">&larr; Onboarding</a>
+<p class="eyebrow">Azure health check</p>
+<h1 class="tight">Onboarding guide</h1>
+
+<section class="prose">
+  <p>The health check reads your Azure estate and never changes it. Everything it needs is a
+  read-only role, or a read-only script run by your own staff. Access is granted in tiers. Reader
+  alone is a complete engagement; each further tier switches on more of the {{ total_rules }}
+  checks, and the report says "not assessed" for whatever was not granted rather than staying
+  silent.</p>
+  <p>You mark each step done on the <a href="/onboarding{{ suffix }}">onboarding page</a>.
+  HarvTech then verifies it with a read-only probe before the first scan, so nobody finds out
+  on scan day that a role was assigned to the wrong identity.</p>
+</section>
+
+{% for group in tiers %}
+  {% set t = group.tier %}
+  <section class="card">
+    <h2><span class="tier-key">{{ t.key }}</span> {{ t.name }}
+      {% if t.optional %}<span class="muted small">optional</span>{% endif %}
+      {% if t.rules %}<span class="tier-rules">{{ t.rules }} checks</span>{% endif %}</h2>
+    <p><strong>{{ t.grant }}.</strong> <span class="muted">{{ t.unlocks }}</span></p>
+    {% for item in group["items"] %}
+      <div class="guide-item">
+        <h3><span class="item-id">{{ item.id }}</span> {{ item.title }}
+          {% if item.rules %}<span class="tier-rules">{{ item.rules }} checks</span>{% endif %}</h3>
+        <p class="muted small">{{ item.who }}</p>
+        <ol>{% for step in item.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+        {% if item.command %}<pre><code>{{ item.command }}</code></pre>{% endif %}
+        {% for note in item.notes %}<p class="muted small">{{ note }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+  </section>
+{% endfor %}
+{% endblock %}
