@@ -1,10 +1,46 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { contact } from '../data/contact';
+
+// The ways to reach us other than the form. A method with nothing set in
+// src/data/contact.ts (no phone number yet, no booking page yet) is left
+// out of the list rather than shown empty.
+const methods = [
+  contact.bookingUrl && {
+    name: 'Pick a time',
+    detail: 'Choose a slot in the diary yourself',
+    href: contact.bookingUrl,
+    external: true,
+    icon: 'calendar',
+  },
+  contact.phoneDisplay && {
+    name: 'Phone',
+    detail: contact.phoneDisplay,
+    href: `tel:${contact.phoneDial}`,
+    external: false,
+    icon: 'phone',
+  },
+  {
+    name: 'Email',
+    detail: contact.email,
+    href: `mailto:${contact.email}`,
+    external: false,
+    icon: 'email',
+  },
+  {
+    name: 'LinkedIn',
+    detail: contact.linkedinName,
+    href: contact.linkedinUrl,
+    external: true,
+    icon: 'linkedin',
+  },
+].filter((m) => !!m) as { name: string; detail: string; href: string; external: boolean; icon: string }[];
 ---
 
 <BaseLayout
   title="Contact - HarvTech"
-  description="Get in touch with HarvTech to discuss Azure platform engineering, cloud migrations, security hardening, or FinOps. UK-based, remote or London."
+  description="Request a call with HarvTech about an Azure Health Check, security and compliance remediation, a platform build or migration, or a cost review. UK-based, remote or London."
 >
   <section class="container-page py-20">
     <p class="eyebrow mb-4">Contact</p>
@@ -12,41 +48,82 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       Let&rsquo;s talk about your platform.
     </h1>
     <p class="body-muted max-w-2xl text-lg">
-      Whether you need a landing zone built from scratch, a security audit,
-      a migration scoped, or a FinOps review - the right place to
-      start is a short conversation about where you are and where you need
-      to be.
+      Whether you want an Azure Health Check, audit findings remediated, a
+      landing zone built or a migration scoped - the right place to start is
+      a short conversation about where you are and where you need to be.
     </p>
   </section>
 
   <section class="border-border-faintest border-t">
     <div class="container-page py-20">
-      <div class="grid gap-10 lg:grid-cols-2">
+      <div class="grid gap-12 lg:grid-cols-[1.15fr_1fr]">
 
-        <!-- Left: availability + how it works -->
+        <!-- Left: the request-a-call form. scroll-mt keeps the heading
+             clear of the sticky header when a link jumps straight here;
+             the header is three rows tall on a phone, so it needs more. -->
+        <div id="request-a-call" class="scroll-mt-52 md:scroll-mt-28">
+          <p class="eyebrow mb-3">Request a call</p>
+          <h2 class="title-section mb-3">Tell us a little, and we&rsquo;ll call you.</h2>
+          <p class="body-muted mb-8 max-w-xl">
+            A 30-minute conversation, with no obligation, to understand your
+            environment and say honestly whether we are a good fit.
+          </p>
+          <ContactForm />
+        </div>
+
+        <!-- Right: every other way in, and what happens next -->
         <div class="space-y-8">
-          <div>
-            <p class="eyebrow mb-3">Availability</p>
-            <div class="card p-7 space-y-4">
-              {[
-                ['Location', 'UK-based, remote or London'],
-                ['Engagements', 'Fixed-scope projects, Well-Architected reviews, ongoing retainers'],
-                ['Response time', 'We aim to reply to all enquiries within one business day'],
-                ['Currently', 'Accepting new engagements - get in touch to discuss timing and scope'],
-              ].map(([label, value]) => (
-                <div class="flex gap-4">
-                  <span class="text-text-subtle mt-0.5 w-32 flex-shrink-0 text-xs font-semibold uppercase tracking-wider">{label}</span>
-                  <span class="text-text-hero text-sm">{value}</span>
-                </div>
-              ))}
-            </div>
+          <div class="space-y-4">
+            <p class="eyebrow mb-3">Or reach us directly</p>
+            {
+              methods.map((m) => (
+                <a
+                  href={m.href}
+                  rel={m.external ? 'noopener' : undefined}
+                  target={m.external ? '_blank' : undefined}
+                  class="card group flex items-center gap-5 p-6 transition hover:border-primary/30"
+                >
+                  <div class="bg-bg-3 text-text-muted flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                    {m.icon === 'email' && (
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M2 4.5C2 3.67 2.67 3 3.5 3h11C15.33 3 16 3.67 16 4.5v9c0 .83-.67 1.5-1.5 1.5h-11C2.67 15 2 14.33 2 13.5v-9z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" />
+                        <path d="M2 5l7 5 7-5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    )}
+                    {m.icon === 'linkedin' && (
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.25" />
+                        <path d="M6 8v5M6 5.5v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M10 13v-3a1.5 1.5 0 0 1 3 0v3M10 8v5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+                      </svg>
+                    )}
+                    {m.icon === 'phone' && (
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M4.2 2.5h2.3l1.2 3.2-1.6 1.1a8.4 8.4 0 0 0 5.1 5.1l1.1-1.6 3.2 1.2v2.3c0 .9-.8 1.7-1.7 1.7C7.6 15.2 2.8 10.4 2.5 4.2c0-.9.8-1.7 1.7-1.7z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" />
+                      </svg>
+                    )}
+                    {m.icon === 'calendar' && (
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <rect x="2.5" y="3.5" width="13" height="12" rx="1.5" stroke="currentColor" stroke-width="1.25" />
+                        <path d="M2.5 7.5h13M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-text-primary text-sm font-semibold group-hover:text-primary transition-colors">{m.name}</p>
+                    <p class="body-muted truncate text-sm">{m.detail}</p>
+                  </div>
+                  <span class="text-text-subtle group-hover:text-primary ml-auto transition-colors text-sm">&rarr;</span>
+                </a>
+              ))
+            }
           </div>
 
           <div>
-            <p class="eyebrow mb-3">How it works</p>
+            <p class="eyebrow mb-3">What happens next</p>
             <div class="space-y-4">
               {[
-                ['01', 'Drop us an email', 'A few sentences about your situation - what you have, what you need, any time constraints - is enough to start.'],
+                ['01', 'You get in touch', 'The form, an email or a message. A few sentences about your situation is enough to start.'],
                 ['02', 'Discovery call', 'A 30-minute conversation to understand your environment and confirm whether we\'re a good fit.'],
                 ['03', 'Proposal', 'A written scope and price, usually within two business days of the discovery call.'],
               ].map(([n, heading, body]) => (
@@ -60,63 +137,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               ))}
             </div>
           </div>
-        </div>
 
-        <!-- Right: contact methods -->
-        <div class="space-y-4">
-          <p class="eyebrow mb-3">Get in touch</p>
-
-          <a
-            href="mailto:alex@harvtech.co.uk"
-            class="card group flex items-center gap-5 p-7 transition hover:border-primary/30"
-          >
-            <div class="bg-bg-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M2 4.5C2 3.67 2.67 3 3.5 3h11C15.33 3 16 3.67 16 4.5v9c0 .83-.67 1.5-1.5 1.5h-11C2.67 15 2 14.33 2 13.5v-9z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" class="text-text-muted"/>
-                <path d="M2 5l7 5 7-5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted"/>
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-text-primary text-sm font-semibold group-hover:text-primary transition-colors">Email</p>
-              <p class="body-muted text-sm">alex@harvtech.co.uk</p>
-            </div>
-            <span class="text-text-subtle group-hover:text-primary ml-auto transition-colors text-sm">&rarr;</span>
-          </a>
-
-          <a
-            href="https://www.linkedin.com/in/alexander-harvey-39433619"
-            rel="noopener"
-            target="_blank"
-            class="card group flex items-center gap-5 p-7 transition hover:border-primary/30"
-          >
-            <div class="bg-bg-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.25" class="text-text-muted"/>
-                <path d="M6 8v5M6 5.5v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M10 13v-3a1.5 1.5 0 0 1 3 0v3M10 8v5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-text-primary text-sm font-semibold group-hover:text-primary transition-colors">LinkedIn</p>
-              <p class="body-muted text-sm">Alexander Harvey</p>
-            </div>
-            <span class="text-text-subtle group-hover:text-primary ml-auto transition-colors text-sm">&rarr;</span>
-          </a>
-
-          <div class="card p-7">
-            <p class="title-card mb-4">What to include in your first email</p>
-            <ul class="space-y-3">
+          <div>
+            <p class="eyebrow mb-3">Availability</p>
+            <div class="card p-7 space-y-4">
               {[
-                'What your current Azure environment looks like (or that you\'re starting from scratch)',
-                'The problem you\'re trying to solve or the outcome you need',
-                'Any deadlines, regulatory pressures, or budget constraints worth knowing upfront',
-              ].map((item) => (
-                <li class="flex gap-3 text-sm">
-                  <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
-                  <span class="body-muted">{item}</span>
-                </li>
+                ['Location', 'UK-based, remote or London'],
+                ['Engagements', 'Azure Health Checks, fixed-scope projects, Well-Architected reviews, ongoing retainers'],
+                ['Response time', 'We aim to reply to all enquiries within one business day'],
+                ['Currently', 'Accepting new engagements - get in touch to discuss timing and scope'],
+              ].map(([label, value]) => (
+                <div class="flex gap-4">
+                  <span class="text-text-subtle mt-0.5 w-32 flex-shrink-0 text-xs font-semibold uppercase tracking-wider">{label}</span>
+                  <span class="text-text-hero text-sm">{value}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -126,11 +162,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <!-- Service links -->
   <section class="border-border-faintest border-t">
     <div class="container-page py-20">
-      <p class="eyebrow mb-4">Not sure which service you need?</p>
+      <p class="eyebrow mb-4">Not sure what you need?</p>
       <h2 class="title-section mb-8 max-w-2xl">
-        Browse the service lines and we&rsquo;ll scope it together.
+        Start with the health check, or browse the service lines.
       </h2>
       <div class="flex flex-wrap gap-3">
+        <a href="/health-check" class="btn-secondary text-sm">Azure Health Check &rarr;</a>
         <a href="/services" class="btn-secondary text-sm">All services &rarr;</a>
         <a href="/approach" class="btn-secondary text-sm">How we work &rarr;</a>
       </div>

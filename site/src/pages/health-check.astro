@@ -1,0 +1,514 @@
+---
+/**
+ * /health-check, the Azure Health Check product page.
+ *
+ * The words and numbers live in src/data/healthCheck.ts; this file is the
+ * layout. Every screenshot is of the DEMONSTRATION estate, a made-up
+ * insurer ("Example Insurance"): no client's data appears on this site,
+ * and the page says so next to the first picture.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Shot from '../components/Shot.astro';
+import CallToAction from '../components/CallToAction.astro';
+import { callLink } from '../data/contact';
+import {
+  facts,
+  pillars,
+  examples,
+  planningFields,
+  coverage,
+  steps,
+  accessTiers,
+  safeguards,
+  questions,
+} from '../data/healthCheck';
+
+import overview from '../assets/health-check/dashboard-overview.png';
+import findings from '../assets/health-check/dashboard-findings.png';
+import findingCost from '../assets/health-check/finding-cost.png';
+import findingSecurity from '../assets/health-check/finding-security.png';
+import findingControls from '../assets/health-check/finding-controls.png';
+import reportSummary from '../assets/health-check/report-summary.png';
+import reportAssurance from '../assets/health-check/report-assurance.png';
+import portalReport from '../assets/health-check/portal-report.png';
+import portalOnboarding from '../assets/health-check/portal-onboarding.png';
+
+// Two-column pictures are shown at about half the page width on a laptop
+// and full width on a phone.
+const half = '(min-width: 1024px) 520px, 92vw';
+
+const frameworks = [
+  ['ISO/IEC 27001:2022', 'The Annex A controls that Azure configuration gives evidence for.'],
+  ['DORA', 'ICT risk management: protection, detection, response and recovery.'],
+  ['IT general controls', 'Access and operations, two of the areas tested for SOX.'],
+  ['Cyber Essentials', 'The five technical controls.'],
+];
+---
+
+<BaseLayout
+  title="Azure Health Check - HarvTech"
+  description="A read-only review of your whole Azure estate. Savings priced in pounds, security and network findings ranked by severity, each with the evidence and a plan for the change. For UK insurers, MGAs, Lloyd's syndicates and brokers."
+>
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div
+        class="absolute -top-32 right-[-10%] h-[34rem] w-[34rem]"
+        style="background: radial-gradient(circle, rgb(0 161 155 / 0.14) 0%, rgb(0 161 155 / 0.05) 40%, transparent 70%)"
+      >
+      </div>
+      <div
+        class="absolute -left-40 top-24 h-[28rem] w-[28rem]"
+        style="background: radial-gradient(circle, rgb(200 204 206 / 0.07) 0%, transparent 65%)"
+      >
+      </div>
+    </div>
+
+    <div class="container-page relative pt-20 pb-16 md:pt-28">
+      <div class="max-w-3xl">
+        <p class="eyebrow mb-6">Azure Health Check</p>
+        <h1 class="hero-gradient mb-6 text-4xl font-bold tracking-tight leading-[1.08] text-balance md:text-5xl">
+          Know what your Azure estate is costing you, and where it is exposed.
+        </h1>
+        <p class="body-muted max-w-2xl text-lg">
+          A read-only review of the whole estate. Savings priced in pounds, security
+          and network findings ranked by severity, and every one of them with the
+          evidence behind it and a plan for making the change. Built for UK insurers,
+          MGAs, Lloyd&rsquo;s syndicates and brokers.
+        </p>
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a href={callLink('health-check')} class="btn-primary text-base">Request a call</a>
+          <a href="#examples" class="btn-secondary text-base">See example findings</a>
+        </div>
+      </div>
+
+      <dl class="border-border-faintest mt-14 grid grid-cols-2 gap-x-8 gap-y-6 border-t pt-8 md:grid-cols-4">
+        {
+          facts.map((f) => (
+            <div>
+              <dt class="font-display text-text-primary text-2xl font-semibold">{f.value}</dt>
+              <dd class="body-muted mt-1 text-sm">{f.label}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <Shot
+        class="mt-14"
+        src={overview}
+        alt="The health check overview: a headline monthly saving, security findings by severity, the top ten actions, and savings by section and by area of Azure."
+        label="Azure estate review - demonstration estate"
+        caption="Every screen on this page shows our demonstration estate, a made-up insurer. No client data appears anywhere on this site. Click any picture to open it full size."
+        eager
+      />
+    </div>
+  </section>
+
+  <!-- The three questions -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What it answers</p>
+      <h2 class="title-section mb-4 max-w-3xl">Three questions, one scan.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        Cost, security and network reviews are usually run separately, by different
+        tools, and joined up by hand afterwards. The health check reads the estate
+        once and answers all three, so a finding about what something costs sits
+        beside the finding about how it is exposed.
+      </p>
+
+      <div class="grid gap-5 md:grid-cols-3">
+        {
+          pillars.map((p) => (
+            <div class="card p-7">
+              <p class="eyebrow mb-3">{p.name}</p>
+              <p class="title-card mb-3">{p.question}</p>
+              <p class="body-muted mb-5 text-sm">{p.body}</p>
+              <ul class="space-y-2.5">
+                {p.points.map((point) => (
+                  <li class="text-text-hero flex gap-3 text-sm leading-relaxed">
+                    <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- What you see: the findings -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What you see</p>
+      <h2 class="title-section mb-4 max-w-3xl">Findings you can act on, not a list to argue with.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        Search by resource name. Filter by subscription, management group,
+        environment, severity, effort, reboot and change type. Sort by pounds or by
+        severity. Open any finding and the evidence is there.
+      </p>
+
+      <Shot
+        src={findings}
+        alt="The exposure findings: filters down the left, the findings table in the middle, and one finding open on the right showing its severity and the plan for the change."
+        label="Azure estate review - exposure"
+        fade
+      />
+
+      <!-- Cost: every pound traced -->
+      <div class="mt-20 grid items-center gap-10 lg:grid-cols-2">
+        <Shot
+          src={findingCost}
+          alt="A cost finding: a DDoS protection plan that protects no networks, the monthly saving, the plan for the change, how the saving was worked out, and the evidence."
+          frame="panel"
+          sizes={half}
+        />
+        <div>
+          <h3 class="title-section mb-4 text-2xl">Every pound traces back to its source.</h3>
+          <p class="body-muted mb-6">
+            A saving nobody can check is a saving nobody will approve. Each one says
+            what was found, how the figure was worked out and what it was worked
+            out from.
+          </p>
+          <ul class="space-y-3">
+            {
+              [
+                'Priced in pounds at Azure list price, from Microsoft’s public price list. Any discount you have only lowers the figure.',
+                'The headline counts one option per resource, so two ways of saving on the same server are never added together.',
+                'Sized from 30 days of your own metrics where the answer depends on use.',
+                'Where a figure cannot be worked out honestly, the finding says so instead of guessing.',
+              ].map((item) => (
+                <li class="text-text-hero flex gap-3 text-sm leading-relaxed">
+                  <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+
+      <!-- Security: severity and the plan -->
+      <div class="mt-20 grid items-center gap-10 lg:grid-cols-2">
+        <div class="order-2 lg:order-1">
+          <h3 class="title-section mb-4 text-2xl">A severity that explains itself, and a plan for the change.</h3>
+          <p class="body-muted mb-6">
+            A rating starts from the weakness and moves with its context. Open to
+            the internet, privileged access, production and software past the end
+            of support raise it. Private-only and non-production lower it. Every
+            finding says why it landed where it did, so nobody has to take
+            &ldquo;Critical&rdquo; on trust.
+          </p>
+          <p class="text-text-hero mb-4 text-sm font-semibold">Every finding also carries what a change board asks for:</p>
+          <dl class="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            {
+              planningFields.map(([term, meaning]) => (
+                <div>
+                  <dt class="text-text-primary text-sm font-semibold">{term}</dt>
+                  <dd class="body-muted text-sm">{meaning}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+        <Shot
+          class="order-1 lg:order-2"
+          src={findingSecurity}
+          alt="A security finding: remote desktop open to the internet on a production server, rated critical because it is internet-facing and in production, with the rule that allows it and the plan for the change."
+          frame="panel"
+          sizes={half}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Example findings -->
+  <section id="examples" class="border-border-faintest scroll-mt-44 border-t md:scroll-mt-16">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">Example findings</p>
+      <h2 class="title-section mb-4 max-w-3xl">The kind of thing it finds.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        Eight findings from the demonstration estate, one from each section of the
+        report. The titles and figures are exactly as the report prints them.
+        Savings are a month, at Azure list price.
+      </p>
+
+      <div class="grid gap-5 md:grid-cols-2">
+        {
+          examples.map((e) => (
+            <article class="card flex flex-col p-7">
+              <div class="mb-4 flex items-start justify-between gap-6">
+                <p class="eyebrow">
+                  {e.pillar} &middot; {e.section}
+                </p>
+                <div class="flex-shrink-0 text-right">
+                  <p
+                    class:list={[
+                      'font-display text-2xl font-semibold leading-none',
+                      e.pillar === 'Cost' ? 'text-primary' : 'text-text-primary',
+                    ]}
+                  >
+                    {e.figure}
+                  </p>
+                  <p class="text-text-muted mt-1 text-xs">{e.figureNote}</p>
+                </div>
+              </div>
+              <h3 class="title-card mb-3 text-base leading-snug">{e.title}</h3>
+              <p class="body-muted mb-5 text-sm">{e.body}</p>
+              <ul class="mt-auto flex flex-wrap gap-2">
+                {e.plan.map((chip) => (
+                  <li class="bg-bg-3 text-text-muted rounded px-2.5 py-1 text-xs font-medium">{chip}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Frameworks -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <div class="grid items-start gap-10 lg:grid-cols-2">
+        <div>
+          <p class="eyebrow mb-4">For your next audit</p>
+          <h2 class="title-section mb-4">Read against the frameworks your auditors use.</h2>
+          <p class="body-muted mb-6">
+            The report sets its security and network findings beside the control
+            areas an auditor examines, so you can see where the work would help
+            before the audit starts.
+          </p>
+
+          <ul class="mb-8 space-y-3">
+            {
+              frameworks.map(([name, scope]) => (
+                <li class="flex gap-3 text-sm leading-relaxed">
+                  <span aria-hidden="true" class="text-primary mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                  <span>
+                    <span class="text-text-primary font-semibold">{name}.</span>{' '}
+                    <span class="body-muted text-sm">{scope}</span>
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+
+          <p class="text-text-hero mb-3 text-sm font-semibold">Each control area shows one of three results:</p>
+          <div class="mb-6 flex flex-wrap gap-2">
+            <span class="badge-neutral">Improvements found</span>
+            <span class="badge-neutral">No improvements found</span>
+            <span class="badge-neutral">Not assessed</span>
+          </div>
+          <p class="body-muted mb-8 text-sm">
+            This is a planning aid. It is not an audit and gives no opinion on any
+            standard. &ldquo;No improvements found&rdquo; means the checks that ran raised
+            nothing; most controls also rest on policy, process and records that a
+            review of Azure configuration cannot see.
+          </p>
+
+          <Shot
+            src={findingControls}
+            alt="The control areas one finding bears on: ISO 27001 A.8.20, DORA Article 9, ITGC access, and Cyber Essentials firewalls, with links to Microsoft's guidance."
+            frame="panel"
+            sizes={half}
+            caption="On each security and network finding: the control areas it bears on, and Microsoft’s own guidance for fixing it."
+          />
+        </div>
+
+        <Shot
+          src={reportAssurance}
+          alt="A page of the PDF report listing ISO 27001 Annex A controls, what was looked at for each, how many improvements were found and the highest severity among them."
+          frame="panel"
+          sizes={half}
+          caption="From the PDF report for the demonstration estate."
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- The report and the portal -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What you get</p>
+      <h2 class="title-section mb-4 max-w-3xl">A report your board can read and your engineers can use.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        We present the findings to you, then publish the report to your own page
+        in the HarvTech client portal. Your people sign in with their Microsoft
+        work accounts and see only your organisation&rsquo;s pages.
+      </p>
+
+      <Shot
+        src={portalReport}
+        alt="The client portal's report page: when the report was last updated, a download button for the PDF, the monthly saving, findings by severity and the top actions."
+        label="HarvTech client portal - report"
+        fade
+      />
+
+      <div class="mt-20 grid items-center gap-10 lg:grid-cols-2">
+        <Shot
+          src={reportSummary}
+          alt="The executive summary page of the PDF report: the monthly saving, security and network findings by severity, and the top ten actions."
+          frame="panel"
+          sizes={half}
+        />
+        <div>
+          <h3 class="title-section mb-6 text-2xl">Four ways to take it away.</h3>
+          <dl class="space-y-5">
+            {
+              [
+                ['The walk-through', 'We take you through the findings in person or on a call, starting with the ones that matter most.'],
+                ['The report page', 'The summary in your portal, with the date it was last updated, for anyone you give access to.'],
+                ['The PDF', 'An executive summary for the people who approve the work and a technical appendix for the people who do it.'],
+                ['CSV and Excel', 'Every finding as a row, with its planning fields, for your engineers to sort, assign and track.'],
+              ].map(([term, meaning]) => (
+                <div class="flex gap-4">
+                  <span aria-hidden="true" class="text-primary mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                  <div>
+                    <dt class="text-text-primary text-sm font-semibold">{term}</dt>
+                    <dd class="body-muted mt-0.5 text-sm">{meaning}</dd>
+                  </div>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Coverage -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">What it reads</p>
+      <h2 class="title-section mb-4 max-w-3xl">Thirteen areas of Azure, each in depth.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        Built for database-heavy estates: SQL Server on virtual machines, Azure SQL,
+        Databricks and Synapse get the same attention as the network and the
+        directory. Every area has cost checks and security checks.
+      </p>
+
+      <!-- A list, not cards: thirteen does not divide into tidy rows, and
+           the areas read better as a table of contents than as tiles. -->
+      <dl class="grid gap-x-12 md:grid-cols-2">
+        {
+          coverage.map((c) => (
+            <div class="border-border-subtle grid grid-cols-[9.5rem_1fr] gap-4 border-t py-4">
+              <dt class="text-text-primary text-sm font-semibold">{c.area}</dt>
+              <dd class="body-muted text-sm">{c.resources}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">How it works</p>
+      <h2 class="title-section mb-12 max-w-3xl">Four steps, and none of them change your estate.</h2>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        {
+          steps.map((s) => (
+            <div class="card p-7">
+              <p class="font-display text-primary text-4xl font-bold leading-none opacity-30">{s.number}</p>
+              <p class="title-card mt-4 mb-2">{s.title}</p>
+              <p class="body-muted text-sm">{s.body}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Access tiers: what you grant, and what each grant switches on -->
+      <div class="mt-20">
+        <h3 class="title-section mb-4 text-2xl">You choose how much it can read.</h3>
+        <p class="body-muted mb-8 max-w-3xl">
+          Access is granted in tiers, all of them read-only. Reader alone is a
+          complete engagement. Each further tier switches on more checks, and
+          anything you do not grant is reported as &ldquo;not assessed&rdquo;, never as
+          a clean result.
+        </p>
+        <div class="card divide-border-faintest divide-y">
+          {
+            accessTiers.map((t) => (
+              <div class="grid gap-x-8 gap-y-2 p-6 md:grid-cols-[5rem_1fr_1.6fr] md:items-baseline">
+                <div class="flex items-baseline gap-2 md:block md:text-right">
+                  <p class="font-display text-primary text-2xl font-semibold leading-none">{t.checks}</p>
+                  <p class="text-text-muted text-[0.65rem] font-semibold uppercase tracking-wider md:mt-1">checks</p>
+                </div>
+                <p class="text-text-primary text-sm font-semibold">{t.grant}</p>
+                <p class="body-muted text-sm">{t.unlocks}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <Shot
+        class="mt-14"
+        src={portalOnboarding}
+        alt="The onboarding page in the client portal: a readiness dial, how many checks are unlocked, a card for each tier of access, and a checklist where each grant shows as verified by HarvTech."
+        label="HarvTech client portal - onboarding"
+        caption="Your onboarding page in the client portal shows each grant, who needs to make it, and whether we have confirmed it works."
+        fade
+      />
+    </div>
+  </section>
+
+  <!-- Safeguards -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">For your security team</p>
+      <h2 class="title-section mb-4 max-w-3xl">What it can read, and what it never touches.</h2>
+      <p class="body-muted mb-12 max-w-3xl">
+        The first question from any regulated firm is what we will have access to.
+        This is the short answer; the full statement comes before you grant anything.
+      </p>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {
+          safeguards.map((s) => (
+            <div class="card p-7">
+              <p class="title-card mb-2">{s.title}</p>
+              <p class="body-muted text-sm">{s.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section class="border-border-faintest border-t">
+    <div class="container-page py-20">
+      <p class="eyebrow mb-4">Straight answers</p>
+      <h2 class="title-section mb-12 max-w-3xl">What people ask first.</h2>
+
+      <dl class="grid gap-x-12 gap-y-10 md:grid-cols-2">
+        {
+          questions.map((item) => (
+            <div>
+              <dt class="title-card mb-2">{item.q}</dt>
+              <dd class="body-muted text-sm">{item.a}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="mt-12 flex flex-wrap gap-3">
+        <a href="/services/security-hardening" class="btn-secondary text-sm">How remediation works &rarr;</a>
+        <a href="/services/finops" class="btn-secondary text-sm">Cost work after the health check &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <CallToAction
+    eyebrow="Find out what yours would show"
+    title="Thirty minutes is enough to scope it."
+    body="Tell us roughly what you run in Azure and what is worrying you. We will tell you what the health check would cover, what access it needs and what it costs."
+    topic="health-check"
+  />
+</BaseLayout>

@@ -1,0 +1,203 @@
+---
+/**
+ * ContactForm, the "request a call" form.
+ *
+ * WHAT IT DOES
+ * The site is static files on Azure Storage: there is no server to post
+ * a form to. So the form does not post anywhere. When the visitor presses
+ * the button, a few lines of script turn what they typed into an email
+ * (a `mailto:` link with the subject and body filled in) and hand it to
+ * their own email app. They press send there.
+ *
+ * WHY IT IS BUILT THIS WAY
+ *   - Nothing typed here ever reaches this website, so there is nothing
+ *     for us to store, secure, or add to the privacy policy.
+ *   - No third-party form service sees a prospect's details.
+ *   - No public endpoint to protect from spam.
+ * The cost is that it relies on the visitor having an email app set up.
+ * For the ones who do not, the same message is shown on the page with a
+ * copy button, next to the address to send it to.
+ * The decision is written up at /docs/decisions/contact-form-without-a-backend.
+ *
+ * The subject can be chosen in advance from the address:
+ * /contact?topic=health-check#request-a-call
+ */
+import { contact, callTopics } from '../data/contact';
+
+const field =
+  'bg-bg-2 border-border-medium text-text-primary placeholder:text-text-subtle focus:border-primary focus:ring-primary w-full rounded-lg border px-4 py-3 text-sm transition focus:ring-1 focus:outline-none';
+const label = 'text-text-hero mb-1.5 block text-sm font-medium';
+---
+
+<form class="space-y-5" data-call-form data-to={contact.email} novalidate>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class={label} for="cf-name">Your name</label>
+      <input class={field} id="cf-name" name="name" type="text" autocomplete="name" required />
+    </div>
+    <div>
+      <label class={label} for="cf-company">Company</label>
+      <input class={field} id="cf-company" name="company" type="text" autocomplete="organization" required />
+    </div>
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class={label} for="cf-role">Your role <span class="text-text-muted font-normal">(optional)</span></label>
+      <input class={field} id="cf-role" name="role" type="text" autocomplete="organization-title" />
+    </div>
+    <div>
+      <label class={label} for="cf-phone">Phone <span class="text-text-muted font-normal">(optional)</span></label>
+      <input class={field} id="cf-phone" name="phone" type="tel" autocomplete="tel" />
+    </div>
+  </div>
+
+  <div>
+    <label class={label} for="cf-topic">What would you like to talk about?</label>
+    <select class={field} id="cf-topic" name="topic">
+      {callTopics.map((t) => <option value={t.label} data-slug={t.slug}>{t.label}</option>)}
+    </select>
+  </div>
+
+  <div>
+    <label class={label} for="cf-times">Good times for a call <span class="text-text-muted font-normal">(optional)</span></label>
+    <input class={field} id="cf-times" name="times" type="text" placeholder="For example: Tuesday or Thursday afternoon" />
+  </div>
+
+  <div>
+    <label class={label} for="cf-message">Anything we should know first <span class="text-text-muted font-normal">(optional)</span></label>
+    <textarea
+      class={field}
+      id="cf-message"
+      name="message"
+      rows="4"
+      placeholder="Roughly how big the estate is, what prompted this, any deadline"
+    ></textarea>
+  </div>
+
+  <p class="text-accent-red-soft hidden text-sm" data-call-error role="alert">
+    Please add your name and company so we know who to call.
+  </p>
+
+  <div class="flex flex-wrap items-center gap-4">
+    <button type="submit" class="btn-primary">Prepare my email</button>
+    <p class="text-text-muted max-w-sm text-xs leading-relaxed">
+      This opens your email app with the request written out. Nothing is sent to this
+      website, and nothing leaves your computer until you press send.
+    </p>
+  </div>
+
+  <noscript>
+    <p class="body-muted text-sm">
+      This form needs JavaScript to write the email for you. You can email us directly at
+      <a class="text-primary underline" href={`mailto:${contact.email}`}>{contact.email}</a>.
+    </p>
+  </noscript>
+</form>
+
+<!-- Shown once the button has been pressed: confirms what happened, and
+     gives the same message to copy for anyone whose email app did not open. -->
+<div class="card mt-6 hidden p-6" data-call-done aria-live="polite">
+  <p class="title-card mb-2">Your email is ready to send</p>
+  <p class="body-muted mb-4 text-sm">
+    Your email app should have opened with the request written out. Press send there and it is on
+    its way; we reply within one business day.
+  </p>
+  <p class="text-text-hero mb-2 text-sm font-medium">
+    Nothing opened? Copy the message below and send it to
+    <a class="text-primary underline" href={`mailto:${contact.email}`}>{contact.email}</a>.
+  </p>
+  <textarea class={`${field} font-mono text-xs`} rows="9" readonly data-call-text aria-label="Your request, ready to copy"></textarea>
+  <div class="mt-3 flex items-center gap-3">
+    <button type="button" class="btn-secondary" data-call-copy>Copy the message</button>
+    <span class="text-text-muted text-xs" data-call-copied aria-live="polite"></span>
+  </div>
+</div>
+
+<style>
+  /* A readable red on black for the one validation message. The theme's
+     accent red (#80142B) is too dark for text on this background. */
+  .text-accent-red-soft {
+    color: rgb(228 142 158);
+  }
+</style>
+
+<script>
+  // Astro bundles this into its own small file; it runs once the page has
+  // loaded. Plain DOM code, no framework.
+  const form = document.querySelector<HTMLFormElement>('[data-call-form]');
+
+  if (form) {
+    const to = form.dataset.to ?? '';
+    const done = document.querySelector<HTMLElement>('[data-call-done]');
+    const text = document.querySelector<HTMLTextAreaElement>('[data-call-text]');
+    const error = form.querySelector<HTMLElement>('[data-call-error]');
+    const copy = document.querySelector<HTMLButtonElement>('[data-call-copy]');
+    const copied = document.querySelector<HTMLElement>('[data-call-copied]');
+    const topic = form.querySelector<HTMLSelectElement>('select[name="topic"]');
+
+    // A link can pick the subject in advance: /contact?topic=health-check
+    const wanted = new URLSearchParams(window.location.search).get('topic');
+    if (wanted && topic) {
+      for (const option of Array.from(topic.options)) {
+        if (option.dataset.slug === wanted) topic.value = option.value;
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const value = (name: string) => String(data.get(name) ?? '').trim();
+
+      // Only two things are required: who is asking, and from where.
+      const missing = !value('name') || !value('company');
+      error?.classList.toggle('hidden', !missing);
+      if (missing) {
+        const first = !value('name') ? 'name' : 'company';
+        form.querySelector<HTMLInputElement>(`[name="${first}"]`)?.focus();
+        return;
+      }
+
+      // The email, line by line. Optional answers left blank are left out.
+      const lines = [
+        `Name: ${value('name')}`,
+        `Company: ${value('company')}`,
+        value('role') && `Role: ${value('role')}`,
+        value('phone') && `Phone: ${value('phone')}`,
+        `About: ${value('topic')}`,
+        value('times') && `Good times for a call: ${value('times')}`,
+        value('message') && `\n${value('message')}`,
+      ].filter(Boolean);
+
+      const subject = `Call request: ${value('topic')} - ${value('company')}`;
+      const body = lines.join('\n');
+
+      // Show the confirmation first, so it is on screen whether or not an
+      // email app takes over the window.
+      if (text) text.value = `To: ${to}\nSubject: ${subject}\n\n${body}`;
+      done?.classList.remove('hidden');
+      done?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // encodeURIComponent makes the text safe to carry in a link: spaces,
+      // line breaks and symbols such as & would otherwise cut it short.
+      // Email expects each line to end "\r\n", so the breaks are widened
+      // first; some email apps drop a bare "\n".
+      const mailBody = body.replace(/\n/g, '\r\n');
+      window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailBody)}`;
+    });
+
+    copy?.addEventListener('click', async () => {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text.value);
+        if (copied) copied.textContent = 'Copied.';
+      } catch {
+        // Clipboard access can be refused; selecting the text lets the
+        // visitor copy it by hand.
+        text.select();
+        if (copied) copied.textContent = 'Press Ctrl+C or Cmd+C to copy.';
+      }
+    });
+  }
+</script>

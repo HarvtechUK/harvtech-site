@@ -3,6 +3,7 @@
 // London market. Single column, buyer-facing headline; the platform.tf
 // code window moved to /approach so the first screen speaks to the
 // audit-owner, not the engineer. Teal and silver glows retained.
+import { counts } from '../data/healthCheck';
 ---
 
 <section class="relative overflow-hidden">
@@ -21,6 +22,19 @@
 
   <div class="container-page relative py-20 md:py-28 lg:py-32">
     <div class="max-w-3xl">
+      <!-- Announcement: one line pointing at the newest thing on the site.
+           The headline below stays the positioning statement. On a phone
+           the line is shortened so the pill never wraps. -->
+      <a
+        href="/health-check"
+        class="border-border-medium bg-bg-2/80 text-text-hero hover:border-primary/40 group mb-8 inline-flex items-center gap-3 rounded-full border py-1.5 pr-4 pl-1.5 text-sm transition"
+      >
+        <span class="badge-accent">New</span>
+        <span class="sm:hidden">The Azure Health Check</span>
+        <span class="hidden sm:inline">The Azure Health Check: {counts.checks} checks across cost, security and network</span>
+        <span aria-hidden="true" class="text-primary transition group-hover:translate-x-0.5">&rarr;</span>
+      </a>
+
       <p class="eyebrow mb-6">Azure security &amp; compliance</p>
 
       <h1 class="hero-gradient mb-6 text-4xl font-bold tracking-tight leading-[1.08] text-balance md:text-5xl">
@@ -36,7 +50,7 @@
       </p>
 
       <div class="mt-10 flex flex-wrap gap-3">
-        <a href="mailto:alex@harvtech.co.uk" class="btn-primary text-base">
+        <a href="/contact#request-a-call" class="btn-primary text-base">
           Talk to us
         </a>
         <a href="/services/security-hardening" class="btn-secondary text-base">
