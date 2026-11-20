@@ -26,6 +26,14 @@ portal_containers = {
   requests = {
     partition_key_path = "/client_id"
   }
+  # Published health-check reports (one document per client) and what
+  # client users did in the portal (portal/app/reports.py, activity.py).
+  reports = {
+    partition_key_path = "/client_id"
+  }
+  activity = {
+    partition_key_path = "/client_id"
+  }
 }
 
 # Entra app for "Sign in with Microsoft". Public identifier, safe in git.

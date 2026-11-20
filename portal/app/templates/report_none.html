@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Report - HarvTech Portal{% endblock %}
+{% block content %}
+<p class="eyebrow">Azure health check &middot; report</p>
+<h1 class="tight">{{ client_name or "Your report" }}</h1>
+{% include "_flash.html" %}
+<section class="card">
+  <h2>No report has been published yet</h2>
+  <p class="muted">Your report appears here once HarvTech has scanned your estate and reviewed the
+  findings. Until then, the <a href="/onboarding{{ suffix }}">onboarding page</a> shows what is
+  still needed before the first scan.</p>
+</section>
+{% endblock %}

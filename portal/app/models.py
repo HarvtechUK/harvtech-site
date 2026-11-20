@@ -247,3 +247,45 @@ class ServiceRequest(BaseModel):
     response: str = ""
     handled_by: str = ""
     closed_at: datetime | None = None
+
+
+# ── Published reports and activity ───────────────────────────────────────────
+
+
+class Report(BaseModel):
+    """A client's published health-check report.
+
+    HarvTech publishes it; the client only ever reads it. `pack` is the
+    report as data, exactly as `finops publish-report` wrote it (see
+    app/reports.py for what is checked before it is accepted). The PDF is
+    kept beside it in blob storage, not in this document: Cosmos documents
+    stop at 2 MB and a report PDF is often larger.
+
+    One document per client (id = client_id): publishing again replaces
+    the report, so "the report" always means the latest one.
+    """
+
+    id: str
+    client_id: str
+    pack: dict
+    published_at: datetime
+    published_by: str
+    pdf_filename: str = ""
+    pdf_bytes: int = 0  # size of the PDF, 0 when none was uploaded
+
+
+class ActivityEvent(BaseModel):
+    """One thing a client user did in the portal: signed in, opened the
+    report, downloaded the PDF.
+
+    This is what lets HarvTech see whether a report has been read before a
+    review meeting. It records the page, never what was typed, and the
+    security statement tells clients it is kept.
+    """
+
+    id: str
+    client_id: str
+    at: datetime
+    who: str                 # their sign-in name
+    kind: str                # "sign_in" | "view" | "download"
+    what: str = ""           # which page or file

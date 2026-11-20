@@ -44,8 +44,10 @@ def nav_for(user: dict | None) -> list[dict]:
         links.append({"href": "/", "label": "Timesheets"})
     if access.is_staff(user):
         links.append({"href": "/admin/onboarding", "label": "Onboarding"})
+        links.append({"href": "/admin/activity", "label": "Activity"})
     elif access.can_see_onboarding(user):
         links.append({"href": "/onboarding", "label": "Onboarding"})
+        links.append({"href": "/report", "label": "Report"})
         links.append({"href": "/documents/security", "label": "Security"})
         links.append({"href": "/requests", "label": "Requests"})
     return links

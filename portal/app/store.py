@@ -38,5 +38,13 @@ list_requests = _backend.list_requests
 get_request = _backend.get_request
 save_request = _backend.save_request
 
+# Published reports (the document, and the PDF beside it) and activity.
+get_report = _backend.get_report
+save_report = _backend.save_report
+get_report_pdf = _backend.get_report_pdf
+save_report_pdf = _backend.save_report_pdf
+add_activity = _backend.add_activity
+list_activity = _backend.list_activity
+
 # Handy for a log line / health output: which backend are we on?
 BACKEND_NAME = _backend.__name__.rsplit(".", 1)[-1]

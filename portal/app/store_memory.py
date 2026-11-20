@@ -11,7 +11,15 @@ store_cosmos.py is the one that persists.
 """
 
 from . import sample_data
-from .models import Engagement, Onboarding, ServiceRequest, Timesheet, User
+from .models import (
+    ActivityEvent,
+    Engagement,
+    Onboarding,
+    Report,
+    ServiceRequest,
+    Timesheet,
+    User,
+)
 
 # Copy the seed lists so mutating the store doesn't edit sample_data's
 # own lists. (`list(...)` makes a new list; the objects inside are still
@@ -23,6 +31,9 @@ _users: list[User] = []  # empty locally; real portal users live in Cosmos
 # by key, and a dict makes "save" the same one line whether new or changed.
 _onboardings: dict[str, Onboarding] = {o.client_id: o for o in sample_data.onboardings()}
 _requests: dict[str, ServiceRequest] = {r.id: r for r in sample_data.requests()}
+_reports: dict[str, Report] = {}
+_report_pdfs: dict[str, bytes] = {}
+_activity: list[ActivityEvent] = []
 
 
 def list_engagements() -> list[Engagement]:
@@ -87,10 +98,43 @@ def save_request(request: ServiceRequest) -> None:
     _requests[request.id] = request
 
 
+# --- Published reports ---
+
+def get_report(client_id: str) -> Report | None:
+    return _reports.get(client_id)
+
+
+def save_report(report: Report) -> None:
+    _reports[report.client_id] = report
+
+
+def get_report_pdf(client_id: str) -> bytes | None:
+    return _report_pdfs.get(client_id)
+
+
+def save_report_pdf(client_id: str, content: bytes) -> None:
+    _report_pdfs[client_id] = content
+
+
+# --- Activity ---
+
+def add_activity(event: ActivityEvent) -> None:
+    _activity.append(event)
+
+
+def list_activity(client_id: str | None = None, limit: int = 200) -> list[ActivityEvent]:
+    """Newest first: one client's events, or everyone's when client_id is None."""
+    events = [e for e in _activity if client_id is None or e.client_id == client_id]
+    return sorted(events, key=lambda e: e.at, reverse=True)[:limit]
+
+
 def reset() -> None:
     """Put the store back to its seed. For tests, so one test's writes
     never leak into the next."""
     global _engagements, _timesheets, _users, _onboardings, _requests
+    _reports.clear()
+    _report_pdfs.clear()
+    _activity.clear()
     _engagements = list(sample_data.ENGAGEMENTS)
     _timesheets = [t.model_copy(deep=True) for t in sample_data.TIMESHEETS]
     _users = []

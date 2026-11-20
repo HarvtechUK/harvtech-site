@@ -28,7 +28,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from . import access, onboarding_services as rules, store
+from . import access, activity, onboarding_services as rules, store
 from .auth import require_user
 from .models import ItemStatus, RequestStatus
 from .notify import notify
@@ -43,7 +43,24 @@ def _when(value) -> str:
     return f"{value.day} {value:%b %Y}" if value else ""
 
 
+def _when_time(value) -> str:
+    """'3 Nov 2026, 14:05' — for activity, where the time of day matters."""
+    return f"{value.day} {value:%b %Y, %H:%M}" if value else ""
+
+
+def _iso_when(value) -> str:
+    """'20 Nov 2026' from the ISO timestamps a report pack carries."""
+    from datetime import datetime
+
+    try:
+        return _when(datetime.fromisoformat(str(value).replace("Z", "+00:00")))
+    except ValueError:
+        return str(value or "")
+
+
 templates.env.filters["when"] = _when
+templates.env.filters["when_time"] = _when_time
+templates.env.filters["iso_when"] = _iso_when
 
 # The readiness ring is an SVG circle of this radius; its circumference is
 # what the stroke-dasharray arithmetic in the template needs.
@@ -124,6 +141,7 @@ def onboarding_dashboard(request: Request, user: dict | None = Depends(require_u
     if onboarding is None:
         return _page(request, user, "onboarding_none.html", "Onboarding")
     ready = rules.readiness(onboarding)
+    activity.record(user, activity.VIEW, "Onboarding")
     return _page(
         request,
         user,
@@ -180,6 +198,7 @@ def document_onboarding(request: Request, user: dict | None = Depends(require_us
     """The onboarding guide, generated from the same catalogue as the checklist."""
     if not access.can_see_onboarding(user):
         return RedirectResponse("/", 303)
+    activity.record(user, activity.VIEW, "Onboarding guide")
     return _page(
         request,
         user,
@@ -197,6 +216,7 @@ def document_security(request: Request, user: dict | None = Depends(require_user
         return RedirectResponse("/", 303)
     client_id = _client_id_for(request, user)
     onboarding = store.get_onboarding(client_id) if client_id else None
+    activity.record(user, activity.VIEW, "Security statement")
     return _page(
         request,
         user,
@@ -337,6 +357,8 @@ def admin_client(request: Request, client_id: str, user: dict | None = Depends(r
         kinds=rules.REQUEST_KINDS,
         history=list(reversed(onboarding.history))[:30],
         ItemStatus=ItemStatus,
+        report=store.get_report(client_id),
+        activity=activity.summary(client_id),
     )
 
 

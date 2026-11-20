@@ -167,6 +167,17 @@ client, with one rule: **the client says "done"; only HarvTech says
   pages, and is posted to `NOTIFY_WEBHOOK_URL` when one is set. The
   webhook is best effort and can never fail a client's button.
 
+- **The report** (`reports` container, `/client_id`, one document per
+  client; the PDF in blob storage under `<client id>/report.pdf`): a
+  snapshot HarvTech publishes by uploading the two files `finops
+  publish-report` writes. The portal holds that snapshot and nothing else
+  from a scan; it has no connection to the scanning engine. The PDF is
+  served by the portal's own identity to a signed-in user of that client,
+  with `Cache-Control: private, no-store`; there are no SAS links.
+- **Activity** (`activity` container, `/client_id`): client sign-ins, page
+  views and downloads, for HarvTech to see whether a report has been read.
+  Staff are not recorded. Clients are told in the statement.
+
 A client user's client id always comes from their session, never from
 the URL or a form, so there is nothing to tamper with. Staff may add
 `?client=<id>` to see a page as that client sees it.
