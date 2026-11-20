@@ -67,6 +67,10 @@ jobs:
   changes:
     name: Site changed?
     runs-on: ubuntu-latest
+    # This job runs on every pull request, so it gets the least it needs:
+    # it reads the repository and nothing else.
+    permissions:
+      contents: read
     outputs:
       site: ${{ steps.diff.outputs.site }}
     steps:

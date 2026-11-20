@@ -1,6 +1,15 @@
 name: Data Platform
 
-# Triggered only when data-platform/ files change.
+# Tests and plans the data-platform/ stack. Its jobs do real work only
+# when data-platform/ files change (or modules/, the shared scanner
+# config, or this file itself).
+#
+# The workflow itself starts on EVERY pull request into dev or main, and
+# the `changes` job below decides whether this stack is affected. The
+# reason is branch protection: the jobs here are required checks on main,
+# and a required check that never starts blocks the merge for ever
+# ("Expected — waiting for status to be reported"). A job that starts and
+# is then skipped counts as passed. site.yml has the long version.
 #
 # feat/* ──PR──→ dev   Stage 1 only
 # dev    ──PR──→ main  Stage 1 + Stage 2 plan
@@ -18,15 +27,10 @@ on:
       - '.trivyignore'
       - '.tflint.hcl'
       - '.github/workflows/data-platform.yml'
+  # No `paths:` here on purpose (see the note at the top). The paths
+  # live in the `changes` job instead; keep the two lists the same.
   pull_request:
     branches: [main, dev]
-    paths:
-      - 'data-platform/**'
-      - 'modules/**'
-      - '.checkov.yaml'
-      - '.trivyignore'
-      - '.tflint.hcl'
-      - '.github/workflows/data-platform.yml'
   schedule:
     - cron: '32 6 * * *'
   workflow_dispatch:
@@ -54,8 +58,56 @@ env:
 
 jobs:
 
+  # Answers one question: does this run need to test the data-platform/ stack?
+  #   push / schedule / manual run -> yes, always (the push trigger has
+  #                                   already filtered on paths)
+  #   pull request                 -> only if it touches the paths below
+  changes:
+    name: Data platform changed?
+    runs-on: ubuntu-latest
+    # This job runs on every pull request, so it gets the least it needs:
+    # it reads the repository and nothing else (no Azure login, no
+    # security-events).
+    permissions:
+      contents: read
+    outputs:
+      stack: ${{ steps.diff.outputs.stack }}
+    steps:
+      # On a pull request GitHub checks out a temporary merge commit: the
+      # base branch with the pull request merged in. Its first parent is
+      # the base branch, so "first parent vs this commit" is exactly what
+      # the pull request changes. Depth 2 fetches that parent too.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Did this run touch the stack?
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          stack=true
+          if [ "$EVENT" = "pull_request" ]; then
+            # If the comparison cannot be made, stay on "true": testing a
+            # stack that did not change wastes a minute, skipping one that
+            # did change lets it through unchecked.
+            if changed=$(git diff --name-only HEAD^1 HEAD); then
+              echo "$changed"
+              if ! echo "$changed" | grep -qE '^(data-platform/|modules/|\.checkov\.yaml$|\.trivyignore$|\.tflint\.hcl$|\.github/workflows/data-platform\.yml$)'; then
+                stack=false
+              fi
+            fi
+          fi
+          echo "stack=$stack" >> "$GITHUB_OUTPUT"
+          echo "Test the stack: $stack"
+
   checkov:
     name: Checkov (data-platform)
+    needs: changes
+    # Skipped (which branch protection counts as passed) only when the
+    # `changes` job succeeded AND said the stack is untouched. If that
+    # job itself failed, run anyway: without `!cancelled()` a failed
+    # `needs` would skip this job, and a skip would read as a pass.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.stack == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -75,6 +127,9 @@ jobs:
 
   trivy:
     name: Trivy (data-platform)
+    needs: changes
+    # Same rule as the Checkov job above.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.stack == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -93,6 +148,9 @@ jobs:
 
   tflint:
     name: tflint (data-platform)
+    needs: changes
+    # Same rule as the Checkov job above.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.stack == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -113,6 +171,9 @@ jobs:
 
   validate-terraform:
     name: Validate Terraform (data-platform)
+    needs: changes
+    # Same rule as the Checkov job above.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.stack == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -130,6 +191,9 @@ jobs:
 
   terraform-data-platform:
     name: Terraform data-platform
+    # No `changes` condition needed here: when the four jobs above are
+    # skipped, GitHub skips this job with them, and that counts as
+    # passed too.
     needs: [checkov, trivy, tflint, validate-terraform]
     if: >-
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
