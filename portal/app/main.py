@@ -22,7 +22,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from . import access, auth, onboarding_web, services, store, web
+from . import access, auth, onboarding_web, report_web, services, store, web
 from .auth import require_user
 from .config import check_safe_to_start, settings
 from .models import Engagement, Timesheet, TimesheetCreate, TimesheetStatus
@@ -35,7 +35,7 @@ check_safe_to_start(settings)
 app = FastAPI(
     title="HarvTech Client Portal",
     summary="Timesheet and engagement approval for HarvTech clients.",
-    version="0.5.0",
+    version="0.6.0",
 )
 
 # Signed session cookie — holds the logged-in user and the in-flight
@@ -59,6 +59,10 @@ app.include_router(web.router, dependencies=[Depends(require_user)])
 # Client onboarding: the checklist, readiness dashboard, documents and
 # data-handling requests, and HarvTech's admin pages over them.
 app.include_router(onboarding_web.router, dependencies=[Depends(require_user)])
+
+# The published health-check report, its PDF, and the pages HarvTech
+# publishes from and sees client activity on.
+app.include_router(report_web.router, dependencies=[Depends(require_user)])
 
 # Serve the CSS (and any future images) from app/static at /static.
 # Path(__file__).parent is the app/ directory, found relative to THIS

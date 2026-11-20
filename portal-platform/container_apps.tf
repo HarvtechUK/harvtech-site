@@ -84,6 +84,9 @@ module "container_app" {
     ENTRA_CLIENT_ID                       = var.portal_entra_client_id
     ENTRA_AUTHORITY                       = "https://login.microsoftonline.com/organizations"
     ENTRA_REDIRECT_URI                    = "https://${local.portal_hostname}/auth/callback"
+    # Where published report PDFs live (storage.tf); read keylessly.
+    REPORTS_BLOB_ENDPOINT = module.reports_storage.primary_blob_endpoint
+    REPORTS_CONTAINER     = "reports"
   }
 
   secrets = {

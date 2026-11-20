@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Activity - HarvTech admin{% endblock %}
+{% block container_class %}wide{% endblock %}
+
+{# What client users have done in the portal, newest first. Staff are not
+   recorded (see activity.py). #}
+
+{% block content %}
+<p class="eyebrow">HarvTech admin</p>
+<h1 class="tight">Client activity</h1>
+{% include "_flash.html" %}
+<table class="grid">
+  <thead><tr><th>When</th><th>Client</th><th>Who</th><th>Did</th></tr></thead>
+  <tbody>
+    {% for e in events %}
+      <tr>
+        <td class="nowrap">{{ e.at|when_time }}</td>
+        <td><a href="/admin/onboarding/{{ e.client_id }}">{{ names.get(e.client_id, e.client_id) }}</a></td>
+        <td>{{ e.who }}</td>
+        <td>{% if e.kind == "sign_in" %}Signed in{% elif e.kind == "download" %}<span class="teal">Downloaded</span> {{ e.what }}{% else %}Viewed {{ e.what }}{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No client activity yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

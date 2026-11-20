@@ -67,6 +67,26 @@ verified by hand on the same page, with a line saying what was confirmed.
 Tier A verified is the bar for a first scan; the dashboard then says
 "Ready for the first scan". Everything else adds depth and can follow.
 
+## 6. Publish the report
+
+After the scan, and once you have read the top findings yourself, from
+the `harvtech-finops` repository:
+
+```bash
+cd engine && uv run finops publish-report --customer "Client Name" --out pack
+```
+
+It writes `pack/report.json` and `pack/report.pdf`. Portal → the client's
+admin page → *Report* → choose both files → *Publish*. The confirmation
+quotes the customer name inside the pack: read it. Publishing replaces
+what the client sees at once. Uploading only `report.json` keeps the PDF
+already there.
+
+The same card then shows whether the client has opened the report and
+downloaded the PDF, and **Activity** in the top bar lists every client's
+sign-ins and views. Staff previews (*View as the client sees it*) are not
+counted.
+
 ## Requests
 
 A client can ask, from **Requests**, for the things the statement

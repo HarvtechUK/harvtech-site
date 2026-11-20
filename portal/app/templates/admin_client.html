@@ -41,6 +41,49 @@
   </form>
 </section>
 
+<section class="card">
+  <h2>Report</h2>
+  {% if report %}
+    <p>Published <strong>{{ report.published_at|when_time }}</strong> by {{ report.published_by }}:
+      "{{ report.pack.customer }}", scan finished {{ report.pack.scan.finished_at|iso_when }},
+      {{ report.pack.findings_total }} findings{% if report.pdf_bytes %}, with PDF{% else %}, <span class="amber">no PDF</span>{% endif %}.
+      <a href="/report?client={{ onboarding.client_id }}">View as the client sees it</a></p>
+    <p class="small {{ 'teal' if activity.report_views else 'amber' }}">
+      {% if activity.report_views %}Opened {{ activity.report_views }} time{{ "s" if activity.report_views != 1 }} by the client,
+        last on {{ activity.report_last_viewed|when_time }}; PDF downloaded {{ activity.downloads }} time{{ "s" if activity.downloads != 1 }}.
+      {% else %}The client has not opened it yet.{% endif %}</p>
+  {% else %}
+    <p class="muted">Nothing published for this client yet.</p>
+  {% endif %}
+  <p class="muted small">Run <code>finops publish-report --customer "{{ onboarding.client_name }}" --out pack</code>,
+  then upload the two files it writes. Check the customer name in the confirmation: publishing
+  replaces what this client sees at once.</p>
+  {# enctype="multipart/form-data" is what lets a form carry files. #}
+  <form method="post" action="/admin/onboarding/{{ onboarding.client_id }}/report" enctype="multipart/form-data" class="form">
+    <div class="field-row">
+      <label class="field">report.json <input type="file" name="pack" accept=".json,application/json" required /></label>
+      <label class="field">report.pdf <input type="file" name="pdf" accept=".pdf,application/pdf" /></label>
+    </div>
+    <button class="btn btn-approve">Publish to {{ onboarding.client_name }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Who has been in</h2>
+  {% if activity.people %}
+    <table class="grid">
+      <thead><tr><th>Who</th><th>Last seen</th><th>Sign-ins</th><th>Pages viewed</th><th>Downloads</th></tr></thead>
+      <tbody>
+        {% for p in activity.people %}
+          <tr><td>{{ p.who }}</td><td>{{ p.last_seen|when_time }}</td><td>{{ p.sign_ins }}</td><td>{{ p.views }}</td><td>{{ p.downloads }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Nobody from this client has signed in yet.</p>
+  {% endif %}
+</section>
+
 {% for t in ready.tiers %}
   <section class="checklist">
     <header><h2><span class="tier-key">{{ t.tier.key }}</span> {{ t.tier.name }}

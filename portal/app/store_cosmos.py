@@ -22,7 +22,15 @@ from functools import lru_cache
 from azure.cosmos import ContainerProxy, CosmosClient, exceptions
 from azure.identity import DefaultAzureCredential
 
-from .models import Engagement, Onboarding, ServiceRequest, Timesheet, User
+from .models import (
+    ActivityEvent,
+    Engagement,
+    Onboarding,
+    Report,
+    ServiceRequest,
+    Timesheet,
+    User,
+)
 
 _DATABASE_NAME = os.environ.get("COSMOS_DATABASE", "portal")
 
@@ -198,3 +206,82 @@ def get_request(request_id: str) -> ServiceRequest | None:
 
 def save_request(request: ServiceRequest) -> None:
     _container("requests").upsert_item(body=request.model_dump(mode="json"))
+
+
+# --- Published reports ---
+# The report document lives in Cosmos (`reports`, partitioned by
+# /client_id, id = client id, so reading a client's report is a point
+# read). The PDF lives in blob storage, because a Cosmos document cannot
+# exceed 2 MB. Both are keyed by client id and nothing else: there is no
+# way to ask for a report by any other handle.
+
+def get_report(client_id: str) -> Report | None:
+    try:
+        row = _container("reports").read_item(item=client_id, partition_key=client_id)
+    except exceptions.CosmosResourceNotFoundError:
+        return None
+    return Report(**row)
+
+
+def save_report(report: Report) -> None:
+    _container("reports").upsert_item(body=report.model_dump(mode="json"))
+
+
+@lru_cache(maxsize=1)
+def _blobs():
+    """The blob container that holds report PDFs, keyless like Cosmos.
+
+    Imported here, not at the top, so the app starts without the storage
+    SDK doing anything until a PDF is actually read or written.
+    """
+    from azure.storage.blob import BlobServiceClient
+
+    endpoint = os.environ["REPORTS_BLOB_ENDPOINT"]
+    service = BlobServiceClient(account_url=endpoint, credential=DefaultAzureCredential())
+    return service.get_container_client(os.environ.get("REPORTS_CONTAINER", "reports"))
+
+
+def _pdf_name(client_id: str) -> str:
+    return f"{client_id}/report.pdf"
+
+
+def get_report_pdf(client_id: str) -> bytes | None:
+    from azure.core.exceptions import ResourceNotFoundError
+
+    try:
+        return _blobs().download_blob(_pdf_name(client_id)).readall()
+    except ResourceNotFoundError:
+        return None
+
+
+def save_report_pdf(client_id: str, content: bytes) -> None:
+    _blobs().upload_blob(_pdf_name(client_id), content, overwrite=True)
+
+
+# --- Activity ---
+
+def add_activity(event: ActivityEvent) -> None:
+    _container("activity").create_item(body=event.model_dump(mode="json"))
+
+
+def list_activity(client_id: str | None = None, limit: int = 200) -> list[ActivityEvent]:
+    """Newest first. A client's events come from their partition alone."""
+    try:
+        if client_id is None:
+            rows = _container("activity").query_items(
+                query="SELECT TOP @limit * FROM c ORDER BY c.at DESC",
+                parameters=[{"name": "@limit", "value": limit}],
+                enable_cross_partition_query=True,
+            )
+        else:
+            rows = _container("activity").query_items(
+                query="SELECT TOP @limit * FROM c WHERE c.client_id = @client_id ORDER BY c.at DESC",
+                parameters=[
+                    {"name": "@limit", "value": limit},
+                    {"name": "@client_id", "value": client_id},
+                ],
+                partition_key=client_id,
+            )
+        return [ActivityEvent(**row) for row in rows]
+    except exceptions.CosmosResourceNotFoundError:
+        return []
