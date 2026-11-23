@@ -21,6 +21,7 @@ import {
   accessTiers,
   safeguards,
   questions,
+  savingsNote,
 } from '../data/healthCheck';
 
 import overview from '../assets/health-check/dashboard-overview.png';
@@ -174,7 +175,7 @@ const frameworks = [
           <ul class="space-y-3">
             {
               [
-                'Priced in pounds at Azure list price, from Microsoft’s public price list. Any discount you have only lowers the figure.',
+                'Priced in pounds at Azure list price, from Microsoft’s public price list.',
                 'The headline counts one option per resource, so two ways of saving on the same server are never added together.',
                 'Sized from 30 days of your own metrics where the answer depends on use.',
                 'Where a figure cannot be worked out honestly, the finding says so instead of guessing.',
@@ -186,6 +187,10 @@ const frameworks = [
               ))
             }
           </ul>
+          <!-- The disclaimer, where the first saving is shown. -->
+          <p class="border-border-medium text-text-muted mt-6 border-l-2 pl-4 text-sm leading-relaxed">
+            {savingsNote}
+          </p>
         </div>
       </div>
 
@@ -265,6 +270,8 @@ const frameworks = [
           ))
         }
       </div>
+
+      <p class="text-text-muted mt-8 max-w-3xl text-xs leading-relaxed">{savingsNote}</p>
     </div>
   </section>
 

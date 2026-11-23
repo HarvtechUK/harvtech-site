@@ -80,6 +80,14 @@ export const pillars: Pillar[] = [
   },
 ];
 
+/**
+ * The disclaimer shown wherever the page quotes a saving. What a client
+ * really pays depends on their own agreement, so every figure is a list
+ * price and the page has to say so in plain words.
+ */
+export const savingsNote =
+  'Savings are estimates at Azure list price in pounds. What you actually pay depends on your own agreement: a CSP or Enterprise Agreement discount, reservations, savings plans or negotiated rates will make the real figure different, and usually lower. Treat each figure as the size and order of the opportunity, to be confirmed against your own bill before it goes into a budget.';
+
 export interface ExampleFinding {
   pillar: 'Cost' | 'Security' | 'Network';
   section: string;
@@ -314,7 +322,7 @@ export const questions: Question[] = [
   },
   {
     q: 'How real are the savings?',
-    a: 'Each one is priced at Azure list price in pounds from Microsoft’s public price list, so any discount you have only lowers it. The headline counts one option per resource, so two ways of saving on the same server are never added together. Where a figure cannot be worked out honestly, the finding says so.',
+    a: 'They are estimates. Each one is priced at Azure list price in pounds from Microsoft’s public price list, so the real figure depends on what you pay through your CSP or Enterprise Agreement and will usually be lower. The headline counts one option per resource, so two ways of saving on the same server are never added together. Where a figure cannot be worked out honestly, the finding says so.',
   },
   {
     q: 'What if we only grant Reader?',
