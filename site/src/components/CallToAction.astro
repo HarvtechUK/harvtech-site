@@ -3,8 +3,8 @@
  * CallToAction, the "talk to us" card that closes a page.
  *
  * One component so every page offers the same ways in, in the same
- * order: the request-a-call form first, then a booking page and a phone
- * number if they are set in src/data/contact.ts, then plain email.
+ * order: the request-a-call form first, then a booking page if one is
+ * set in src/data/contact.ts, then plain email.
  *
  * `topic` pre-selects the subject on the form, so someone arriving from
  * the health check page does not have to say so again.
@@ -45,13 +45,6 @@ const { eyebrow = 'Get started', title, body, topic } = Astro.props;
             contact.bookingUrl && (
               <a href={contact.bookingUrl} rel="noopener" target="_blank" class="btn-secondary w-full justify-center md:w-auto">
                 Pick a time
-              </a>
-            )
-          }
-          {
-            contact.phoneDisplay && (
-              <a href={`tel:${contact.phoneDial}`} class="btn-secondary w-full justify-center md:w-auto">
-                Call {contact.phoneDisplay}
               </a>
             )
           }

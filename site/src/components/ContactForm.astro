@@ -41,15 +41,9 @@ const label = 'text-text-hero mb-1.5 block text-sm font-medium';
     </div>
   </div>
 
-  <div class="grid gap-5 sm:grid-cols-2">
-    <div>
-      <label class={label} for="cf-role">Your role <span class="text-text-muted font-normal">(optional)</span></label>
-      <input class={field} id="cf-role" name="role" type="text" autocomplete="organization-title" />
-    </div>
-    <div>
-      <label class={label} for="cf-phone">Phone <span class="text-text-muted font-normal">(optional)</span></label>
-      <input class={field} id="cf-phone" name="phone" type="tel" autocomplete="tel" />
-    </div>
+  <div>
+    <label class={label} for="cf-role">Your role <span class="text-text-muted font-normal">(optional)</span></label>
+    <input class={field} id="cf-role" name="role" type="text" autocomplete="organization-title" />
   </div>
 
   <div>
@@ -76,7 +70,7 @@ const label = 'text-text-hero mb-1.5 block text-sm font-medium';
   </div>
 
   <p class="text-accent-red-soft hidden text-sm" data-call-error role="alert">
-    Please add your name and company so we know who to call.
+    Please add your name and company so we know who is asking.
   </p>
 
   <div class="flex flex-wrap items-center gap-4">
@@ -164,7 +158,6 @@ const label = 'text-text-hero mb-1.5 block text-sm font-medium';
         `Name: ${value('name')}`,
         `Company: ${value('company')}`,
         value('role') && `Role: ${value('role')}`,
-        value('phone') && `Phone: ${value('phone')}`,
         `About: ${value('topic')}`,
         value('times') && `Good times for a call: ${value('times')}`,
         value('message') && `\n${value('message')}`,
