@@ -1,23 +1,22 @@
 /**
  * How to reach HarvTech, in one place.
  *
- * Every call to action on the site reads from here, so a new phone number
- * or booking link is a one-line change and appears everywhere at once.
+ * Every call to action on the site reads from here, so a change of
+ * address or a new booking link is a one-line change and appears
+ * everywhere at once.
  *
- * `phone` and `bookingUrl` are optional: leave them as empty strings and
- * the site simply does not show a phone line or a "Pick a time" button.
- * Nothing breaks and nothing shows a placeholder.
+ * There is deliberately no telephone number: a published number attracts
+ * sales calls and scams, not clients. People reach us by the form or by
+ * email, and we arrange the call from there.
+ *
+ * `bookingUrl` is optional: leave it as an empty string and the site
+ * simply does not show a "Pick a time" button.
  */
 export const contact = {
-  email: 'alex@harvtech.co.uk',
+  email: 'enquiries@harvtech.co.uk',
 
   linkedinUrl: 'https://www.linkedin.com/in/alexander-harvey-39433619',
   linkedinName: 'Alexander Harvey',
-
-  // The number as people read it, e.g. '020 7946 0123'. Empty hides it.
-  phoneDisplay: '',
-  // The same number as a phone dials it, e.g. '+442079460123'.
-  phoneDial: '',
 
   // A booking page (Microsoft Bookings or similar) where a visitor picks a
   // slot themselves. Empty hides the button.
