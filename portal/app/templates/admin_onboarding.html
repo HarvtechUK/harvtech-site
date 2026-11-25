@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Onboarding - HarvTech admin{% endblock %}
+{% block container_class %}wide{% endblock %}
+
+{# HarvTech's view: every client's readiness, and what is waiting on us. #}
+
+{% block content %}
+<p class="eyebrow">HarvTech admin</p>
+<h1 class="tight">Client onboarding</h1>
+{% include "_flash.html" %}
+
+{% if open_requests %}
+  <a class="banner" href="/admin/requests">
+    <span><strong>{{ open_requests|length }} request{{ "s" if open_requests|length != 1 }} waiting</strong> for a written answer.</span>
+    <span class="banner-go">Open &rarr;</span>
+  </a>
+{% endif %}
+
+{% for c in clients %}
+  {% set o = c.onboarding %}{% set r = c.ready %}
+  <a class="card client-row" href="/admin/onboarding/{{ o.client_id }}">
+    <div class="client-main">
+      <h2>{{ o.client_name }}</h2>
+      <p class="muted small">{{ o.client_id }} &middot; tiers {{ o.tiers|join(" ") }}
+        &middot; statement {{ "accepted" if r.statement_ok else "not accepted" }}</p>
+      <div class="bar bar-thin">
+        <div class="bar-claimed" style="width: {{ r.claimed_pct }}%"></div>
+        <div class="bar-fill" style="width: {{ r.verified_pct }}%"></div>
+      </div>
+    </div>
+    <div class="client-stats">
+      <span class="chip chip-{{ 'ready' if r.can_scan else ('attention' if r.attention else 'waiting') }}">{{ r.headline }}</span>
+      <span class="small"><strong class="teal">{{ r.verified }}</strong>/{{ r.total }} verified</span>
+      {% if c.waiting %}<span class="small amber"><strong>{{ c.waiting|length }}</strong> to verify: {{ c.waiting|map(attribute="id")|join(", ") }}</span>{% endif %}
+      {% if r.attention %}<span class="small rose">{{ r.attention }} need attention</span>{% endif %}
+    </div>
+  </a>
+{% else %}
+  <p class="muted">No onboardings yet. Open the first one below.</p>
+{% endfor %}
+
+<section class="card">
+  <h2>Open an onboarding</h2>
+  <p class="muted small">The client id must match the <code>client_id</code> on the client's user
+  records, which is what ties their sign-in to this checklist.</p>
+  <form method="post" action="/admin/onboarding" class="form">
+    <div class="field-row">
+      <label class="field">Client id <input name="client_id" placeholder="client-example" required /></label>
+      <label class="field">Client name <input name="client_name" placeholder="Example Insurance" required /></label>
+    </div>
+    <div class="choices choices-inline">
+      {% for t in tiers %}
+        <label class="choice">
+          <input type="checkbox" name="tiers" value="{{ t.key }}"
+                 {% if t.key in default_tiers %}checked{% endif %} {% if t.key in ("A", "X") %}disabled checked{% endif %} />
+          <span><strong>{{ t.key }} {{ t.name }}</strong><span class="muted small">{{ t.grant }}</span></span>
+        </label>
+      {% endfor %}
+    </div>
+    <button class="btn btn-approve">Open onboarding</button>
+  </form>
+</section>
+{% endblock %}

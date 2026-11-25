@@ -1,0 +1,108 @@
+---
+/**
+ * Shot, a product screenshot in a frame.
+ *
+ * Two frames:
+ *   'window'  a dark browser-style window with a title bar. For whole
+ *             screens (the dashboard, the client portal).
+ *   'panel'   a light card with padding. For a crop of one panel, or a
+ *             page of the PDF report, which are white and would otherwise
+ *             sit on the black page as a hard-edged rectangle.
+ *
+ * The picture itself goes through Astro's <Image>, which at build time
+ * writes several WebP sizes and lets the browser pick one (`srcset` and
+ * `sizes`), so a phone does not download a 2880-pixel screenshot. The
+ * sources in src/assets are 2x captures, which is why they stay sharp on
+ * high-density screens.
+ *
+ * Clicking the picture opens the full-size version in a new tab: the
+ * text in a dashboard screenshot is small, and people want to read it.
+ *
+ * `fade` dissolves the bottom edge. Use it when the screenshot was cut
+ * off part-way down a page, so the cut reads as "there is more" and not
+ * as a broken image.
+ */
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  frame?: 'window' | 'panel';
+  /** Text shown in the window's title bar. */
+  label?: string;
+  fade?: boolean;
+  /** How wide the picture is shown, so the browser can choose a file. */
+  sizes?: string;
+  /** Load straight away (for a picture at the top of a page). */
+  eager?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  frame = 'window',
+  label,
+  fade = false,
+  sizes = '(min-width: 1280px) 1100px, 92vw',
+  eager = false,
+  class: className,
+} = Astro.props;
+
+// Never ask for a size larger than the source: that only makes a blurry,
+// bigger file. The source's own width is always offered as the largest.
+const widths = [...[480, 720, 1080, 1440, 2160].filter((w) => w < src.width), src.width];
+
+// The file the click opens.
+const full = await getImage({ src, format: 'webp', quality: 90 });
+
+const fadeStyle = fade
+  ? '-webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%); mask-image: linear-gradient(to bottom, black 72%, transparent 100%);'
+  : undefined;
+---
+
+<figure class={className}>
+  <div
+    class:list={[
+      'overflow-hidden rounded-xl border shadow-2xl',
+      frame === 'window' ? 'border-border-medium bg-bg-2' : 'border-border-strong bg-white p-3 md:p-5',
+    ]}
+  >
+    {
+      frame === 'window' && (
+        <div class="border-border-subtle flex items-center gap-2 border-b px-4 py-3" aria-hidden="true">
+          <span class="h-3 w-3 rounded-full bg-[#ff5f57] opacity-70" />
+          <span class="h-3 w-3 rounded-full bg-[#febc2e] opacity-70" />
+          <span class="h-3 w-3 rounded-full bg-[#28c840] opacity-70" />
+          {label && (
+            <span class="border-border-subtle bg-bg-3/60 text-text-muted ml-4 truncate rounded-md border px-3 py-1 font-mono text-xs">
+              {label}
+            </span>
+          )}
+        </div>
+      )
+    }
+    <a
+      href={full.src}
+      target="_blank"
+      rel="noopener"
+      class="block cursor-zoom-in"
+      aria-label={`Open the full-size picture: ${alt}`}
+    >
+      <div style={fadeStyle}>
+        <Image
+          src={src}
+          alt={alt}
+          widths={widths}
+          sizes={sizes}
+          loading={eager ? 'eager' : 'lazy'}
+          class="block h-auto w-full"
+        />
+      </div>
+    </a>
+  </div>
+  {caption && <figcaption class="text-text-muted mt-3 text-xs leading-relaxed">{caption}</figcaption>}
+</figure>

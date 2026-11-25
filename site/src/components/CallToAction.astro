@@ -1,0 +1,58 @@
+---
+/**
+ * CallToAction, the "talk to us" card that closes a page.
+ *
+ * One component so every page offers the same ways in, in the same
+ * order: the request-a-call form first, then a booking page if one is
+ * set in src/data/contact.ts, then plain email.
+ *
+ * `topic` pre-selects the subject on the form, so someone arriving from
+ * the health check page does not have to say so again.
+ */
+import { contact, callLink, type CallTopic } from '../data/contact';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  body: string;
+  topic?: CallTopic;
+}
+
+const { eyebrow = 'Get started', title, body, topic } = Astro.props;
+---
+
+<section class="border-border-faintest border-t">
+  <div class="container-page py-20">
+    <div class="card relative overflow-hidden p-10 md:p-14">
+      <!-- Teal corner glow, mirrors the hero treatment -->
+      <div
+        class="pointer-events-none absolute -right-24 -top-24 h-80 w-80"
+        style="background: radial-gradient(circle, rgb(0 161 155 / 0.16) 0%, transparent 70%)"
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+        <div>
+          <p class="eyebrow mb-3">{eyebrow}</p>
+          <h2 class="title-section mb-4">{title}</h2>
+          <p class="body-muted max-w-2xl">{body}</p>
+        </div>
+        <div class="flex flex-col gap-3 md:items-end">
+          <a href={callLink(topic)} class="btn-primary w-full justify-center md:w-auto">
+            Request a call
+          </a>
+          {
+            contact.bookingUrl && (
+              <a href={contact.bookingUrl} rel="noopener" target="_blank" class="btn-secondary w-full justify-center md:w-auto">
+                Pick a time
+              </a>
+            )
+          }
+          <a href={`mailto:${contact.email}`} class="btn-secondary w-full justify-center md:w-auto">
+            {contact.email}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

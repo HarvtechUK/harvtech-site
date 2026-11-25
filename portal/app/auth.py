@@ -124,6 +124,11 @@ def callback(request: Request):
         "role": user.role,
         "client_id": user.client_id,
     }
+    # Note the sign-in for HarvTech's activity view (client users only;
+    # see activity.py). Imported here because activity imports the store.
+    from . import activity
+
+    activity.record(request.session["user"], activity.SIGN_IN)
     return RedirectResponse("/", status_code=302)
 
 

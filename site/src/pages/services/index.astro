@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CallToAction from '../../components/CallToAction.astro';
 import { services } from '../../data/services';
+import { counts } from '../../data/healthCheck';
 ---
 
 <BaseLayout
@@ -23,6 +25,47 @@ import { services } from '../../data/services';
   <!-- Service cards -->
   <section class="border-border-faintest border-t">
     <div class="container-page py-20">
+      <!-- Not a service line of its own: the Azure Health Check is the
+           fixed-fee review that tells you which of the lines below you
+           need. It has its own page, so it gets its own card here. -->
+      <a
+        href="/health-check"
+        class="card group relative mb-5 block overflow-hidden p-8 transition hover:border-primary/30 md:p-10"
+      >
+        <div
+          class="pointer-events-none absolute -right-24 -top-24 h-80 w-80"
+          style="background: radial-gradient(circle, rgb(0 161 155 / 0.16) 0%, transparent 70%)"
+          aria-hidden="true"
+        >
+        </div>
+        <div class="relative grid gap-8 md:grid-cols-[1fr_auto]">
+          <div>
+            <p class="eyebrow mb-3">Start here</p>
+            <h2 class="title-card mb-2 text-xl group-hover:text-primary transition-colors">
+              Azure Health Check
+            </h2>
+            <p class="body-muted mb-5 max-w-2xl text-sm leading-relaxed">
+              A read-only review of the whole estate for a fixed fee: savings priced in
+              pounds, security and network findings ranked by severity, each with the
+              evidence and a plan for the change. It tells you which of the services
+              below you need, and which you do not.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {['Cost', 'Security', 'Network', `${counts.checks} checks`, 'Read-only'].map((chip) => (
+                <span class="bg-bg-3 text-text-muted rounded px-2.5 py-1 text-xs font-medium">
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-center md:pl-8">
+            <span class="text-text-subtle group-hover:text-primary transition-colors text-sm font-medium whitespace-nowrap">
+              See what it finds &rarr;
+            </span>
+          </div>
+        </div>
+      </a>
+
       <div class="space-y-5">
         {
           services.map((s) => (
@@ -64,30 +107,9 @@ import { services } from '../../data/services';
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="border-border-faintest border-t">
-    <div class="container-page py-20">
-      <div class="card p-10 md:p-14">
-        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
-          <div>
-            <p class="eyebrow mb-3">Not sure where to start?</p>
-            <h2 class="title-section mb-4">Let&rsquo;s scope it together.</h2>
-            <p class="body-muted max-w-2xl">
-              Most engagements start with a short discovery conversation.
-              Tell us where your platform is and where you need it to be,
-              we&rsquo;ll help you work out which service line fits.
-            </p>
-          </div>
-          <div class="flex flex-col gap-3 md:items-end">
-            <a href="mailto:alex@harvtech.co.uk" class="btn-primary w-full justify-center md:w-auto">
-              alex@harvtech.co.uk
-            </a>
-            <a href="/approach" class="btn-secondary w-full justify-center md:w-auto">
-              How we work &rarr;
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <CallToAction
+    eyebrow="Not sure where to start?"
+    title="Let’s scope it together."
+    body="Most engagements start with a short discovery conversation. Tell us where your platform is and where you need it to be, and we’ll help you work out which service line fits."
+  />
 </BaseLayout>

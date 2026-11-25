@@ -19,7 +19,7 @@ API documentation at /docs directly from them. Learn Pydantic well and a
 lot of FastAPI falls into place for free.
 """
 
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field, computed_field
@@ -124,7 +124,9 @@ class User(BaseModel):
     tid: str = Field(..., description="Entra tenant ID — the user's home Microsoft 365 org.")
     email: str = ""
     name: str = ""
-    role: str = Field(..., description="admin | contractor | client_approver")
+    role: str = Field(
+        ..., description="admin | contractor | client_approver | client_technical (see access.py)"
+    )
     client_id: str | None = Field(
         None, description="For client_approver: which client they may approve for."
     )
@@ -153,3 +155,137 @@ class TimesheetCreate(BaseModel):
     engagement_id: str
     period: str = Field(..., description="The month covered, e.g. '2026-07'.")
     entries: list[TimesheetEntry] = Field(default_factory=list)
+
+
+# ── Client onboarding ────────────────────────────────────────────────────────
+# A health-check client works through a checklist of read-only grants. Two
+# people touch each line: the client says "done", HarvTech verifies it. The
+# models below record both, and who did what when.
+
+
+class ItemStatus(str, Enum):
+    """Where one checklist line stands.
+
+    The client can only move a line between TODO and DONE. VERIFIED and
+    NEEDS_ATTENTION are HarvTech's to set, so a client can never mark
+    their own work as checked.
+    """
+
+    TODO = "todo"                        # not started
+    DONE = "done"                        # the client says it is done; not yet checked
+    VERIFIED = "verified"                # HarvTech confirmed it works
+    NEEDS_ATTENTION = "needs_attention"  # HarvTech checked and it does not work yet
+
+
+class ItemState(BaseModel):
+    """One checklist line's state for one client."""
+
+    status: ItemStatus = ItemStatus.TODO
+    done_by: str = ""                    # who at the client marked it done
+    done_at: datetime | None = None
+    checked_by: str = ""                 # who at HarvTech verified or bounced it
+    checked_at: datetime | None = None
+    # What the check found — shown to the client, so it must be readable
+    # by them ("1 of 2 workspaces answered; law-prod refused").
+    detail: str = ""
+
+
+class OnboardingEvent(BaseModel):
+    """One line of the audit trail: who did what, when."""
+
+    at: datetime
+    who: str
+    what: str
+
+
+class Onboarding(BaseModel):
+    """A client's onboarding: which tiers are in scope and how far along.
+
+    One document per client. `id` equals `client_id`, so fetching a
+    client's onboarding is a Cosmos point read (id + partition key both
+    known) — the cheapest read there is.
+    """
+
+    id: str
+    client_id: str
+    client_name: str
+    # Which tiers this engagement includes ("A", "B", ... see the catalogue).
+    tiers: list[str] = Field(default_factory=list)
+    # Checklist item id -> its state. Missing means TODO.
+    items: dict[str, ItemState] = Field(default_factory=dict)
+    # The security and data-handling statement: who read and accepted it.
+    statement_acknowledged_by: str = ""
+    statement_acknowledged_at: datetime | None = None
+    statement_version: str = ""
+    history: list[OnboardingEvent] = Field(default_factory=list)
+    created_at: datetime | None = None
+
+
+class RequestStatus(str, Enum):
+    OPEN = "open"                # raised, not yet picked up
+    IN_PROGRESS = "in_progress"  # HarvTech is on it
+    DONE = "done"                # completed, with a written response
+    DECLINED = "declined"        # not done, with the reason
+
+
+class ServiceRequest(BaseModel):
+    """Something a client asks HarvTech to do about their data.
+
+    The security and data-handling statement makes promises (delete on
+    request, tell you who has access, rotate the scan credential). This is
+    how a client calls one in, and how HarvTech shows it was done.
+    """
+
+    id: str
+    client_id: str
+    kind: str = Field(..., description="One of onboarding_services.REQUEST_KINDS.")
+    detail: str = ""
+    status: RequestStatus = RequestStatus.OPEN
+    raised_by: str = ""
+    raised_at: datetime | None = None
+    # HarvTech's written answer, shown to the client.
+    response: str = ""
+    handled_by: str = ""
+    closed_at: datetime | None = None
+
+
+# ── Published reports and activity ───────────────────────────────────────────
+
+
+class Report(BaseModel):
+    """A client's published health-check report.
+
+    HarvTech publishes it; the client only ever reads it. `pack` is the
+    report as data, exactly as `finops publish-report` wrote it (see
+    app/reports.py for what is checked before it is accepted). The PDF is
+    kept beside it in blob storage, not in this document: Cosmos documents
+    stop at 2 MB and a report PDF is often larger.
+
+    One document per client (id = client_id): publishing again replaces
+    the report, so "the report" always means the latest one.
+    """
+
+    id: str
+    client_id: str
+    pack: dict
+    published_at: datetime
+    published_by: str
+    pdf_filename: str = ""
+    pdf_bytes: int = 0  # size of the PDF, 0 when none was uploaded
+
+
+class ActivityEvent(BaseModel):
+    """One thing a client user did in the portal: signed in, opened the
+    report, downloaded the PDF.
+
+    This is what lets HarvTech see whether a report has been read before a
+    review meeting. It records the page, never what was typed, and the
+    security statement tells clients it is kept.
+    """
+
+    id: str
+    client_id: str
+    at: datetime
+    who: str                 # their sign-in name
+    kind: str                # "sign_in" | "view" | "download"
+    what: str = ""           # which page or file

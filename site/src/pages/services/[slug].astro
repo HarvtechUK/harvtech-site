@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CallToAction from '../../components/CallToAction.astro';
 import { services } from '../../data/services';
+import type { CallTopic } from '../../data/contact';
 
 export function getStaticPaths() {
   return services.map((s) => ({
@@ -10,6 +12,25 @@ export function getStaticPaths() {
 }
 
 const { service: s } = Astro.props;
+
+// Two services start naturally from the Azure Health Check: its findings
+// are the list of things to remediate, or the list of savings to make.
+const startsWithHealthCheck: Record<string, string> = {
+  'security-hardening':
+    'Not sure yet what an auditor would find? The Azure Health Check reads the whole estate and ranks what it finds by severity, so remediation starts from evidence.',
+  finops:
+    'Want the numbers before committing to anything? The Azure Health Check prices every saving in pounds, each one traced to the meter and the measurement behind it.',
+};
+const healthCheckNote = startsWithHealthCheck[s.slug];
+
+// Which subject the request-a-call form opens with for this service.
+const topics: Record<string, CallTopic> = {
+  'security-hardening': 'security',
+  'greenfield-platform-build': 'platform',
+  migrations: 'platform',
+  networking: 'platform',
+  finops: 'cost',
+};
 ---
 
 <BaseLayout
@@ -35,6 +56,23 @@ const { service: s } = Astro.props;
     <p class="body-muted max-w-2xl text-lg">
       {s.summary}
     </p>
+
+    {
+      healthCheckNote && (
+        <a
+          href="/health-check"
+          class="card group mt-10 flex max-w-3xl flex-wrap items-center justify-between gap-4 p-6 transition hover:border-primary/30"
+        >
+          <div class="max-w-xl">
+            <p class="eyebrow mb-2">A good place to start</p>
+            <p class="body-muted text-sm">{healthCheckNote}</p>
+          </div>
+          <span class="text-text-subtle group-hover:text-primary text-sm font-medium whitespace-nowrap transition-colors">
+            Azure Health Check &rarr;
+          </span>
+        </a>
+      )
+    }
   </section>
 
   <!-- Packaged stages (services structured as an engagement journey) -->
@@ -172,39 +210,10 @@ const { service: s } = Astro.props;
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="border-border-faintest border-t">
-    <div class="container-page py-20">
-      <div class="card p-10 md:p-14">
-        <div class="grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
-          <div>
-            <p class="eyebrow mb-3">Ready to get started?</p>
-            <h2 class="title-section mb-4">
-              Tell us about your {s.title.toLowerCase()} needs.
-            </h2>
-            <p class="body-muted max-w-2xl">
-              A short conversation is usually enough to scope an engagement.
-              Drop us an email with where you are and where you need to be.
-            </p>
-          </div>
-          <div class="flex flex-col gap-3 md:items-end">
-            <a
-              href="mailto:alex@harvtech.co.uk"
-              class="btn-primary w-full justify-center md:w-auto"
-            >
-              alex@harvtech.co.uk
-            </a>
-            <a
-              href="https://www.linkedin.com/in/alexander-harvey-39433619"
-              rel="noopener"
-              target="_blank"
-              class="btn-secondary w-full justify-center md:w-auto"
-            >
-              LinkedIn
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <CallToAction
+    eyebrow="Ready to get started?"
+    title={`Tell us about your ${s.title.toLowerCase()} needs.`}
+    body="A short conversation is usually enough to scope an engagement. Tell us where you are and where you need to be."
+    topic={topics[s.slug]}
+  />
 </BaseLayout>

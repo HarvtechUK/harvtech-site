@@ -16,6 +16,14 @@
   <body>
     <header class="topbar">
       <a class="brand" href="/">HarvTech <span>Portal</span></a>
+      {# The links this user may open; routes pass `nav` (see web.nav_for). #}
+      {% if nav %}
+        <nav class="nav">
+          {% for link in nav %}
+            <a href="{{ link.href }}" {% if active == link.label %}class="on"{% endif %}>{{ link.label }}</a>
+          {% endfor %}
+        </nav>
+      {% endif %}
       {# When signed in, show who, and a way out. #}
       {% if user %}
         <span class="muted">{{ user.name or user.email }} &middot; <a class="back" href="/auth/logout">Sign out</a></span>
@@ -24,7 +32,8 @@
       {% endif %}
     </header>
 
-    <main class="container">
+    {# A page can ask for the wider layout: {% block container_class %}wide{% endblock %} #}
+    <main class="container {% block container_class %}{% endblock %}">
       {# Each page's content drops in here. #}
       {% block content %}{% endblock %}
     </main>

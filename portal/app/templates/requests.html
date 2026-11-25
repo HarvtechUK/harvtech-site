@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Requests - HarvTech Portal{% endblock %}
+
+{% block content %}
+<a class="back" href="/onboarding{{ suffix }}">&larr; Onboarding</a>
+<p class="eyebrow">{{ onboarding.client_name if onboarding else "Your organisation" }}</p>
+<h1 class="tight">Requests</h1>
+{% include "_flash.html" %}
+
+<section class="card">
+  <h2>Ask HarvTech to do something about your data</h2>
+  <p class="muted">Each of these is a promise in the
+    <a href="/documents/security{{ suffix }}">security and data-handling statement</a>.
+    Your request goes straight to HarvTech, and the written answer appears below.</p>
+  <form method="post" action="/requests{{ suffix }}" class="form">
+    <div class="choices">
+      {% for key, kind in kinds.items() %}
+        <label class="choice">
+          <input type="radio" name="kind" value="{{ key }}" required />
+          <span><strong>{{ kind.label }}</strong><span class="muted small">{{ kind.help }}</span></span>
+        </label>
+      {% endfor %}
+    </div>
+    <label class="field">Anything we should know
+      <textarea name="detail" rows="3" maxlength="2000" placeholder="Who to send it to, a deadline, the reason"></textarea>
+    </label>
+    <button class="btn btn-approve">Send to HarvTech</button>
+  </form>
+</section>
+
+<h2>Your requests</h2>
+{% for r in requests %}
+  <section class="card request" id="{{ r.id }}">
+    <div class="item-head">
+      <h3>{{ kinds[r.kind].label if r.kind in kinds else r.kind }}</h3>
+      <span class="badge badge-{{ {'open': 'submitted', 'in_progress': 'submitted', 'done': 'approved', 'declined': 'rejected'}[r.status.value] }}">{{ r.status.value|replace("_", " ") }}</span>
+    </div>
+    <p class="muted small">Raised by {{ r.raised_by }}{% if r.raised_at %} on {{ r.raised_at|when }}{% endif %}</p>
+    {% if r.detail %}<p>{{ r.detail }}</p>{% endif %}
+    {% if r.response %}
+      <div class="answer"><span class="muted small">HarvTech{% if r.closed_at %}, {{ r.closed_at|when }}{% endif %}</span><p>{{ r.response }}</p></div>
+    {% endif %}
+  </section>
+{% else %}
+  <p class="muted">No requests yet.</p>
+{% endfor %}
+{% endblock %}

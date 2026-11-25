@@ -53,6 +53,25 @@ env:
   IMAGE: portal
 
 jobs:
+  # ── Stage 0: the tests (every branch / PR) ────────────────────────────────
+  # Runs the app against its in-memory store. The tests that matter most
+  # prove one client cannot see or change another client's records, so a
+  # change that breaks isolation fails here, before an image is built.
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install the app and test dependencies
+        working-directory: portal
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Run the tests
+        working-directory: portal
+        run: pytest -q
+
   # ── Stage 1: build the image (every branch / PR) ──────────────────────────
   # Proves the Dockerfile builds. No Azure, no push — just a local build on
   # the runner, so a broken Dockerfile fails the PR before it can merge.
@@ -67,7 +86,7 @@ jobs:
   # ── Stage 2: push + deploy (main only) ────────────────────────────────────
   deploy:
     name: Deploy to Container Apps
-    needs: build
+    needs: [test, build]
     if: >-
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch')

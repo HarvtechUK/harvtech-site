@@ -1,8 +1,18 @@
 name: Site
 
-# Triggered only when site/ files change. No IaC in this stack so
-# Checkov/Trivy/tflint don't apply — only Snyk (npm deps) and the
-# Astro build.
+# No IaC in this stack so Checkov/Trivy/tflint don't apply — only Snyk
+# (npm deps) and the Astro build.
+#
+# This workflow starts on EVERY pull request into dev or main, and then
+# decides for itself whether the site changed (the `changes` job below).
+# The reason is branch protection: "Snyk (Open Source)" and "Build site"
+# are required checks. A required check that never starts does not count
+# as passed — GitHub shows it as "Expected — waiting for status to be
+# reported" for ever, and the pull request cannot merge. That is what a
+# `paths:` filter on the pull_request trigger did to every pull request
+# that only touched the portal. A job that starts and is then SKIPPED
+# does count as passed, so the two jobs now always report: they run for
+# real when site/ changed and are skipped when it did not.
 #
 # deploy-site reads the storage account name from infra Terraform state
 # at deploy time rather than hard-coding it.
@@ -19,11 +29,10 @@ on:
     paths:
       - 'site/**'
       - '.github/workflows/site.yml'
+  # No `paths:` here on purpose — see the note at the top. The paths
+  # live in the `changes` job instead; keep the two lists the same.
   pull_request:
     branches: [main, dev]
-    paths:
-      - 'site/**'
-      - '.github/workflows/site.yml'
   schedule:
     - cron: '37 6 * * *'
   workflow_dispatch:
@@ -51,8 +60,55 @@ env:
 
 jobs:
 
+  # Answers one question: does this run need to test the site?
+  #   push / schedule / manual run -> yes, always (the push trigger has
+  #                                   already filtered on site/ paths)
+  #   pull request                 -> only if it touches site/ or this file
+  changes:
+    name: Site changed?
+    runs-on: ubuntu-latest
+    # This job runs on every pull request, so it gets the least it needs:
+    # it reads the repository and nothing else.
+    permissions:
+      contents: read
+    outputs:
+      site: ${{ steps.diff.outputs.site }}
+    steps:
+      # On a pull request GitHub checks out a temporary merge commit: the
+      # base branch with the pull request merged in. Its first parent is
+      # the base branch, so "first parent vs this commit" is exactly what
+      # the pull request changes. Depth 2 fetches that parent too.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Did this run touch the site?
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          site=true
+          if [ "$EVENT" = "pull_request" ]; then
+            # If the comparison cannot be made, stay on "true": testing a
+            # site that did not change wastes a minute, skipping one that
+            # did change lets a broken build through.
+            if changed=$(git diff --name-only HEAD^1 HEAD); then
+              echo "$changed"
+              if ! echo "$changed" | grep -qE '^(site/|\.github/workflows/site\.yml$)'; then
+                site=false
+              fi
+            fi
+          fi
+          echo "site=$site" >> "$GITHUB_OUTPUT"
+          echo "Test the site: $site"
+
   snyk:
     name: Snyk (Open Source)
+    needs: changes
+    # Skipped (which branch protection counts as passed) only when the
+    # `changes` job succeeded AND said the site is untouched. If that job
+    # itself failed, run anyway: without `!cancelled()` a failed `needs`
+    # would skip this job, and a skip would read as a pass.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.site == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -75,6 +131,9 @@ jobs:
 
   build-site:
     name: Build site
+    needs: changes
+    # Same rule as the Snyk job above.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.site == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -30,5 +30,21 @@ add_timesheet = _backend.add_timesheet
 save_timesheet = _backend.save_timesheet
 get_user = _backend.get_user
 
+# Client onboarding and data-handling requests.
+get_onboarding = _backend.get_onboarding
+list_onboardings = _backend.list_onboardings
+save_onboarding = _backend.save_onboarding
+list_requests = _backend.list_requests
+get_request = _backend.get_request
+save_request = _backend.save_request
+
+# Published reports (the document, and the PDF beside it) and activity.
+get_report = _backend.get_report
+save_report = _backend.save_report
+get_report_pdf = _backend.get_report_pdf
+save_report_pdf = _backend.save_report_pdf
+add_activity = _backend.add_activity
+list_activity = _backend.list_activity
+
 # Handy for a log line / health output: which backend are we on?
 BACKEND_NAME = _backend.__name__.rsplit(".", 1)[-1]

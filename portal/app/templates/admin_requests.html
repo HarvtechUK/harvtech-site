@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Requests - HarvTech admin{% endblock %}
+
+{% block content %}
+<a class="back" href="/admin/onboarding">&larr; Client onboarding</a>
+<p class="eyebrow">HarvTech admin</p>
+<h1 class="tight">Client requests</h1>
+{% include "_flash.html" %}
+
+{% for r in requests %}
+  <section class="card request" id="{{ r.id }}">
+    <div class="item-head">
+      <h3>{{ kinds[r.kind].label if r.kind in kinds else r.kind }}</h3>
+      <span class="badge badge-{{ {'open': 'submitted', 'in_progress': 'submitted', 'done': 'approved', 'declined': 'rejected'}[r.status.value] }}">{{ r.status.value|replace("_", " ") }}</span>
+    </div>
+    <p class="muted small">{{ names.get(r.client_id, r.client_id) }} &middot; raised by {{ r.raised_by }}{% if r.raised_at %} on {{ r.raised_at|when }}{% endif %}</p>
+    {% if r.detail %}<p>{{ r.detail }}</p>{% endif %}
+    {# Closing a request needs a written response: the statement promises one. #}
+    <form method="post" action="/admin/requests/{{ r.id }}" class="form">
+      <label class="field">Written response (the client sees this)
+        <textarea name="response" rows="3" maxlength="2000">{{ r.response }}</textarea>
+      </label>
+      <div class="check-form">
+        <select name="status">
+          {% for s in statuses %}<option value="{{ s.value }}" {% if s == r.status %}selected{% endif %}>{{ s.value|replace("_", " ") }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-approve">Save</button>
+      </div>
+    </form>
+  </section>
+{% else %}
+  <p class="muted">No requests.</p>
+{% endfor %}
+{% endblock %}

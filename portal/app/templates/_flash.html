@@ -1,0 +1,4 @@
+{# A one-line message carried back on the redirect after a form post
+   (?notice=... or ?error=...). Included near the top of each page. #}
+{% if error %}<div class="alert">{{ error }}</div>{% endif %}
+{% if notice %}<div class="notice">{{ notice }}</div>{% endif %}

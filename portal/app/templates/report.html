@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Report - {{ client_name }}{% endblock %}
+{% block container_class %}wide{% endblock %}
+
+{# The client's published report.
+
+   Everything printed here comes from `pack`, the snapshot HarvTech
+   published: its labels are already the client's words and its figures
+   are already formatted, so this template only lays it out. `view` adds
+   the few numbers the layout needs (bar widths). #}
+
+{% block content %}
+{% if is_staff %}
+  <p class="preview">You are viewing this page as {{ client_name }} sees it.
+    <a href="/admin/onboarding/{{ report.client_id }}">Back to the admin view</a></p>
+{% endif %}
+
+<p class="eyebrow">Azure health check &middot; report</p>
+<h1 class="tight">{{ client_name }}</h1>
+{% include "_flash.html" %}
+
+{# ── When, and the download ─────────────────────────────────────────── #}
+<section class="card report-meta">
+  <div>
+    <p class="updated">Last updated <strong>{{ report.published_at|when }}</strong></p>
+    <p class="muted small">
+      From the scan that finished {{ pack.scan.finished_at|iso_when }}
+      &middot; {{ "{:,}".format(pack.scan.resources) }} resources
+      &middot; {{ pack.scan.rules_ran }} checks ran{% if pack.scan.rules_not_assessed %},
+      {{ pack.scan.rules_not_assessed }} not assessed{% endif %}
+      &middot; {{ pack.scan.source }}
+    </p>
+  </div>
+  {% if report.pdf_bytes %}
+    <a class="btn btn-approve btn-download" href="/report/download{{ suffix }}">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download PDF <span class="size">{{ pdf_size }}</span>
+    </a>
+  {% endif %}
+</section>
+
+{# ── The two headlines: money and risk ──────────────────────────────── #}
+<div class="report-heads">
+  <section class="card hero-cost">
+    <p class="lbl">Cost</p>
+    {% if pack.headline.priced %}
+      <p class="big">{{ pack.headline.monthly_text }}</p>
+      <p class="big-sub">a month you could stop paying</p>
+      <p class="muted small">{{ pack.headline.yearly_text }} a year across {{ pack.headline.priced }}
+        priced findings, an estimate at Azure list price. What you pay through your CSP or
+        Enterprise Agreement will make the real figure different, usually lower.
+        {% if pack.headline.needs_change_window_text %}{{ pack.headline.needs_change_window_text }} of it needs a change window.{% endif %}</p>
+    {% else %}
+      <p class="big">{{ pack.headline.findings }}</p>
+      <p class="big-sub">findings, none priced yet</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <p class="lbl">Security and network</p>
+    <p class="big">{{ view.security_total }}</p>
+    <p class="big-sub">findings, by severity</p>
+    {# One bar, a segment per severity, each as wide as its share. #}
+    <div class="sevbar" role="img" aria-label="Findings by severity">
+      {% for s in view.severity if s.count %}
+        <span class="sev-{{ s.level }}" style="width: {{ s.pct }}%"></span>
+      {% endfor %}
+    </div>
+    <div class="sevkey">
+      {% for s in view.severity %}
+        <span><i class="sev-{{ s.level }}"></i>{{ s.count }} {{ s.label }}</span>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+{# ── Top actions ─────────────────────────────────────────────────────── #}
+<h2>Top actions</h2>
+<p class="muted small">The largest savings, one option per resource, and the most severe security and network findings.</p>
+<ol class="actions-list">
+  {% for a in pack.top_actions %}
+    <li>
+      <span class="n">{{ loop.index }}</span>
+      <span class="what"><strong>{{ a.title }}</strong><span class="muted small">{{ a.resource }}</span></span>
+      <span class="figure {{ 'teal' if a.why == 'saving' else 'sevtext-' ~ (a.severity or 'low') }}">{{ a.figure }}</span>
+    </li>
+  {% endfor %}
+</ol>
+
+{# ── Where it is ─────────────────────────────────────────────────────── #}
+<div class="split split-even">
+  <section>
+    <h2>Where the savings are</h2>
+    {% for s in view.cost_sections %}
+      <div class="meter">
+        <div class="meter-head"><span>{{ s.name }}</span><span><strong>{{ s.saving_text }}</strong> <span class="muted small">{{ s.findings }} findings</span></span></div>
+        <div class="bar"><div class="bar-fill" style="width: {{ s.pct }}%"></div></div>
+      </div>
+    {% else %}
+      <p class="muted">No priced findings.</p>
+    {% endfor %}
+  </section>
+  <section>
+    <h2>Where the risk is</h2>
+    <table class="grid">
+      <tbody>
+        {% for s in view.risk_sections %}
+          <tr><td>{{ s.name }}</td><td>{{ s.findings }} findings</td>
+            <td><span class="sevtext-{{ s.worst_severity }}">Worst: {{ s.worst_severity_label }}</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+{# ── Assurance view ──────────────────────────────────────────────────── #}
+<h2 id="assurance">Assurance view</h2>
+<p class="muted small prose">{{ pack.assurance.note }}</p>
+{% for f in pack.assurance.frameworks %}
+  <details class="card framework" {% if loop.first %}open{% endif %}>
+    <summary>
+      <span class="fw-name">{{ f.name }}</span>
+      <span class="muted small">improvements found in {{ f.with_improvements }} of {{ f.assessed }} control areas assessed{% if f.outside %}; {{ f.outside }} outside a configuration review{% endif %}</span>
+    </summary>
+    <p class="muted small">{{ f.note }}</p>
+    <table class="grid controls">
+      <thead><tr><th>Control</th><th>What was looked at</th><th>Result</th><th>Highest severity</th></tr></thead>
+      <tbody>
+        {% for c in f.controls %}
+          <tr>
+            <td class="ref">{{ c.ref }}</td>
+            <td><strong>{{ c.title }}</strong>
+              <span class="muted small block">{% if c.outside %}{{ c.outside }}{% else %}{{ c.looked_at|join("; ")|capitalize }}.{% endif %}</span></td>
+            <td class="result-{{ c.status }}">{{ c.result }}</td>
+            <td>{% if c.worst_severity %}<span class="sevtext-{{ c.worst_severity }}">{{ c.worst_severity|capitalize }}</span>{% else %}<span class="muted">&ndash;</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+{% endfor %}
+
+{# ── The leading findings ────────────────────────────────────────────── #}
+<h2 id="findings">Findings</h2>
+<p class="muted small">
+  The first {{ view.findings_shown }} of {{ "{:,}".format(pack.findings_total) }} findings, largest saving
+  first. {% if report.pdf_bytes %}The <a href="/report/download{{ suffix }}">PDF</a> carries every one, with the evidence and how to plan each change.{% endif %}
+</p>
+<div class="findings">
+  {% for f in pack.findings %}
+    <details class="finding">
+      <summary>
+        <span class="what"><strong>{{ f.title }}</strong>
+          <span class="muted small">{{ f.kind }} {{ f.resource }}{% if f.where %} &middot; {{ f.where }}{% endif %}</span></span>
+        {% if f.saving_text %}<span class="figure teal">{{ f.saving_text }}<span class="muted small"> a month</span></span>
+        {% elif f.severity %}<span class="figure sevtext-{{ f.severity }}">{{ f.severity_label }}</span>
+        {% else %}<span class="figure muted small">not priced</span>{% endif %}
+      </summary>
+      <div class="finding-body">
+        <p>{{ f.detail }}</p>
+        {% if f.remediation %}<p><strong>What to do.</strong> {{ f.remediation }}</p>{% endif %}
+        <p class="muted small">
+          {{ f.section }} &middot; {{ f.area }}
+          {% if f.effort %}&middot; Effort {{ f.effort|lower }}{% endif %}
+          {% if f.change_type %}&middot; {{ f.change_type }} change{% endif %}
+          {% if f.severity_reasons %}&middot; {{ f.severity_label }}: {{ f.severity_reasons|join(", ") }}{% endif %}
+        </p>
+        {% if f.relates_to %}<p class="muted small"><strong>Relates to</strong> {{ f.relates_to }}</p>{% endif %}
+      </div>
+    </details>
+  {% endfor %}
+</div>
+
+{% if pack.not_assessed.count %}
+  <section class="card">
+    <h2>Not assessed in this scan</h2>
+    <p class="muted">{{ pack.not_assessed.count }} checks did not run ({{ pack.not_assessed.reasons|join("; ") }}).
+    Granting the remaining tiers on the <a href="/onboarding{{ suffix }}">onboarding page</a> switches them on.</p>
+  </section>
+{% endif %}
+{% endblock %}
