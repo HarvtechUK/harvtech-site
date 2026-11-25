@@ -7,6 +7,7 @@ import CallToAction from '../components/CallToAction.astro';
 import { services } from '../data/services';
 import { callLink } from '../data/contact';
 import { counts } from '../data/healthCheck';
+import { publishedNews, newsDate } from '../data/news';
 import overview from '../assets/health-check/dashboard-overview.png';
 
 const engagementModes = [
@@ -27,6 +28,7 @@ const engagementModes = [
   },
 ];
 
+const latestNews = (await publishedNews()).slice(0, 3);
 ---
 
 <BaseLayout
@@ -145,6 +147,34 @@ const engagementModes = [
       </div>
     </div>
   </section>
+
+  <!-- Latest news: only shown once there is something to show. -->
+  {
+    latestNews.length > 0 && (
+      <section class="border-border-faintest border-t">
+        <div class="container-page py-20">
+          <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p class="eyebrow mb-4">News</p>
+              <h2 class="title-section">Azure security news, and what to do about it.</h2>
+            </div>
+            <a href="/news" class="btn-secondary text-sm">All news &rarr;</a>
+          </div>
+          <div class="grid gap-5 md:grid-cols-3">
+            {latestNews.map((a) => (
+              <a href={`/news/${a.id}`} class="card group block p-7 transition hover:border-primary/30">
+                <p class="text-text-muted mb-2 text-xs font-semibold tracking-wider uppercase">
+                  {newsDate(a.data.published)}
+                </p>
+                <p class="title-card group-hover:text-primary mb-2 transition-colors">{a.data.title}</p>
+                <p class="body-muted text-sm">{a.data.description}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <!-- Credibility -->
   <section class="border-border-faintest border-y">

@@ -11,7 +11,7 @@ status: living
 
 The earlier hero positioning, *"Secure Cloud platforms for AI and data workloads"*, was deliberately
 generic about the cloud and led on AI. Both choices made sense at the time and are documented in
-[the previous ADR](/docs/decisions/cloud-not-azure-in-heading), which this one supersedes.
+[the previous ADR](cloud-not-azure-in-heading.md), which this one supersedes.
 
 Two things shifted the thinking:
 

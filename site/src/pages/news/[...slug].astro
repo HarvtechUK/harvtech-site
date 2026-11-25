@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { render } from 'astro:content';
+import { publishedNews, newsDate } from '../../data/news';
+
+// Only published articles get a page at all. A draft's URL simply does not
+// exist until the frontmatter flips, so there is nothing to leak.
+export async function getStaticPaths() {
+  return (await publishedNews()).map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const { title, description, published, updated, tags, sources } = article.data;
+---
+
+<BaseLayout title={`${title} - HarvTech`} description={description} ogType="article" published={published}>
+  <section class="container-page pt-12 pb-20 md:pt-16">
+    <a
+      href="/news"
+      class="text-text-muted hover:text-primary mb-8 inline-flex items-center gap-1.5 text-sm font-medium transition"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M8.5 3L5 7L8.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      All news
+    </a>
+
+    <p class="text-text-muted mb-3 text-xs font-semibold tracking-wider uppercase">
+      {newsDate(published)}
+      {updated && <span> &middot; updated {newsDate(updated)}</span>}
+    </p>
+    <h1 class="title-display hero-gradient mb-4 max-w-3xl leading-tight">
+      {title}
+    </h1>
+    <p class="body-muted mb-6 max-w-2xl text-lg">{description}</p>
+    {
+      tags.length > 0 && (
+        <div class="mb-10 flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <span class="badge-neutral">{t}</span>
+          ))}
+        </div>
+      )
+    }
+
+    <article class="post-prose max-w-3xl">
+      <Content />
+    </article>
+
+    {
+      sources.length > 0 && (
+        <aside class="card mt-12 max-w-3xl p-7">
+          <p class="eyebrow mb-3">Sources</p>
+          <ul class="space-y-2 text-sm">
+            {sources.map((s) => (
+              <li>
+                <a href={s.url} rel="noopener" class="text-primary underline underline-offset-2">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+  </section>
+
+  <CallToAction
+    title="Want to know where your estate stands?"
+    body="The Azure Health Check reads your estate with read-only access and shows what is exposed, with evidence. Ask for a call and we will talk it through."
+    topic="health-check"
+  />
+</BaseLayout>
+
+<style>
+  /* Minimal markdown prose styles, scoped to news articles. */
+  .post-prose :global(h2) {
+    color: var(--color-text-primary);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 2.2rem 0 0.8rem;
+  }
+  .post-prose :global(h3) {
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.8rem 0 0.6rem;
+  }
+  .post-prose :global(p) {
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    margin: 0 0 1.1rem;
+  }
+  .post-prose :global(ul),
+  .post-prose :global(ol) {
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    margin: 0 0 1.1rem;
+    padding-left: 1.4rem;
+  }
+  .post-prose :global(li) {
+    margin: 0.35rem 0;
+  }
+  .post-prose :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .post-prose :global(strong) {
+    color: var(--color-text-hero);
+    font-weight: 600;
+  }
+  .post-prose :global(code) {
+    overflow-wrap: anywhere;
+    background: var(--color-bg-3);
+    border-radius: 4px;
+    font-size: 0.875em;
+    padding: 0.1em 0.35em;
+  }
+  .post-prose :global(pre) {
+    background: var(--color-bg-2);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 10px;
+    margin: 0 0 1.2rem;
+    overflow-x: auto;
+    padding: 1rem 1.2rem;
+  }
+  .post-prose :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+  .post-prose :global(blockquote) {
+    border-left: 2px solid var(--color-primary);
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 0 0 1.1rem;
+    padding-left: 1rem;
+  }
+</style>

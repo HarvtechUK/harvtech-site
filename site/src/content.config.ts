@@ -2,46 +2,27 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 /**
- * The `docs` collection, the internal-style wiki at /docs/*.
+ * The `news` collection, articles at /news/<slug>.
  *
- * Each .md file under src/content/docs/<category>/<slug>.md gets routed to
- * /docs/<category>/<slug> by src/pages/docs/[...slug].astro. The category
- * is also derived from the folder name as a safety belt, but the
- * frontmatter `category` is the source of truth.
+ * One .md file per article under src/content/news. Each is a short piece on
+ * an Azure security event: what happened, who is affected, what to do. The
+ * `sources` list is rendered at the foot of the article, so every claim in
+ * the body should trace back to one of them.
  *
- * status: drafts, deprecated, and superseded docs are still indexable by
- *   URL but the /docs landing page filters them out so the index stays
- *   clean. "superseded" is the standard ADR vocabulary for "this decision
- *   has been re-made elsewhere", semantically distinct from "deprecated"
- *   (rotting / will be removed) even though both hide from the index.
+ * draft: true keeps an article out of the listing AND prevents its page
+ * from being generated. Publishing is a one-line frontmatter flip.
  */
-const docs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    category: z.enum(['architecture', 'decisions', 'how-to', 'tools']),
-    order: z.number().default(100),
-    updated: z.coerce.date(),
-    status: z.enum(['living', 'draft', 'deprecated', 'superseded']).default('living'),
-  }),
-});
-
-/**
- * The `writing` collection, posts at /writing/<slug>.
- *
- * draft: true keeps a post out of the listing AND prevents its page from
- * being generated, so stubs and in-progress pieces can live in the repo
- * without ever rendering. Publishing is a one-line frontmatter flip.
- */
-const writing = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/writing' }),
+const news = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    updated: z.coerce.date(),
+    published: z.coerce.date(),
+    updated: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    sources: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
     draft: z.boolean().default(false),
   }),
 });
 
-export const collections = { docs, writing };
+export const collections = { news };

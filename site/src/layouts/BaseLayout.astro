@@ -15,14 +15,21 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  /** 'article' on a news article, so a shared link shows as one. */
+  ogType?: 'website' | 'article';
+  published?: Date;
 }
 
 const {
   title,
+  ogType = 'website',
+  published,
   description = 'HarvTech - Azure security and compliance remediation for London-market insurers and regulated financial services. Audit findings fixed in Terraform with auditor-ready evidence. CAF and Well-Architected aligned.',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+// The card LinkedIn and others show when a page is shared: 1200 x 630.
+const ogImage = new URL('/og-default.png', Astro.site).toString();
 ---
 
 <!doctype html>
@@ -35,14 +42,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <link rel="canonical" href={canonical} />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="HarvTech" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="HarvTech: Azure security and compliance for London-market insurers" />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
