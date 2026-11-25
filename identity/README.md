@@ -59,7 +59,7 @@ If a CA policy misfires and locks the daily-use account out:
 2. The break-glass passkey is on a **separate device** from the daily-use one — find it
 3. Once signed in, navigate to Entra → Protection → Conditional Access → Policies
 4. Either disable the offending policy in the portal, OR set its state back to "Report-only" temporarily
-5. Sign back in as `alex@alexander-harvey.com` to confirm
+5. Sign back in with your admin account to confirm
 6. Open a `git revert` PR to undo the Terraform change that caused the issue
 7. Sign out of break-glass; **never** let it stay signed-in
 

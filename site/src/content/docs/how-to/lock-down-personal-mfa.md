@@ -51,7 +51,7 @@ gh api repos/HarvtechUK/harvtech-site --jq '.security_and_analysis'
 
 Findings:
 
-- **Azure identity**: Owner on the subscription via `alex@alexander-harvey.com`. Tenant has Microsoft 365 Business Premium, which includes **Entra ID P1** - Conditional Access available.
+- **Azure identity**: Owner on the subscription via a named personal admin account. Tenant has Microsoft 365 Business Premium, which includes **Entra ID P1** - Conditional Access available.
 - **No Conditional Access policies** existed.
 - **Microsoft Authenticator was registered** (Alex had set it up previously and forgotten, common pattern).
 - **Security Defaults state** couldn't be queried via CLI without elevated permissions; required a portal check.
