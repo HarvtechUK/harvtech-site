@@ -15,8 +15,8 @@
 export const contact = {
   email: 'enquiries@harvtech.co.uk',
 
-  linkedinUrl: 'https://www.linkedin.com/in/alexander-harvey-39433619',
-  linkedinName: 'Alexander Harvey',
+  linkedinUrl: 'https://www.linkedin.com/company/harvtechuk/',
+  linkedinName: 'HarvTech',
 
   // A booking page (Microsoft Bookings or similar) where a visitor picks a
   // slot themselves. Empty hides the button.
