@@ -49,7 +49,7 @@ const projects = [
     tags: ['Azure', 'Terraform', 'Astro', 'Front Door + WAF', 'GitHub Actions', 'OIDC', 'Checkov', 'Trivy'],
     links: [
       { label: 'View repository', href: 'https://github.com/HarvtechUK/harvtech-site', external: true },
-      { label: 'Read the architecture', href: '/docs/architecture/site-infra-hld', external: false },
+      { label: 'Read the architecture', href: 'https://github.com/HarvtechUK/harvtech-site/blob/main/docs/architecture/site-infra-hld.md', external: true },
     ],
     highlight: true,
   },
@@ -61,7 +61,7 @@ const projects = [
       'Reference IaC for an Azure data platform - ADLS Gen2 with a medallion architecture (raw, cleansed, curated layers), Cosmos DB on the free tier for operational data, Data Factory as orchestrator, and a Databricks Premium workspace. All storage hardened: local auth disabled, infrastructure encryption enabled, OAuth-only access, network rules. The platform stays under £1/month by deploying the resources without running active workloads - the Terraform patterns are the showcase, drawn from real-world data engineering delivery.',
     tags: ['Azure', 'Terraform', 'ADLS Gen2', 'Databricks', 'Cosmos DB', 'Data Factory', 'Entra ID'],
     links: [
-      { label: 'Read the HLD', href: '/docs/architecture/data-platform-hld', external: false },
+      { label: 'Read the HLD', href: 'https://github.com/HarvtechUK/harvtech-site/blob/main/docs/architecture/data-platform-hld.md', external: true },
       { label: 'View the Terraform', href: 'https://github.com/HarvtechUK/harvtech-site/tree/main/data-platform', external: true },
     ],
     highlight: false,
@@ -83,7 +83,7 @@ const projects = [
   title="Showcase - HarvTech"
   description="HarvTech working portfolio - Azure platform engineering, data platform, and landing zone reference architecture. Source on GitHub, trade-offs written up in plain English."
 >
-  <section class="container-page py-20">
+  <section class="container-page pt-12 pb-20 md:pt-16">
     <p class="eyebrow mb-4">Showcase</p>
     <h1 class="title-display mb-6 hero-gradient max-w-3xl leading-tight">
       Proof of practice.

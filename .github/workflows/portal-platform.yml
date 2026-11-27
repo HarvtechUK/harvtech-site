@@ -134,6 +134,21 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' && github.base_ref == 'main') ||
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    # The image deploy (portal.yml) and this stack's Terraform apply
+    # (portal-platform.yml) both write to the same Container App. A
+    # concurrency group is shared across workflows by its NAME, so giving
+    # both jobs the group "portal-production" on main makes them take
+    # turns instead of overlapping. Why it matters: on 25 Nov 2026 the two
+    # ran together, Terraform read the app before the new image landed,
+    # and its update then put the OLD image back. Either order is safe as
+    # long as they do not overlap: Terraform reads the app afresh when its
+    # turn comes and leaves the image alone (ignore_changes in the module).
+    # Queued, never cancelled.
+    # On a pull request this job only plans, so it keeps a group of its
+    # own and never holds up, or is held up by, a production deploy.
+    concurrency:
+      group: ${{ github.ref == 'refs/heads/main' && 'portal-production' || format('portal-platform-plan-{0}', github.ref) }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { publishedNews, newsDate } from '../../data/news';
+
+const articles = await publishedNews();
+---
+
+<BaseLayout
+  title="News - HarvTech"
+  description="Azure security news for insurers and regulated firms: what happened, who is affected and what to do about it, in plain English."
+>
+  <section class="container-page pt-12 pb-20 md:pt-16">
+    <p class="eyebrow mb-4">News</p>
+    <h1 class="title-display hero-gradient mb-6 max-w-3xl leading-tight">
+      Azure security news, and what to do about it.
+    </h1>
+    <p class="body-muted max-w-2xl text-lg">
+      Short pieces on the Azure security events that matter to insurers and
+      regulated firms. Each one says what happened, who is affected and what
+      to check in your own estate, with links to the sources.
+    </p>
+
+    {
+      articles.length > 0 ? (
+        <div class="mt-12 max-w-3xl space-y-5">
+          {articles.map((a) => (
+            <a href={`/news/${a.id}`} class="card group block p-7 transition hover:border-primary/30">
+              <p class="text-text-muted mb-2 text-xs font-semibold tracking-wider uppercase">
+                {newsDate(a.data.published)}
+              </p>
+              <p class="title-card group-hover:text-primary mb-2 transition-colors">{a.data.title}</p>
+              <p class="body-muted text-sm">{a.data.description}</p>
+              {a.data.tags.length > 0 && (
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {a.data.tags.map((t) => (
+                    <span class="badge-neutral">{t}</span>
+                  ))}
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="body-muted mt-12">The first article is on its way.</p>
+      )
+    }
+  </section>
+
+  <CallToAction
+    title="Not sure what this means for your estate?"
+    body="The Azure Health Check reads your estate with read-only access and shows what is exposed, with evidence. Ask for a call and we will talk it through."
+    topic="health-check"
+  />
+</BaseLayout>

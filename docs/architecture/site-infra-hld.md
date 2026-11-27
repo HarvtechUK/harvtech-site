@@ -30,7 +30,7 @@ The split exists so application-layer changes can move fast through PRs without 
 
 ## Identity and access
 
-- **Personal admin login**: `alex@alexander-harvey.com`, Owner on the subscription. MFA enforced via Microsoft 365 Business Premium (Entra ID P1).
+- **Personal admin login**: a named admin account, Owner on the subscription. MFA enforced via Microsoft 365 Business Premium (Entra ID P1).
 - **CI service principal**: `sp-github-harvtech-site` (client ID stored as a GitHub repo variable, not a secret, the ID itself isn't sensitive and Variables can be read by Dependabot PRs). Federated via OIDC to two subjects: `refs/heads/main` for push, `pull_request` for PRs. No client secret, no PAT.
 - **SP roles**: Contributor at subscription scope today, Storage Blob Data Contributor on the state SA, Storage Blob Data Contributor on the site SA. Tightening this to RG-scoped is on the followup list, getting User Access Administrator on a single RG so the SP can manage its own role assignments via Terraform is the unlock.
 
